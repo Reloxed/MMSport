@@ -1,6 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:mmsport/components/dialogs.dart';
+import 'package:mmsport/navigations/navigations.dart';
+import 'package:mmsport/screens/create_sport_school.dart';
 
 class Register extends StatefulWidget {
   @override
@@ -13,65 +17,70 @@ class _RegisterState extends State<Register> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _password = TextEditingController();
   final TextEditingController _confirmPassword = TextEditingController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  String email;
+  String password;
 
   String hasSchoolSport = "";
 
   @override
   Widget build(BuildContext context) {
     return Material(
-        child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 30),
-            child: Form(
-                key: _formKey,
-                autovalidate: false,
-                child: ListView(
-                  children: <Widget>[
-                    _logoImage(),
-                    Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          _emailField("Correo electrónico"),
-                          _passwordField("Contraseña"),
-                          _confirmPasswordField("Confirmar contraseña"),
-                          Container(
-                            margin: const EdgeInsets.only(top: 16.0),
-                            child: Text(
-                              "¿Tienes una escuela?",
-                              style: TextStyle(fontSize: 20.0),
-                            ),
-                          ),
-                          Container(
-                            margin: const EdgeInsets.only(top: 4.0),
-                            child: FormBuilderRadio(
-                              decoration: InputDecoration(
-
+        child: Scaffold(
+            body: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(horizontal: 30),
+                child: Form(
+                    key: _formKey,
+                    autovalidate: false,
+                    child: Column(
+                      children: <Widget>[
+                        _logoImage(),
+                        Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: <Widget>[
+                              _emailField("Correo electrónico"),
+                              _passwordField("Contraseña"),
+                              _confirmPasswordField("Confirmar contraseña"),
+                              Container(
+                                margin: const EdgeInsets.only(top: 16.0),
+                                child: Text(
+                                  "¿Tienes una escuela?",
+                                  style: TextStyle(fontSize: 20.0),
+                                ),
                               ),
-                              initialValue: "",
-                              attribute: "has_school_sport",
-                              leadingInput: true,
-                              onChanged: _handleRadioValueChange,
-                              validators: [_checkSelectedRadioButton],
-                              options: ["Sí", "No"]
-                                  .map((lang) =>
-                                  FormBuilderFieldOption(
-                                    value: lang,
-                                    child: Text('$lang', style: TextStyle(fontSize: 16.0),),
-                                  ))
-                                  .toList(growable: false),
-                            ),
+                              Container(
+                                margin: const EdgeInsets.only(top: 4.0),
+                                child: FormBuilderRadio(
+                                  decoration: InputDecoration(),
+                                  initialValue: "",
+                                  attribute: "has_school_sport",
+                                  leadingInput: true,
+                                  onChanged: _handleRadioValueChange,
+                                  validators: [_checkSelectedRadioButton],
+                                  options: ["Sí", "No"]
+                                      .map((lang) => FormBuilderFieldOption(
+                                            value: lang,
+                                            child: Text(
+                                              '$lang',
+                                              style: TextStyle(fontSize: 16.0),
+                                            ),
+                                          ))
+                                      .toList(growable: false),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[_button()],
-                    ),
-                  ],
-                ))));
+                        ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[_button()],
+                        ),
+                      ],
+                    )))));
   }
 
   Widget _logoImage() {
@@ -81,7 +90,7 @@ class _RegisterState extends State<Register> {
   }
 
   Widget _emailField(String hintText) {
-    IconData icon = null;
+    IconData icon;
     icon = Icons.email;
     final RegExp emailRegex = new RegExp(
         r"^[a-zA-Z0-9.!#$%&'+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)$");
@@ -102,6 +111,7 @@ class _RegisterState extends State<Register> {
                 border: OutlineInputBorder(),
                 labelText: hintText,
                 prefixIcon: Icon(icon)),
+            onChanged: (value) => email = value,
           )
         ],
       ),
@@ -109,7 +119,7 @@ class _RegisterState extends State<Register> {
   }
 
   Widget _passwordField(String hintText) {
-    IconData icon = null;
+    IconData icon;
     icon = Icons.lock;
     return Container(
       margin: const EdgeInsets.only(top: 8.0),
@@ -130,6 +140,7 @@ class _RegisterState extends State<Register> {
                 border: OutlineInputBorder(),
                 labelText: hintText,
                 prefixIcon: Icon(icon)),
+            onChanged: (value) => password = value,
           )
         ],
       ),
@@ -137,7 +148,7 @@ class _RegisterState extends State<Register> {
   }
 
   Widget _confirmPasswordField(String hintText) {
-    IconData icon = null;
+    IconData icon;
     icon = Icons.check;
     return Container(
       margin: const EdgeInsets.only(top: 8.0),
@@ -148,8 +159,8 @@ class _RegisterState extends State<Register> {
             validator: (v) {
               if (v.isEmpty)
                 return "Este campo no puede estar vacío";
-              else if (!identical(v, _password.text))
-                return "La contraseña tiene que tener más de 5 caracteres";
+              else if (v != _password.text)
+                return "Las contraseñas no coinciden";
               else
                 return null;
             },
@@ -169,24 +180,49 @@ class _RegisterState extends State<Register> {
       margin: EdgeInsets.only(top: 16),
       padding: EdgeInsets.symmetric(horizontal: 30),
       child: Align(
-          alignment: Alignment.bottomCenter,
-          child: RaisedButton(
-            onPressed: () {
+        alignment: Alignment.bottomCenter,
+        child: RaisedButton(
+          onPressed: () async {
+            try {
               if (_formKey.currentState.validate()) {
-                showDialog(
-                    context: context,
-                    child: AlertDialog(
-                      title: Text("LMAO"),
-                    ));
+                final FirebaseUser newUser =
+                    (await _auth.createUserWithEmailAndPassword(
+                  email: email,
+                  password: password,
+                ))
+                        .user;
+
+                if (newUser != null) {
+                  if (hasSchoolSport == "Sí") {
+                    navigateFromRegisterToCreateSchool(context);
+                  } else {
+                    //Ir a login
+                  }
+                }
               }
-            },
-            elevation: 3.0,
-            color: Colors.blueAccent,
-            child: Text(
-              "REGISTRARSE",
-              style: TextStyle(fontSize: 20, color: Colors.white),
-            ),
+            } catch (e) {
+              String message;
+              if (e.code == "ERROR_INVALID_EMAIL") {
+                message = "El email no es válido";
+              } else if (e.code == "ERROR_EMAIL_ALREADY_IN_USE") {
+                message = "El email ya está en uso";
+              } else if (e.code == "ERROR_WEAK_PASSWORD") {
+                message = "La contraseña es demasiado débil";
+              } else {
+                message = "Ha ocurrido un error";
+              }
+              setState(() {
+                errorDialog(context, message);
+              });
+            }
+          },
+          elevation: 3.0,
+          color: Colors.blueAccent,
+          child: Text(
+            "REGISTRARSE",
+            style: TextStyle(fontSize: 20, color: Colors.white),
           ),
+        ),
       ),
     );
   }
@@ -197,8 +233,8 @@ class _RegisterState extends State<Register> {
     });
   }
 
-  String _checkSelectedRadioButton(dynamic v){
-    if(v == ""){
+  String _checkSelectedRadioButton(dynamic v) {
+    if (v == "") {
       return "Debe de seleccionar una opción";
     }
   }

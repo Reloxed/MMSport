@@ -1,0 +1,3 @@
+library globalVariables;
+
+String loggedInUserId;

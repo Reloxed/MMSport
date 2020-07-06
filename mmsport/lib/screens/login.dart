@@ -1,6 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mmsport/Navigations/navigations.dart';
+import 'package:mmsport/components/dialogs.dart';
+import 'package:mmsport/models/globalVariables.dart' as globals;
 
 class Login extends StatefulWidget {
   @override
@@ -10,63 +13,58 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   final _formKey = GlobalKey<FormState>();
+
+  String email;
+  String password;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Material(
-        child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 30),
-            child: Form(
-                key: _formKey,
-                autovalidate: false,
-                child: Stack(
-              children: <Widget>[
-                _logoImage(),
-                Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      _textField("Correo electrónico", false),
-                      _textField("Contraseña", true),
-                    ],
-                  ),
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    _button(),
-                    _registerYet()
-                  ],
-                ),
-              ],
-            ))));
+        child: Scaffold(
+            body: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(horizontal: 30),
+                child: Form(
+                    key: _formKey,
+                    autovalidate: false,
+                    child: Column(
+                      children: <Widget>[
+                        _logoImage(),
+                        Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: <Widget>[
+                              _emailTextField(),
+                              _passwordTextField(),
+                            ],
+                          ),
+                        ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[_button(), _registerYet()],
+                        ),
+                      ],
+                    )))));
   }
 
-  Widget _logoImage(){
+  Widget _logoImage() {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 50),
-      child: Image.asset("assets/logo/Logo_MMSport_sin_fondo.png")
-    );
+        padding: EdgeInsets.symmetric(vertical: 50),
+        child: Image.asset("assets/logo/Logo_MMSport_sin_fondo.png"));
     //return Image.asset("assets/logo/Logo_MMSport_sin_fondo.png");
   }
 
-  Widget _textField(String hintText, bool isPassword) {
-    IconData icon = null;
-    String text = "";
-    if (isPassword) {
-      icon = Icons.lock;
-    } else {
-      icon = Icons.email;
-    }
+  Widget _emailTextField() {
+    IconData icon = Icons.email;
     final RegExp emailRegex = new RegExp(
         r"^[a-zA-Z0-9.!#$%&'+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)$");
     return Container(
@@ -77,17 +75,43 @@ class _LoginState extends State<Login> {
             validator: (v) {
               if (v.isEmpty)
                 return "Este campo no puede estar vacío";
-              else if (!emailRegex.hasMatch(v) && isPassword == false) {
+              else if (!emailRegex.hasMatch(v)) {
                 return "El email no es válido";
-              } else if (v.length < 5 && isPassword == true)
-                return "La contraseña tiene que tener más de 5 caracteres";
-                else return null;
+              } else
+                return null;
             },
-            obscureText: isPassword,
             decoration: InputDecoration(
                 border: OutlineInputBorder(),
-                labelText: hintText,
+                labelText: "Correo electrónico",
                 prefixIcon: Icon(icon)),
+            onChanged: (value) => email = value,
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _passwordTextField() {
+    IconData icon = Icons.lock;
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 10),
+      child: Column(
+        children: <Widget>[
+          TextFormField(
+            validator: (v) {
+              if (v.isEmpty)
+                return "Este campo no puede estar vacío";
+              else if (v.length < 5)
+                return "La contraseña tiene que tener más de 5 caracteres";
+              else
+                return null;
+            },
+            obscureText: true,
+            decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: "Contraseña",
+                prefixIcon: Icon(icon)),
+            onChanged: (value) => password = value,
           )
         ],
       ),
@@ -96,15 +120,33 @@ class _LoginState extends State<Login> {
 
   Widget _button() {
     return Container(
+      margin: EdgeInsets.only(top: 16),
         padding: EdgeInsets.symmetric(horizontal: 30),
-        child: SizedBox(
-          width: double.infinity,
+        child: Align(
+          alignment: Alignment.bottomCenter,
           child: RaisedButton(
-            onPressed: () {
-              if(_formKey.currentState.validate()){
-                showDialog(context: context, child: AlertDialog(
-                  title: Text("LMAO"),
-                ));
+            onPressed: () async {
+              try {
+                if (_formKey.currentState.validate()) {
+                  final FirebaseUser user = (await _auth.signInWithEmailAndPassword(
+                      email: email, password: password)).user;
+
+                  if (user != null){
+                    globals.loggedInUserId = user.uid;
+                  }
+                }
+              } catch (e) {
+                String message;
+                if (e.code == "ERROR_USER_NOT_FOUND") {
+                  message = "El usuario no existe";
+                } else if (e.code == "ERROR_WRONG_PASSWORD") {
+                  message = "La contraseña no es correcta";
+                } else {
+                  message = "Ha ocurrido un error";
+                }
+                setState(() {
+                  errorDialog(context, message);
+                });
               }
             },
             elevation: 3.0,
@@ -117,11 +159,12 @@ class _LoginState extends State<Login> {
         ));
   }
 
-  Widget _registerYet(){
+  Widget _registerYet() {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 20),
-      child: Column(
-        children: <Widget>[
+        padding: EdgeInsets.symmetric(vertical: 20),
+        child: Align(
+          alignment: Alignment.bottomCenter,
+        child: Column(children: <Widget>[
           new Text(
             "¿Aún no te has registrado?",
             style: TextStyle(fontSize: 15, color: Colors.black),
@@ -132,11 +175,12 @@ class _LoginState extends State<Login> {
             },
             child: new Text(
               "¡Regístrate!",
-              style: TextStyle(fontSize: 15, color: Colors.black, decoration: TextDecoration.underline),
+              style: TextStyle(
+                  fontSize: 15,
+                  color: Colors.black,
+                  decoration: TextDecoration.underline),
             ),
           )
-        ]
-      )
-    );
+        ])));
   }
 }
