@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mmsport/Navigations/navigations.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -10,6 +11,13 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
   final _formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -102,7 +110,7 @@ class _LoginState extends State<Login> {
             elevation: 3.0,
             color: Colors.blueAccent,
             child: Text(
-              "Iniciar sesión",
+              "INICIAR SESIÓN",
               style: TextStyle(fontSize: 20, color: Colors.white),
             ),
           ),
@@ -118,9 +126,14 @@ class _LoginState extends State<Login> {
             "¿Aún no te has registrado?",
             style: TextStyle(fontSize: 15, color: Colors.black),
           ),
-          new Text(
-            "¡Regístrate!",
-            style: TextStyle(fontSize: 15, color: Colors.black, decoration: TextDecoration.underline),
+          new GestureDetector(
+            onTap: () {
+              navigateFromLoginToRegister(context);
+            },
+            child: new Text(
+              "¡Regístrate!",
+              style: TextStyle(fontSize: 15, color: Colors.black, decoration: TextDecoration.underline),
+            ),
           )
         ]
       )
