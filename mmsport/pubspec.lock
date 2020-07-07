@@ -35,7 +35,7 @@ packages:
       name: basic_utils
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.5.4"
+    version: "2.5.5"
   boolean_selector:
     dependency: transitive
     description:
@@ -269,12 +269,12 @@ packages:
     source: hosted
     version: "2.1.12"
   image_picker:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: image_picker
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.6.7+3"
+    version: "0.6.7+4"
   image_picker_platform_interface:
     dependency: transitive
     description:

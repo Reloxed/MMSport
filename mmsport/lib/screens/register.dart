@@ -1,10 +1,13 @@
+import 'dart:io';
+
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:mmsport/components/dialogs.dart';
 import 'package:mmsport/navigations/navigations.dart';
-import 'package:mmsport/screens/create_sport_school.dart';
 
 class Register extends StatefulWidget {
   @override
@@ -107,10 +110,7 @@ class _RegisterState extends State<Register> {
                 return null;
             },
             obscureText: false,
-            decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: hintText,
-                prefixIcon: Icon(icon)),
+            decoration: InputDecoration(border: OutlineInputBorder(), labelText: hintText, prefixIcon: Icon(icon)),
             onChanged: (value) => email = value,
           )
         ],
@@ -136,10 +136,7 @@ class _RegisterState extends State<Register> {
                 return null;
             },
             obscureText: true,
-            decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: hintText,
-                prefixIcon: Icon(icon)),
+            decoration: InputDecoration(border: OutlineInputBorder(), labelText: hintText, prefixIcon: Icon(icon)),
             onChanged: (value) => password = value,
           )
         ],
@@ -165,10 +162,7 @@ class _RegisterState extends State<Register> {
                 return null;
             },
             obscureText: true,
-            decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: hintText,
-                prefixIcon: Icon(icon)),
+            decoration: InputDecoration(border: OutlineInputBorder(), labelText: hintText, prefixIcon: Icon(icon)),
           )
         ],
       ),
@@ -185,18 +179,17 @@ class _RegisterState extends State<Register> {
           onPressed: () async {
             try {
               if (_formKey.currentState.validate()) {
-                final FirebaseUser newUser =
-                    (await _auth.createUserWithEmailAndPassword(
+                final FirebaseUser newUser = (await _auth.createUserWithEmailAndPassword(
                   email: email,
                   password: password,
                 ))
-                        .user;
+                    .user;
 
                 if (newUser != null) {
                   if (hasSchoolSport == "Sí") {
                     navigateFromRegisterToCreateSchool(context);
                   } else {
-                    //Ir a login
+
                   }
                 }
               }
