@@ -133,6 +133,7 @@ class _LoginState extends State<Login> {
 
                   if (user != null){
                     globals.loggedInUserId = user.uid;
+                    navigateFromLoginToChooseSportSchool(context);
                   }
                 }
               } catch (e) {
