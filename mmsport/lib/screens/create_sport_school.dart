@@ -82,9 +82,10 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
         padding: EdgeInsets.symmetric(vertical: 30.0),
         child: InkWell(
             onTap: () async {
-              var _image = await ImagePicker.pickImage(source: ImageSource.gallery);
+              ImagePicker picker = ImagePicker();
+              var _image = await picker.getImage(source: ImageSource.gallery);
               setState(() {
-                imageSchool = _image;
+                imageSchool = File(_image.path);
               });
             },
             child: Align(
@@ -211,6 +212,7 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
         alignment: Alignment.bottomCenter,
         child: RaisedButton(
           onPressed: () async {
+            // ignore: unrelated_type_equality_checks
             if (_formKey.currentState.validate() && imageSchool != "") {
               _controller.animateToPage(1, duration: const Duration(milliseconds: 400), curve: Curves.easeInOut);
             }
@@ -263,9 +265,10 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
         padding: EdgeInsets.symmetric(vertical: 30.0),
         child: InkWell(
             onTap: () async {
-              var _image = await ImagePicker.pickImage(source: ImageSource.gallery);
+              ImagePicker picker = ImagePicker();
+              var _image = await picker.getImage(source: ImageSource.gallery);
               setState(() {
-                imageProfile = _image;
+                imageProfile = File(_image.path);
               });
             },
             child: Align(

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mmsport/screens/login.dart';
-import 'package:mmsport/screens/register.dart';
 
 void main() {
   runApp(MyApp());

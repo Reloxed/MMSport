@@ -208,7 +208,7 @@ packages:
       name: flutter_form_builder
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.11.3"
+    version: "3.11.4"
   flutter_keyboard_visibility:
     dependency: transitive
     description:
@@ -386,7 +386,7 @@ packages:
       name: signature
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.1.2"
+    version: "3.2.0"
   sky_engine:
     dependency: transitive
     description: flutter

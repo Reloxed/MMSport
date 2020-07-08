@@ -1,11 +1,7 @@
-import 'dart:io';
-
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:mmsport/components/dialogs.dart';
 import 'package:mmsport/navigations/navigations.dart';
 
@@ -226,6 +222,7 @@ class _RegisterState extends State<Register> {
     });
   }
 
+  // ignore: missing_return
   String _checkSelectedRadioButton(dynamic v) {
     if (v == "") {
       return "Debe de seleccionar una opción";

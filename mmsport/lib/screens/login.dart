@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mmsport/Navigations/navigations.dart';
 import 'package:mmsport/components/dialogs.dart';
-import 'package:mmsport/models/globalVariables.dart' as globals;
+import 'package:mmsport/models/global_variables.dart' as globals;
 
 class Login extends StatefulWidget {
   @override
