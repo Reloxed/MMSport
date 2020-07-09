@@ -1,6 +1,5 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mmsport/models/global_variables.dart';
@@ -24,7 +23,7 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
   int _currentPage = 0;
 
   Future<QuerySnapshot> _loadFirebaseData() async {
-    String firebaseUser =  loggedInUserId;
+    String firebaseUser = loggedInUserId;
     await Firestore.instance
         .collection("socialProfiles")
         .where('userAccountId', isEqualTo: firebaseUser)
@@ -61,36 +60,33 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
         }
         return Material(
             child: Scaffold(
-              appBar: AppBar(
-                title: const Text('Mis escuelas'),
-                centerTitle: true,
-                actions: <Widget>[
-                  _logoutButton(),
-                ],
+          appBar: AppBar(
+            title: const Text('Mis escuelas'),
+            centerTitle: true,
+            actions: <Widget>[
+              _logoutButton(),
+            ],
+          ),
+          body: SingleChildScrollView(
+            padding: EdgeInsets.all(20.0),
+            child: Center(
+              child: Column(
+                children: [Center(child: _carouselSlider()), _pageIndicator()],
               ),
-              body: Container(
-                padding: EdgeInsets.all(50.0),
-                child: Center(
-                  child: Column(
-                    children: [
-                      _carouselSlider(),
-                      _pageIndicator()
-                    ],
+            ),
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: null,
+            tooltip: 'Inscribirme en una escuela',
+            child: IconButton(
+              icon: new IconTheme(
+                  data: new IconThemeData(
+                    color: Colors.white,
                   ),
-                ),
-              ),
-              floatingActionButton: FloatingActionButton(
-                onPressed: null,
-                tooltip: 'Inscribirme en una escuela',
-                child: IconButton(
-                  icon: new IconTheme(
-                      data: new IconThemeData(
-                        color: Colors.white,
-                      ),
-                      child: Icon(Icons.add)),
-                ),
-              ),
-            ));
+                  child: Icon(Icons.add)),
+            ),
+          ),
+        ));
       },
     );
   }
@@ -135,18 +131,18 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
   List<Widget> _cardViews() {
     List<Widget> cardViews = new List();
     for (SportSchool actualSportSchool in sportSchools.keys) {
-      cardViews.add(Card(
-        elevation: 2.0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0))),
-        margin: EdgeInsets.all(16.0),
-        child: Center(
+      cardViews.add(
+        Card(
+          elevation: 2.0,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0))),
+          margin: EdgeInsets.all(16.0),
           child: Column(
             children: [
-              InkWell(
-                  child: Align(
+              Align(
                 alignment: Alignment.center,
                 child: CircleAvatar(
                     radius: 85,
+                    backgroundImage: NetworkImage(actualSportSchool.urlLogo),
                     child: ClipOval(
                       child: Image.network(
                         actualSportSchool.urlLogo,
@@ -155,7 +151,7 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
                         height: 64,
                       ),
                     )),
-              )),
+              ),
               Text(
                 actualSportSchool.name,
                 style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
@@ -182,7 +178,7 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
             ],
           ),
         ),
-      ));
+      );
     }
 
     return cardViews;
