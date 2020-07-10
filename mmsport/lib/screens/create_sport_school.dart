@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -415,10 +416,17 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
     });
   }
 
+  String getRandomString(int length){
+    const _chars = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890";
+    Random _rnd = Random();
+
+    return String.fromCharCodes(Iterable.generate(length, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
+  }
+
   // Auxiliary method to upload image of school to FirebaseStorage
   Future uploadPicSchool(BuildContext context) async {
-    String fileName = nameSportSchool;
-    StorageReference storageReference = FirebaseStorage.instance.ref().child(fileName);
+    String fileName = nameProfile + firstSurnameProfile + secondSurnameProfile;
+    StorageReference storageReference = FirebaseStorage.instance.ref().child(fileName + getRandomString(12));
     StorageUploadTask uploadTask = storageReference.putFile(imageSchool);
     StorageTaskSnapshot taskSnapshot = await uploadTask.onComplete;
     var url = await taskSnapshot.ref.getDownloadURL();
@@ -428,11 +436,11 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
   // Auxiliary method to upload image of profile to FirebaseStorage
 
   Future uploadPicProfile(BuildContext context) async {
-    String fileName = nameProfile;
-    StorageReference storageReference = FirebaseStorage.instance.ref().child(fileName);
+    String fileName = nameProfile + firstSurnameProfile + secondSurnameProfile;
+    StorageReference storageReference = FirebaseStorage.instance.ref().child(fileName + getRandomString(12));
     StorageUploadTask uploadTask = storageReference.putFile(imageProfile);
     StorageTaskSnapshot taskSnapshot = await uploadTask.onComplete;
-    var url = taskSnapshot.ref.getDownloadURL();
-    urlProfile = url.toString();
+    var url = await taskSnapshot.ref.getDownloadURL();
+    urlProfile = url;
   }
 }

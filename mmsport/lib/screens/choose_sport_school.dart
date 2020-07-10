@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:mmsport/models/global_variables.dart';
 import 'package:mmsport/models/socialProfile.dart';
 import 'package:mmsport/models/sportSchool.dart';
-import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class ChooseSportSchool extends StatefulWidget {
   @override
@@ -16,12 +15,10 @@ class ChooseSportSchool extends StatefulWidget {
 }
 
 class _ChooseSportSchoolState extends State<ChooseSportSchool> {
-  final _formKey = new GlobalKey<FormState>();
-  PageController _controller = PageController(initialPage: 0);
   List<SocialProfile> profiles = new List();
   Map<SportSchool, int> sportSchools = new Map();
-  int _currentPage = 0;
 
+  // ignore: missing_return
   Future<QuerySnapshot> _loadFirebaseData() async {
     String firebaseUser = loggedInUserId;
     await Firestore.instance
@@ -47,17 +44,14 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
   @override
   void initState() {
     super.initState();
-    _loadFirebaseData();
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<QuerySnapshot>(
       future: _loadFirebaseData(),
-      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> profilesSnapshot) {
-        if (!profilesSnapshot.hasData) {
-          //loading
-        }
+      builder: (context, profilesSnapshot) {
+        if (!profilesSnapshot.hasData) {}
         return Material(
             child: Scaffold(
           appBar: AppBar(
@@ -67,18 +61,23 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
               _logoutButton(),
             ],
           ),
-          body: SingleChildScrollView(
+          body: Center(
+              child: SingleChildScrollView(
             padding: EdgeInsets.all(20.0),
             child: Center(
-              child: Column(
-                children: [Center(child: _carouselSlider()), _pageIndicator()],
-              ),
-            ),
-          ),
+                child: SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.55,
+                    child: ListView(
+                      children: <Widget>[
+                        Container(height: MediaQuery.of(context).size.height * 0.5, child: _carouselSlider())
+                      ], /*_pageIndicator()*/
+                    ))),
+          )),
           floatingActionButton: FloatingActionButton(
             onPressed: null,
             tooltip: 'Inscribirme en una escuela',
             child: IconButton(
+              onPressed: () {},
               icon: new IconTheme(
                   data: new IconThemeData(
                     color: Colors.white,
@@ -93,6 +92,7 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
 
   Widget _logoutButton() {
     return IconButton(
+      onPressed: () {},
       icon: new IconTheme(
           data: new IconThemeData(
             color: Colors.white,
@@ -102,85 +102,67 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
   }
 
   Widget _carouselSlider() {
-    return CarouselSlider(
-      options: CarouselOptions(autoPlay: false, enlargeCenterPage: true),
-      items: _cardViews(),
+    return PageView.builder(
+      //options: CarouselOptions(autoPlay: false, enlargeCenterPage: true),
+      //items: _cardViews(),
+      itemCount: sportSchools.length,
+      //carouselController: controller(),
+      itemBuilder: (BuildContext context, int index) {
+        return _cardView(index);
+      },
     );
   }
 
-  Widget _pageIndicator() {
-    return SmoothPageIndicator(
-      controller: controller(),
-      count: sportSchools.length,
-      effect: WormEffect(
-          spacing: 8.0,
-          radius: 4.0,
-          dotWidth: 24.0,
-          dotHeight: 16.0,
-          paintStyle: PaintingStyle.stroke,
-          strokeWidth: 1.5,
-          dotColor: Colors.grey,
-          activeDotColor: Colors.blueAccent),
-    );
+  CarouselController controller() {
+    return new CarouselController();
   }
 
-  PageController controller() {
-    return new PageController(initialPage: 0);
-  }
-
-  List<Widget> _cardViews() {
-    List<Widget> cardViews = new List();
-    for (SportSchool actualSportSchool in sportSchools.keys) {
-      cardViews.add(
-        Card(
-          elevation: 2.0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0))),
-          margin: EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              Align(
-                alignment: Alignment.center,
-                child: CircleAvatar(
-                    radius: 85,
-                    backgroundImage: NetworkImage(actualSportSchool.urlLogo),
-                    child: ClipOval(
-                      child: Image.network(
-                        actualSportSchool.urlLogo,
-                        fit: BoxFit.cover,
-                        width: 64,
-                        height: 64,
-                      ),
-                    )),
-              ),
-              Text(
-                actualSportSchool.name,
-                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
-              ),
-              Text(
-                sportSchools[actualSportSchool].toString() + ' Perfiles sociales verificados',
-                style: TextStyle(fontSize: 12.0),
-              ),
-              OutlineButton.icon(
-                onPressed: null,
-                icon: new IconTheme(
-                    data: new IconThemeData(
-                      color: Colors.white,
-                    ),
-                    child: Icon(Icons.add)),
-                label: Text(
-                  'Añadir Perfil Social',
-                  style: TextStyle(fontSize: 16.0),
-                ),
-                highlightElevation: 3.0,
-                textColor: Colors.blueAccent,
-                color: Colors.blueAccent,
-              )
-            ],
+  Widget _cardView(int index) {
+    return Card(
+      elevation: 2.0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0))),
+      margin: EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          Align(
+            alignment: Alignment.center,
+            child: CircleAvatar(
+                radius: 85,
+                backgroundImage: NetworkImage(sportSchools.keys.elementAt(index).urlLogo),
+                child: ClipOval(
+                  child: Image.network(
+                    sportSchools.keys.elementAt(index).urlLogo,
+                    fit: BoxFit.cover,
+                    width: 64,
+                    height: 64,
+                  ),
+                )),
           ),
-        ),
-      );
-    }
-
-    return cardViews;
+          Text(
+            sportSchools.keys.elementAt(index).name,
+            style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+          ),
+          Text(
+            sportSchools.values.elementAt(index).toString() + ' Perfiles sociales verificados',
+            style: TextStyle(fontSize: 12.0),
+          ),
+          OutlineButton.icon(
+            onPressed: null,
+            icon: new IconTheme(
+                data: new IconThemeData(
+                  color: Colors.white,
+                ),
+                child: Icon(Icons.add)),
+            label: Text(
+              'Añadir Perfil Social',
+              style: TextStyle(fontSize: 16.0),
+            ),
+            highlightElevation: 3.0,
+            textColor: Colors.blueAccent,
+            color: Colors.blueAccent,
+          )
+        ],
+      ),
+    );
   }
 }

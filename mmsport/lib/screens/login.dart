@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:mmsport/Navigations/navigations.dart';
+import 'package:mmsport/navigations/navigations.dart';
 import 'package:mmsport/components/dialogs.dart';
 import 'package:mmsport/models/global_variables.dart' as globals;
 
