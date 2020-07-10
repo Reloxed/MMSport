@@ -16,4 +16,9 @@ class SportSchool{
     this.urlLogo = urlLogo;
   }
 
+  static SportSchool sportSchoolFromMap(Map<String, dynamic> map){
+
+    return new SportSchool(map['name'], map['address'], map['town'], map['province'], map['status'], map['urlLogo']);
+  }
+
 }

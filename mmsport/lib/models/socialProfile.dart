@@ -23,4 +23,9 @@ class SocialProfile{
     this.groupId = groupId;
   }
 
+  static SocialProfile socialProfileFromMap(Map<String, dynamic> map){
+
+    return new SocialProfile(map['userAccountId'], map['name'], map['firstSurname'], map['secondSurname'], map['role'], map['status'], map['urlImage'], map['sportSchoolId'], map['groupId']);
+  }
+
 }
