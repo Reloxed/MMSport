@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:mmsport/models/global_variables.dart';
 import 'package:mmsport/models/socialProfile.dart';
 import 'package:mmsport/models/sportSchool.dart';
+import 'package:mmsport/navigations/navigations.dart';
 
 class ChooseSportSchool extends StatefulWidget {
   @override
@@ -32,6 +33,7 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
     for (SocialProfile actualProfile in profiles) {
       await Firestore.instance.collection('sportSchools').document(actualProfile.sportSchoolId).get().then((document) {
         SportSchool newSportSchool = SportSchool.sportSchoolFromMap(document.data);
+        newSportSchool.id = actualProfile.sportSchoolId;
         if (sportSchools.containsKey(newSportSchool)) {
           sportSchools[newSportSchool] += 1;
         } else {
@@ -119,50 +121,54 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
 
   Widget _cardView(int index) {
     return Card(
-      elevation: 2.0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0))),
-      margin: EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          Align(
-            alignment: Alignment.center,
-            child: CircleAvatar(
-                radius: 85,
-                backgroundImage: NetworkImage(sportSchools.keys.elementAt(index).urlLogo),
-                child: ClipOval(
-                  child: Image.network(
-                    sportSchools.keys.elementAt(index).urlLogo,
-                    fit: BoxFit.cover,
-                    width: 64,
-                    height: 64,
-                  ),
-                )),
-          ),
-          Text(
-            sportSchools.keys.elementAt(index).name,
-            style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
-          ),
-          Text(
-            sportSchools.values.elementAt(index).toString() + ' Perfiles sociales verificados',
-            style: TextStyle(fontSize: 12.0),
-          ),
-          OutlineButton.icon(
-            onPressed: null,
-            icon: new IconTheme(
-                data: new IconThemeData(
-                  color: Colors.white,
+        elevation: 2.0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0))),
+        margin: EdgeInsets.all(16.0),
+        child: InkWell(
+          onTap: () {
+            navigateFromChooseSportSchoolToChooseSocialProfile(context);
+          },
+          child: Column(
+            children: [
+              Align(
+                alignment: Alignment.center,
+                child: CircleAvatar(
+                    radius: 85,
+                    backgroundImage: NetworkImage(sportSchools.keys.elementAt(index).urlLogo),
+                    child: ClipOval(
+                      child: Image.network(
+                        sportSchools.keys.elementAt(index).urlLogo,
+                        fit: BoxFit.cover,
+                        width: 64,
+                        height: 64,
+                      ),
+                    )),
+              ),
+              Text(
+                sportSchools.keys.elementAt(index).name,
+                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                sportSchools.values.elementAt(index).toString() + ' Perfiles sociales verificados',
+                style: TextStyle(fontSize: 12.0),
+              ),
+              OutlineButton.icon(
+                onPressed: null,
+                icon: new IconTheme(
+                    data: new IconThemeData(
+                      color: Colors.white,
+                    ),
+                    child: Icon(Icons.add)),
+                label: Text(
+                  'Añadir Perfil Social',
+                  style: TextStyle(fontSize: 16.0),
                 ),
-                child: Icon(Icons.add)),
-            label: Text(
-              'Añadir Perfil Social',
-              style: TextStyle(fontSize: 16.0),
-            ),
-            highlightElevation: 3.0,
-            textColor: Colors.blueAccent,
-            color: Colors.blueAccent,
-          )
-        ],
-      ),
-    );
+                highlightElevation: 3.0,
+                textColor: Colors.blueAccent,
+                color: Colors.blueAccent,
+              )
+            ],
+          ),
+        ));
   }
 }

@@ -1,5 +1,6 @@
 class SportSchool{
 
+  String id;
   String name;
   String address;
   String town;
