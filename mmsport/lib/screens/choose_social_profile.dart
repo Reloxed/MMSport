@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import "package:flutter/material.dart";
-import "package:mmsport/models/global_variables.dart";
 import 'package:mmsport/models/socialProfile.dart';
+import 'package:mmsport/models/sportSchool.dart';
 import 'package:mmsport/navigations/navigations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ChooseSocialProfile extends StatefulWidget {
   @override
@@ -17,13 +20,17 @@ class _ChooseSocialProfileState extends State<ChooseSocialProfile> {
 
   // ignore: missing_return
   Future<QuerySnapshot> _loadFirebaseData() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    Map map = jsonDecode(preferences.get("chosenSportSchool"));
+    SportSchool chosenSportSchool = SportSchool.sportSchoolFromMap(map);
     await Firestore.instance
         .collection("socialProfiles")
-        .where("userAccountId", isEqualTo: loggedInUserId)
-        .where("sportSchoolId", isEqualTo: chosenSportSchoolId)
+        .where("userAccountId", isEqualTo: preferences.get("loggedInUserId"))
+        .where("sportSchoolId", isEqualTo: chosenSportSchool.id)
         .getDocuments()
         .then((value) => value.documents.forEach((element) {
               SocialProfile newProfile = SocialProfile.socialProfileFromMap(element.data);
+              newProfile.id = element.documentID;
               socialProfiles.add(newProfile);
             }));
   }
@@ -38,8 +45,9 @@ class _ChooseSocialProfileState extends State<ChooseSocialProfile> {
           appBar: AppBar(
             leading: new IconButton(
                 icon: new Icon(Icons.arrow_back),
-                onPressed: () {
-                  chosenSportSchoolId = "";
+                onPressed: () async {
+                  SharedPreferences preferences = await SharedPreferences.getInstance();
+                  preferences.remove("chosenSportSchool");
                   navigateToChooseSportSchool(context);
                 }),
             title: const Text("Perfiles sociales"),
@@ -61,7 +69,14 @@ class _ChooseSocialProfileState extends State<ChooseSocialProfile> {
         elevation: 2.0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0))),
         margin: EdgeInsets.all(16.0),
-        child: Column(
+        child: InkWell(
+          onTap: () async{
+            SharedPreferences preferences = await SharedPreferences.getInstance();
+            String socialProfileToJson = jsonEncode(socialProfiles.elementAt(index).socialProfileToJson());
+            preferences.setString("chosenSocialProfile", socialProfileToJson);
+            navigateToHomeStudent(context);
+          },
+            child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
@@ -99,7 +114,7 @@ class _ChooseSocialProfileState extends State<ChooseSocialProfile> {
                   style: TextStyle(fontSize: 20.0),
                 ))
           ],
-        ));
+        )));
   }
 
   Widget _pageView() {

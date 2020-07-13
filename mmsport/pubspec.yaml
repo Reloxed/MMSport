@@ -32,6 +32,7 @@ dependencies:
   image_picker: ^0.6.7
   smooth_page_indicator: ^0.1.5
   flutter_chips_input: ^1.8.3
+  shared_preferences: ^0.5.8
 
 
 

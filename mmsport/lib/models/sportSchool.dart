@@ -22,4 +22,14 @@ class SportSchool{
     return new SportSchool(map['name'], map['address'], map['town'], map['province'], map['status'], map['urlLogo']);
   }
 
+  Map<String, dynamic> sportSchoolToJson() => {
+    "id": id,
+    "name": name,
+    "address": address,
+    "town": town,
+    "province": province,
+    "status": status,
+    "urlLogo": urlLogo
+  };
+
 }

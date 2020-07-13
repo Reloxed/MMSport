@@ -1,5 +1,6 @@
 class SocialProfile{
 
+  String id;
   String userAccountId;
   String name;
   String firstSurname;
@@ -27,5 +28,18 @@ class SocialProfile{
 
     return new SocialProfile(map['userAccountId'], map['name'], map['firstSurname'], map['secondSurname'], map['role'], map['status'], map['urlImage'], map['sportSchoolId'], map['groupId']);
   }
+
+  Map<String, dynamic> socialProfileToJson() => {
+    "id": id,
+    "userAccountId": userAccountId,
+    "name": name,
+    "firstSurname": firstSurname,
+    "secondSurname": secondSurname,
+    "role": role,
+    "status": status,
+    "urlImage": urlImage,
+    "sportSchoolId": sportSchoolId,
+    "groupId": groupId
+  };
 
 }
