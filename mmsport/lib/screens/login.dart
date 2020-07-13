@@ -133,7 +133,7 @@ class _LoginState extends State<Login> {
 
                   if (user != null){
                     globals.loggedInUserId = user.uid;
-                    navigateFromLoginToChooseSportSchool(context);
+                    navigateToChooseSportSchool(context);
                   }
                 }
               } catch (e) {
@@ -172,7 +172,7 @@ class _LoginState extends State<Login> {
           ),
           new GestureDetector(
             onTap: () {
-              navigateFromLoginToRegister(context);
+              navigateToRegister(context);
             },
             child: new Text(
               "¡Regístrate!",

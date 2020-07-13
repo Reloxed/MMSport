@@ -126,7 +126,7 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
         margin: EdgeInsets.all(16.0),
         child: InkWell(
           onTap: () {
-            navigateFromChooseSportSchoolToChooseSocialProfile(context);
+            navigateToChooseSocialProfile(context);
           },
           child: Column(
             children: [
