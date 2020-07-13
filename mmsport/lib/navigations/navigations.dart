@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:mmsport/screens/choose_social_profile.dart';
 import 'package:mmsport/screens/choose_sport_school.dart';
 import 'package:mmsport/screens/create_sport_school.dart';
+import 'package:mmsport/screens/login.dart';
 import 'package:mmsport/screens/register.dart';
 
 void navigateToRegister(BuildContext context){
@@ -19,4 +20,8 @@ void navigateToChooseSportSchool(BuildContext context){
 
 void navigateToChooseSocialProfile(BuildContext context){
   Navigator.of(context).push(MaterialPageRoute(builder: (context) => ChooseSocialProfile()));
+}
+
+void logout(BuildContext context){
+  Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => Login()), (Route<dynamic> route) => false);
 }
