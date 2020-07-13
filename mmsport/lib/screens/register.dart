@@ -183,7 +183,7 @@ class _RegisterState extends State<Register> {
 
                 if (newUser != null) {
                   if (hasSchoolSport == "Sí") {
-                    navigateFromRegisterToCreateSchool(context);
+                    navigateToCreateSchool(context);
                   } else {
 
                   }
