@@ -74,7 +74,7 @@ class _ChooseSocialProfileState extends State<ChooseSocialProfile> {
             SharedPreferences preferences = await SharedPreferences.getInstance();
             String socialProfileToJson = jsonEncode(socialProfiles.elementAt(index).socialProfileToJson());
             preferences.setString("chosenSocialProfile", socialProfileToJson);
-            navigateToHomeStudent(context);
+            navigateToHome(context);
           },
             child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
