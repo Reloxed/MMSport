@@ -3,6 +3,7 @@ import 'package:mmsport/screens/chats/chat_main.dart';
 import 'package:mmsport/screens/choose_social_profile.dart';
 import 'package:mmsport/screens/choose_sport_school.dart';
 import 'package:mmsport/screens/create_sport_school.dart';
+import 'package:mmsport/screens/inscription_list_sport_school.dart';
 import 'package:mmsport/screens/login.dart';
 import 'package:mmsport/screens/register.dart';
 import 'package:mmsport/screens/homes/home.dart';
@@ -33,4 +34,8 @@ void logout(BuildContext context){
 
 void navigateToChatMain(BuildContext context){
   Navigator.of(context).push(MaterialPageRoute(builder: (context) => ChatMain()));
+}
+
+void navigateToInscriptionListSportSchool(BuildContext context){
+  Navigator.of(context).push(MaterialPageRoute(builder: (context) => InscriptionListSportSchool()));
 }
