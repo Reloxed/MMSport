@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mmsport/navigations/navigations.dart';
 import 'package:mmsport/components/dialogs.dart';
-import 'package:mmsport/models/global_variables.dart' as globals;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -132,7 +132,8 @@ class _LoginState extends State<Login> {
                       email: email, password: password)).user;
 
                   if (user != null){
-                    globals.loggedInUserId = user.uid;
+                    SharedPreferences preferences = await SharedPreferences.getInstance();
+                    preferences.setString("loggedInUserId", user.uid);
                     navigateToChooseSportSchool(context);
                   }
                 }

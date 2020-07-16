@@ -1,12 +1,14 @@
+import 'dart:convert';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:mmsport/models/global_variables.dart';
 import 'package:mmsport/models/socialProfile.dart';
 import 'package:mmsport/models/sportSchool.dart';
 import 'package:mmsport/navigations/navigations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class ChooseSportSchool extends StatefulWidget {
@@ -26,7 +28,8 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
 
   // ignore: missing_return
   Future<QuerySnapshot> _loadFirebaseData() async {
-    String firebaseUser = loggedInUserId;
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    String firebaseUser = preferences.get("loggedInUserId");
     await Firestore.instance
         .collection("socialProfiles")
         .where('userAccountId', isEqualTo: firebaseUser)
@@ -160,7 +163,10 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
         elevation: 2.0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0))),
         child: InkWell(
-          onTap: () {
+          onTap: () async {
+            SharedPreferences preferences = await SharedPreferences.getInstance();
+            String sportSchoolToJson = jsonEncode(sportSchools.keys.elementAt(index).sportSchoolToJson());
+            preferences.setString("chosenSportSchool", sportSchoolToJson);
             navigateToChooseSocialProfile(context);
           },
           child: Column(
