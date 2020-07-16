@@ -101,7 +101,9 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
             onPressed: null,
             tooltip: 'Inscribirme en una escuela',
             child: IconButton(
-              onPressed: () {},
+              onPressed: () {
+                navigateToInscriptionListSportSchool(context);
+              },
               icon: new IconTheme(
                   data: new IconThemeData(
                     color: Colors.white,
