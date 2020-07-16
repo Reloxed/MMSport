@@ -36,6 +36,7 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
         .getDocuments()
         .then((value) => value.documents.forEach((element) {
               SocialProfile newProfile = SocialProfile.socialProfileFromMap(element.data);
+              newProfile.id = element.documentID;
               profiles.add(newProfile);
             }));
     for (SocialProfile actualProfile in profiles) {

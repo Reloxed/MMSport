@@ -11,7 +11,7 @@ class SocialProfile{
   String sportSchoolId;
   String groupId;
 
-  SocialProfile(String userAccountId, String name, String firstSurname, String secondSurname, String role,
+  SocialProfile(String id, String userAccountId, String name, String firstSurname, String secondSurname, String role,
       String status, String urlImage, String sportSchoolId, String groupId){
     this.userAccountId = userAccountId;
     this.name = name;
@@ -26,7 +26,7 @@ class SocialProfile{
 
   static SocialProfile socialProfileFromMap(Map<String, dynamic> map){
 
-    return new SocialProfile(map['userAccountId'], map['name'], map['firstSurname'], map['secondSurname'], map['role'], map['status'], map['urlImage'], map['sportSchoolId'], map['groupId']);
+    return new SocialProfile("", map['userAccountId'], map['name'], map['firstSurname'], map['secondSurname'], map['role'], map['status'], map['urlImage'], map['sportSchoolId'], map['groupId']);
   }
 
   Map<String, dynamic> socialProfileToJson() => {
