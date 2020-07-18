@@ -2,7 +2,9 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:mmsport/models/chat_room.dart';
 import 'package:mmsport/models/socialProfile.dart';
+import 'package:mmsport/navigations/navigations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatMain extends StatefulWidget {
@@ -76,35 +78,78 @@ class _ChatMain extends State<ChatMain> {
   }
 
   Widget _listItem(Map<String, dynamic> socialProfile) {
-    return Container(
-        padding: EdgeInsets.all(10.0),
-        child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: <Widget>[
-          Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
-            CircleAvatar(
-              radius: 40,
-              backgroundImage: NetworkImage(socialProfile["urlImage"]),
-            ),
-            SizedBox(
-                width: MediaQuery.of(context).size.width * 0.7,
-                child: Container(
-                    padding: EdgeInsets.all(10.0),
-                    child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Text(
-                              socialProfile["name"] +
-                                  " " +
-                                  socialProfile["firstSurname"] +
-                                  " " +
-                                  socialProfile["secondSurname"],
-                              overflow: TextOverflow.ellipsis,
-                              softWrap: true,
-                              style: TextStyle(fontSize: 21)),
-                          Text("El ultimo mensaje jej",
-                              overflow: TextOverflow.ellipsis, softWrap: true, style: TextStyle(fontSize: 13))
-                        ]))),
-          ])
-        ]));
+    return InkWell(
+      child: Container(
+          padding: EdgeInsets.all(10.0),
+          child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: <Widget>[
+            Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
+              CircleAvatar(
+                radius: 30,
+                backgroundImage: NetworkImage(socialProfile["urlImage"]),
+              ),
+              SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.7,
+                  child: Container(
+                      padding: EdgeInsets.all(10.0),
+                      child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                                socialProfile["name"] +
+                                    " " +
+                                    socialProfile["firstSurname"] +
+                                    " " +
+                                    socialProfile["secondSurname"],
+                                overflow: TextOverflow.ellipsis,
+                                softWrap: true,
+                                style: TextStyle(fontSize: 21)),
+                            Text("El ultimo mensaje jej",
+                                overflow: TextOverflow.ellipsis, softWrap: true, style: TextStyle(fontSize: 13))
+                          ]))),
+              Container(child: Icon(Icons.chevron_right))
+            ]),
+          ])),
+      onTap: () async {
+        SharedPreferences preferences = await SharedPreferences.getInstance();
+//          String socialProfileToJson = jsonEncode(socialProfile);
+//          preferences.setString("socialProfileToChat", socialProfileToJson);
+        var existsDoc = await Firestore.instance
+            .collection("chatRooms")
+            .document(chosenSocialProfile.id + "_" + socialProfile['id'])
+            .get();
+        if (existsDoc.exists) {
+          // Check if document exists one way
+          List<String> users = [];
+          users.add(existsDoc.data['users'][0]);
+          users.add(existsDoc.data['users'][1]);
+          ChatRoomModel chatRoomModel = new ChatRoomModel(existsDoc.documentID, users);
+          preferences.setString("chosenChatRoom", jsonEncode(chatRoomModel.chatRoomModelToJson()));
+        } else {
+          // Check if document exists the other way
+          var existsDoc2 = await Firestore.instance
+              .collection("chatRooms")
+              .document(socialProfile['id'] + "_" + chosenSocialProfile.id)
+              .get();
+          if (existsDoc2.exists) {
+            List<String> users = [];
+            users.add(existsDoc2.data['users'][0]);
+            users.add(existsDoc2.data['users'][1]);
+            ChatRoomModel chatRoomModel = new ChatRoomModel(existsDoc.documentID, users);
+            preferences.setString("chosenChatRoom", jsonEncode(chatRoomModel.chatRoomModelToJson()));
+          } else {
+            // None of previous exists, create a new chat room
+            ChatRoomModel chatRoomModel = new ChatRoomModel(
+                chosenSocialProfile.id + "_" + socialProfile['id'], [chosenSocialProfile.id, socialProfile['id']]);
+            await Firestore.instance
+                .collection("chatRooms")
+                .document(chatRoomModel.id)
+                .setData(chatRoomModel.chatRoomModelToJson());
+            preferences.setString("chosenChatRoom", jsonEncode(chatRoomModel.chatRoomModelToJson()));
+          }
+        }
+        navigateToChatRoom(context);
+      },
+    );
   }
 }
