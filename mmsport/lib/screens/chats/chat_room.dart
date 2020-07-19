@@ -15,51 +15,50 @@ class ChatRoom extends StatefulWidget {
 class _ChatRoom extends State<ChatRoom> {
   ChatRoomModel chosenChatRoom;
   SocialProfile socialProfileToChat;
+  SocialProfile loggedSocialProfile;
 
-  Future<dynamic> _loadData() async {
+  Future<ChatRoomModel> _loadDataChatRoom() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    Map aux = await jsonDecode(preferences.get("chosenChatRoom"));
-    Map loggedSocialProfileMap = await jsonDecode(preferences.get("chosenSocialProfile"));
-    setState(() async {
-      chosenChatRoom = ChatRoomModel.chatRoomModelFromMap(aux);
-      SocialProfile loggedSocialProfile = SocialProfile.socialProfileFromMap(loggedSocialProfileMap);
-      if (loggedSocialProfile.id == chosenChatRoom.users[0]) {
-        await Firestore.instance
-            .collection("socialProfiles")
-            .document(chosenChatRoom.users[1])
-            .get()
-            .then((value) {
-          socialProfileToChat = SocialProfile.socialProfileFromMap(value.data);
-          socialProfileToChat.id = value.data['id'];
-        });
-      } else {
-        await Firestore.instance.collection("socialProfiles").document(chosenChatRoom.users[0]).get().then((value) {
-          socialProfileToChat = SocialProfile.socialProfileFromMap(value.data);
-          socialProfileToChat.id = value.data['id'];
-        });
-      }
-    });
+    Map aux = jsonDecode(preferences.get("chosenChatRoom"));
+    chosenChatRoom = ChatRoomModel.chatRoomModelFromMap(aux);
+    return chosenChatRoom;
+  }
+
+  Future<SocialProfile> _loadDataSocialProfile() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    Map loggedSocialProfileMap = jsonDecode(preferences.get("chosenSocialProfile"));
+    loggedSocialProfile = SocialProfile.socialProfileFromMap(loggedSocialProfileMap);
+    if (loggedSocialProfile.id == chosenChatRoom.users[0]) {
+      DocumentSnapshot jaja =
+          await Firestore.instance.collection("socialProfiles").document(chosenChatRoom.users[1]).get();
+        socialProfileToChat = SocialProfile.socialProfileFromMap(jaja.data);
+        socialProfileToChat.id = jaja.data['id'];
+    } else {
+      DocumentSnapshot jaja =
+          await Firestore.instance.collection("socialProfiles").document(chosenChatRoom.users[0]).get();
+        socialProfileToChat = SocialProfile.socialProfileFromMap(jaja.data);
+        socialProfileToChat.id = jaja.data['id'];
+    }
+    return socialProfileToChat;
   }
 
   @override
   void initState() {
+    _loadDataChatRoom();
+    _loadDataSocialProfile();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-        future: _loadData(),
-        builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-          switch (snapshot.connectionState) {
-            case ConnectionState.waiting:
-            default:
-              return Scaffold(
+    return FutureBuilder<List<dynamic>>(
+        future: Future.wait([_loadDataChatRoom(), _loadDataSocialProfile()]),
+        builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
+          if(snapshot.hasData){
+          return Material(
+              child: Scaffold(
                   appBar: PreferredSize(
-                    preferredSize: Size.fromHeight(MediaQuery
-                        .of(context)
-                        .size
-                        .height * 0.1),
+                    preferredSize: Size.fromHeight(MediaQuery.of(context).size.height * 0.1),
                     child: AppBar(
                       leading: IconButton(
                         icon: Icon(Icons.arrow_back),
@@ -77,17 +76,19 @@ class _ChatRoom extends State<ChatRoom> {
                           children: <Widget>[
                             CircleAvatar(
                               radius: 30,
-                              backgroundImage: NetworkImage(socialProfileToChat.urlImage),
+                              backgroundImage: NetworkImage(snapshot.data[1].urlImage),
                             ),
                             Container(
                                 padding: EdgeInsets.all(10),
-                                child: Text(socialProfileToChat.name + " " + socialProfileToChat.firstSurname))
+                                child: Text(snapshot.data[1].name + " " + snapshot.data[1].firstSurname))
                           ],
                         ),
                       ),
                     ),
                   ),
-                  body: Text(chosenChatRoom.id));
+                  body: Text(snapshot.data[0].id)));
+          }else{
+            return CircularProgressIndicator();
           }
         });
   }
