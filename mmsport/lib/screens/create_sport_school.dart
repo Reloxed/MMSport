@@ -397,13 +397,14 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
       "urlLogo": sportSchool.urlLogo
     });
     String sportSchoolId = ref.documentID;
+    await databaseReference.collection("sportSchools").document(ref.documentID).setData({"id": ref.documentID});
     if(imageProfile != null) {
       await uploadPicProfile(context);
     }
     FirebaseUser firebaseUser = await FirebaseAuth.instance.currentUser();
-    SocialProfile socialProfile = new SocialProfile(firebaseUser.uid, nameProfile, firstSurnameProfile,
+    SocialProfile socialProfile = new SocialProfile("", firebaseUser.uid, nameProfile, firstSurnameProfile,
         secondSurnameProfile, "DIRECTOR", "PENDING", urlProfile, sportSchoolId, "");
-    await databaseReference.collection("socialProfiles").add({
+    DocumentReference ref2 = await databaseReference.collection("socialProfiles").add({
       "userAccountId": socialProfile.userAccountId,
       "name": socialProfile.name,
       "firstSurname": socialProfile.firstSurname,
@@ -414,6 +415,7 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
       "sportSchoolId": socialProfile.sportSchoolId,
       "groupId": socialProfile.groupId
     });
+    await databaseReference.collection("socialProfiles").document(ref2.documentID).setData({"id": ref.documentID});
   }
 
   String getRandomString(int length){

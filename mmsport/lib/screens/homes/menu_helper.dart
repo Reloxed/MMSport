@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mmsport/navigations/navigations.dart';
 
 
   Widget menuGrid(BuildContext context, String role) {
@@ -64,7 +65,7 @@ import 'package:flutter/material.dart';
   void _navigatorHelper(String role, int i, BuildContext context) {
     //TODO: Añadir roles a los navigator necesarios
     if (i == 1) {
-      // TODO: Navigate into chats
+      navigateToChatMain(context);
     } else if (i == 2) {
       // TODO: Navigate to my group
     } else if (i == 3) {
