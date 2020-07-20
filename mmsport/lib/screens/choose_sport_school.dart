@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -44,8 +43,7 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
         newSportSchool.id = actualProfile.sportSchoolId;
         if (sportSchoolIds.contains(newSportSchool.id)) {
           sportSchools[newSportSchool] += 1;
-        }
-        else if(!sportSchoolIds.contains(newSportSchool.id)){
+        } else if (!sportSchoolIds.contains(newSportSchool.id)) {
           sportSchools[newSportSchool] = 1;
           sportSchoolIds.add(newSportSchool.id);
         }
@@ -55,7 +53,7 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
 
   @override
   void initState() {
-    _pageController.addListener((){
+    _pageController.addListener(() {
       setState(() {
         currentPage = _pageController.page;
       });
@@ -96,7 +94,6 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
                             child: _smoothPageIndicator(),
                           ),
                         )
-
                       ],
                     ))),
           )),
@@ -132,7 +129,7 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
     );
   }
 
-  void _logout() async{
+  void _logout() async {
     await FirebaseAuth.instance.signOut();
     logout(context);
   }
@@ -147,14 +144,11 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
     );
   }
 
-  Widget _smoothPageIndicator(){
+  Widget _smoothPageIndicator() {
     return SmoothPageIndicator(
-      controller: _pageController,  // PageController
-      count:  sportSchools.keys.length,
-      effect:  WormEffect(
-          dotColor:  Colors.grey,
-          activeDotColor:  Colors.blueAccent
-      ),  // your preferred effect
+      controller: _pageController, // PageController
+      count: sportSchools.keys.length,
+      effect: WormEffect(dotColor: Colors.grey, activeDotColor: Colors.blueAccent), // your preferred effect
     );
   }
 
@@ -199,37 +193,29 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
                     style: TextStyle(fontSize: 14.0),
                   )),
               Expanded(
-                child: Align(
-                    alignment: Alignment.center,
-                    child: Container(
-                        margin: EdgeInsets.all(4.0),
-                        child: OutlineButton.icon(
-                          onPressed: (){
-                            navigateToChooseSocialProfile(context);
-                          },
-                          icon: new IconTheme(
-                              data: new IconThemeData(
-                                color: Colors.blueAccent,
-                              ),
-                              child: Icon(Icons.add)),
-                          label: Text(
-                            'Añadir Perfil Social',
-                            style: TextStyle(fontSize: 20.0),
-                          ),
-                          borderSide: BorderSide(
-                              color: Colors.blueAccent,
-                              style: BorderStyle.solid,
-                              width: 2.0
-                          ),
-                          textColor: Colors.blueAccent,
-                          highlightElevation: 3.0,
-                        )))
-              )
-
+                  child: Align(
+                      alignment: Alignment.center,
+                      child: Container(
+                          margin: EdgeInsets.all(4.0),
+                          child: OutlineButton.icon(
+                            onPressed: () {
+                              navigateToChooseSocialProfile(context);
+                            },
+                            icon: new IconTheme(
+                                data: new IconThemeData(
+                                  color: Colors.blueAccent,
+                                ),
+                                child: Icon(Icons.add)),
+                            label: Text(
+                              'Añadir Perfil Social',
+                              style: TextStyle(fontSize: 20.0),
+                            ),
+                            borderSide: BorderSide(color: Colors.blueAccent, style: BorderStyle.solid, width: 2.0),
+                            textColor: Colors.blueAccent,
+                            highlightElevation: 3.0,
+                          ))))
             ],
           ),
         ));
-
-
   }
 }
