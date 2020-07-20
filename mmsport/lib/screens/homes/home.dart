@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:mmsport/models/socialProfile.dart';
 import 'package:mmsport/models/sportSchool.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'file:///F:/Universidad/MMSPORT/mmsport/lib/screens/homes/menu_helper.dart';
+import 'package:mmsport/screens/homes/menu_helper.dart';
 
 class Home extends StatefulWidget {
   @override
