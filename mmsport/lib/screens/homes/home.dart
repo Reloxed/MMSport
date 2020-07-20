@@ -17,14 +17,18 @@ class _Home extends State<Home> {
   SportSchool chosenSportSchool;
   SocialProfile chosenSocialProfile;
 
-  Future<Null> _loadData() async {
+  Future<SportSchool> _loadSportSchool() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    Map aux1 = await jsonDecode(preferences.get("chosenSportSchool"));
-    Map aux2 = await jsonDecode(preferences.get("chosenSocialProfile"));
-    setState(() {
-      chosenSportSchool = SportSchool.sportSchoolFromMap(aux1);
-      chosenSocialProfile = SocialProfile.socialProfileFromMap(aux2);
-    });
+    Map aux = await jsonDecode(preferences.get("chosenSportSchool"));
+    chosenSportSchool = SportSchool.sportSchoolFromMap(aux);
+    return chosenSportSchool;
+  }
+
+  Future<SocialProfile> _loadSocialProfile() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    Map aux = await jsonDecode(preferences.get("chosenSocialProfile"));
+    chosenSocialProfile = SocialProfile.socialProfileFromMap(aux);
+    return chosenSocialProfile;
   }
 
   @override
@@ -34,9 +38,10 @@ class _Home extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-        future: _loadData(),
-        builder: (BuildContext context, AsyncSnapshot<Null> snapshot) {
+    return FutureBuilder<List<dynamic>>(
+        future: Future.wait([_loadSportSchool(), _loadSocialProfile()]),
+        builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshots) {
+          if(snapshots.hasData){
           return Scaffold(
             appBar: PreferredSize(
               preferredSize: Size.fromHeight(MediaQuery.of(context).size.height * 0.15),
@@ -47,20 +52,20 @@ class _Home extends State<Home> {
                     title: Center(
                         child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: <Widget>[
                           Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
-                            CircleAvatar(radius: 40, backgroundImage: NetworkImage(chosenSportSchool.urlLogo)),
+                            CircleAvatar(radius: 40, backgroundImage: NetworkImage(snapshots.data[0].urlLogo)),
                             Container(
                                 padding: EdgeInsets.all(10.0),
                                 child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: <Widget>[
-                                      Text(chosenSportSchool.name, style: TextStyle(color: Colors.white, fontSize: 30)),
+                                      Text(snapshots.data[0].name, style: TextStyle(color: Colors.white, fontSize: 30)),
                                       Text(
-                                          chosenSocialProfile.name +
+                                          snapshots.data[1].name +
                                               " " +
-                                              chosenSocialProfile.firstSurname +
+                                              snapshots.data[1].firstSurname +
                                               " " +
-                                              chosenSocialProfile.secondSurname,
+                                              snapshots.data[1].secondSurname,
                                           style: TextStyle(color: Colors.white, fontStyle: FontStyle.italic))
                                     ])),
                           ]),
@@ -90,8 +95,10 @@ class _Home extends State<Home> {
                         ]))),
               ),
             ),
-            body: menuGrid(context, chosenSocialProfile.role),
-          );
+            body: menuGrid(context, snapshots.data[1].role),
+          );} else {
+            return CircularProgressIndicator();
+          }
         });
   }
 

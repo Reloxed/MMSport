@@ -16,13 +16,12 @@ class ChatMain extends StatefulWidget {
 class _ChatMain extends State<ChatMain> {
   SocialProfile chosenSocialProfile;
 
-  Future<Null> _loadData() async {
+  Future<SocialProfile> _loadData() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     Map aux = await jsonDecode(preferences.get("chosenSocialProfile"));
-    setState(() {
-      chosenSocialProfile = SocialProfile.socialProfileFromMap(aux);
-      chosenSocialProfile.id = aux['id'];
-    });
+    chosenSocialProfile = SocialProfile.socialProfileFromMap(aux);
+    chosenSocialProfile.id = aux['id'];
+    return chosenSocialProfile;
   }
 
   @override
@@ -33,48 +32,59 @@ class _ChatMain extends State<ChatMain> {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-        length: 2,
-        child: Scaffold(
-            appBar: AppBar(
-                title: Text("Chats"),
-                bottom: TabBar(tabs: <Widget>[
-                  Container(
-                      child: Tab(
-                    text: "Chats",
-                  )),
-                  Container(
-                      child: Tab(
-                    text: "Usuarios",
-                  ))
-                ])),
-            body: TabBarView(children: <Widget>[
-              Text("Chats abiertos"),
-              StreamBuilder(
-                  stream: Firestore.instance
-                      .collection("socialProfiles")
-                      .where("sportSchoolId", isEqualTo: chosenSocialProfile.sportSchoolId)
-                      .snapshots(),
-                  builder: (context, snapshot) {
-                    return ListView.builder(
-                        itemCount: snapshot.data.documents.length,
-                        // ignore: missing_return
-                        itemBuilder: (context, index) {
-                          DocumentSnapshot document = snapshot.data.documents[index];
-                          if (document.documentID != chosenSocialProfile.id) {
-                            if (index + 1 < snapshot.data.documents.length) {
-                              return Column(
-                                children: <Widget>[_listItem(document.data), Divider(color: Colors.black38)],
-                              );
-                            } else {
-                              return _listItem(document.data);
+    return FutureBuilder<SocialProfile>(
+        future: _loadData(),
+        builder: (context, snapshotSocialProfile) {
+          if (snapshotSocialProfile.hasData) {
+            return DefaultTabController(
+                length: 2,
+                child: Scaffold(
+                    appBar: AppBar(
+                        title: Text("Chats"),
+                        bottom: TabBar(tabs: <Widget>[
+                          Container(
+                              child: Tab(
+                            text: "Chats",
+                          )),
+                          Container(
+                              child: Tab(
+                            text: "Usuarios",
+                          ))
+                        ])),
+                    body: TabBarView(children: <Widget>[
+                      Text("Chats abiertos"),
+                      StreamBuilder(
+                          stream: Firestore.instance
+                              .collection("socialProfiles")
+                              .where("sportSchoolId", isEqualTo: snapshotSocialProfile.data.sportSchoolId)
+                              .snapshots(),
+                          builder: (context, listSnapshot) {
+                            if(listSnapshot.hasData){
+                            return ListView.builder(
+                                itemCount: listSnapshot.data.documents.length,
+                                // ignore: missing_return
+                                itemBuilder: (context, index) {
+                                  DocumentSnapshot document = listSnapshot.data.documents[index];
+                                  if (document.documentID != snapshotSocialProfile.data.id) {
+                                    if (index + 1 < listSnapshot.data.documents.length) {
+                                      return Column(
+                                        children: <Widget>[_listItem(document.data), Divider(color: Colors.black38)],
+                                      );
+                                    } else {
+                                      return _listItem(document.data);
+                                    }
+                                  } else {
+                                    return Container();
+                                  }
+                                });} else {
+                              return CircularProgressIndicator();
                             }
-                          } else {
-                            return Container();
-                          }
-                        });
-                  }),
-            ])));
+                          }),
+                    ])));
+          } else {
+            return CircularProgressIndicator();
+          }
+        });
   }
 
   Widget _listItem(Map<String, dynamic> socialProfile) {

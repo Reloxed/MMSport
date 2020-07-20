@@ -19,7 +19,7 @@ class _ChooseSocialProfileState extends State<ChooseSocialProfile> {
   List<SocialProfile> socialProfiles = new List();
 
   // ignore: missing_return
-  Future<QuerySnapshot> _loadFirebaseData() async {
+  Future<List<SocialProfile>> _loadFirebaseData() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     Map map = jsonDecode(preferences.get("chosenSportSchool"));
     SportSchool chosenSportSchool = SportSchool.sportSchoolFromMap(map);
@@ -33,95 +33,102 @@ class _ChooseSocialProfileState extends State<ChooseSocialProfile> {
               newProfile.id = element.documentID;
               socialProfiles.add(newProfile);
             }));
+    return socialProfiles;
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<QuerySnapshot>(
+    return FutureBuilder<List<SocialProfile>>(
       future: _loadFirebaseData(),
       builder: (context, snapshot) {
-        return Material(
-            child: Scaffold(
-          appBar: AppBar(
-            leading: new IconButton(
-                icon: new Icon(Icons.arrow_back),
-                onPressed: () async {
-                  SharedPreferences preferences = await SharedPreferences.getInstance();
-                  preferences.remove("chosenSportSchool");
-                  navigateToChooseSportSchool(context);
-                }),
-            title: const Text("Perfiles sociales"),
-            centerTitle: true,
-          ),
-          body: Center(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.all(20.0),
-              child: Center(child: SizedBox(height: MediaQuery.of(context).size.height * 0.55, child: _pageView())),
+        if (snapshot.hasData) {
+          return Material(
+              child: Scaffold(
+            appBar: AppBar(
+              leading: new IconButton(
+                  icon: new Icon(Icons.arrow_back),
+                  onPressed: () async {
+                    SharedPreferences preferences = await SharedPreferences.getInstance();
+                    preferences.remove("chosenSportSchool");
+                    navigateToChooseSportSchool(context);
+                  }),
+              title: const Text("Perfiles sociales"),
+              centerTitle: true,
             ),
-          ),
-        ));
+            body: Center(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.all(20.0),
+                child: Center(
+                    child: SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.55, child: _pageView(context, snapshot.data))),
+              ),
+            ),
+          ));
+        } else {
+          return CircularProgressIndicator();
+        }
       },
     );
   }
 
-  Widget _cardView(int index) {
+  Widget _cardView(SocialProfile socialProfile) {
     return Card(
         elevation: 2.0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0))),
         margin: EdgeInsets.all(16.0),
         child: InkWell(
-          onTap: () async{
-            SharedPreferences preferences = await SharedPreferences.getInstance();
-            String socialProfileToJson = jsonEncode(socialProfiles.elementAt(index).socialProfileToJson());
-            preferences.setString("chosenSocialProfile", socialProfileToJson);
-            navigateToHome(context);
-          },
+            onTap: () async {
+              SharedPreferences preferences = await SharedPreferences.getInstance();
+              String socialProfileToJson = jsonEncode(socialProfile.socialProfileToJson());
+              preferences.setString("chosenSocialProfile", socialProfileToJson);
+              navigateToHome(context);
+            },
             child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Align(
-                alignment: Alignment.center,
-                child: Container(
-                  margin: EdgeInsets.all(10.0),
-                  child: CircleAvatar(
-                      radius: 85,
-                      child: ClipOval(
-                        child: Image.network(
-                          socialProfiles.elementAt(index).urlImage,
-                          fit: BoxFit.cover,
-                          width: 150,
-                          height: 150,
-                        ),
-                      )),
-                )),
-            Container(
-                margin: EdgeInsets.all(5.0),
-                child: Text(
-                  socialProfiles.elementAt(index).name,
-                  style: TextStyle(fontSize: 20.0),
-                )),
-            Container(
-                margin: EdgeInsets.all(5.0),
-                child: Text(
-                  socialProfiles.elementAt(index).firstSurname,
-                  style: TextStyle(fontSize: 20.0),
-                )),
-            Container(
-                margin: EdgeInsets.all(5.0),
-                child: Text(
-                  socialProfiles.elementAt(index).secondSurname,
-                  style: TextStyle(fontSize: 20.0),
-                ))
-          ],
-        )));
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Align(
+                    alignment: Alignment.center,
+                    child: Container(
+                      margin: EdgeInsets.all(10.0),
+                      child: CircleAvatar(
+                          radius: 85,
+                          child: ClipOval(
+                            child: Image.network(
+                              socialProfile.urlImage,
+                              fit: BoxFit.cover,
+                              width: 150,
+                              height: 150,
+                            ),
+                          )),
+                    )),
+                Container(
+                    margin: EdgeInsets.all(5.0),
+                    child: Text(
+                      socialProfile.name,
+                      style: TextStyle(fontSize: 20.0),
+                    )),
+                Container(
+                    margin: EdgeInsets.all(5.0),
+                    child: Text(
+                      socialProfile.firstSurname,
+                      style: TextStyle(fontSize: 20.0),
+                    )),
+                Container(
+                    margin: EdgeInsets.all(5.0),
+                    child: Text(
+                      socialProfile.secondSurname,
+                      style: TextStyle(fontSize: 20.0),
+                    ))
+              ],
+            )));
   }
 
-  Widget _pageView() {
+  Widget _pageView(BuildContext context, List<SocialProfile> snapshot) {
     return PageView.builder(
-        itemCount: socialProfiles.length,
-        itemBuilder: (BuildContext context, int index) {
-          return _cardView(index);
+        itemCount: snapshot.length,
+        itemBuilder: (context, int index) {
+          return _cardView(snapshot.elementAt(index));
         });
   }
 }
