@@ -29,15 +29,15 @@ class _ChatRoom extends State<ChatRoom> {
     Map loggedSocialProfileMap = jsonDecode(preferences.get("chosenSocialProfile"));
     loggedSocialProfile = SocialProfile.socialProfileFromMap(loggedSocialProfileMap);
     if (loggedSocialProfile.id == chosenChatRoom.users[0]) {
-      DocumentSnapshot jaja =
+      DocumentSnapshot aux =
           await Firestore.instance.collection("socialProfiles").document(chosenChatRoom.users[1]).get();
-        socialProfileToChat = SocialProfile.socialProfileFromMap(jaja.data);
-        socialProfileToChat.id = jaja.data['id'];
+        socialProfileToChat = SocialProfile.socialProfileFromMap(aux.data);
+        socialProfileToChat.id = aux.data['id'];
     } else {
-      DocumentSnapshot jaja =
+      DocumentSnapshot aux =
           await Firestore.instance.collection("socialProfiles").document(chosenChatRoom.users[0]).get();
-        socialProfileToChat = SocialProfile.socialProfileFromMap(jaja.data);
-        socialProfileToChat.id = jaja.data['id'];
+        socialProfileToChat = SocialProfile.socialProfileFromMap(aux.data);
+        socialProfileToChat.id = aux.data['id'];
     }
     return socialProfileToChat;
   }

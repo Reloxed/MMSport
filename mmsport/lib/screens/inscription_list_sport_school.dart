@@ -19,12 +19,12 @@ class _InscriptionListSportSchoolState extends State<InscriptionListSportSchool>
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   // ignore: missing_return
-  Future<SportSchool> getAll() async {
+  Future<List<SportSchool>> getAll() async {
     if (_sportSchools.isEmpty) {
       await Firestore.instance
           .collection("sportSchools")
           .getDocuments()
-          .then((value) => value.documents.forEach((element) {
+          .then((value) => value.documents.forEach((element) async {
                 SportSchool newSportSchool = SportSchool.sportSchoolFromMap(element.data);
                 _sportSchools.add(newSportSchool);
               }));
@@ -34,17 +34,21 @@ class _InscriptionListSportSchoolState extends State<InscriptionListSportSchool>
       await Firestore.instance
           .collection("sportSchools")
           .getDocuments()
-          .then((value) => value.documents.forEach((element) {
+          .then((value) => value.documents.forEach((element) async {
                 SportSchool newSportSchool = SportSchool.sportSchoolFromMap(element.data);
-                SportSchool existingSportSchool = _sportSchools.firstWhere(
-                    (element) => newSportSchool.name == element.name && newSportSchool.province == element.province &&
-                        newSportSchool.address == element.address && newSportSchool.town == element.town &&
-                        newSportSchool.urlLogo == element.urlLogo && newSportSchool.status == element.status);
-                if(existingSportSchool == null){
+                SportSchool existingSportSchool = _sportSchools.firstWhere((element) =>
+                    newSportSchool.name == element.name &&
+                    newSportSchool.province == element.province &&
+                    newSportSchool.address == element.address &&
+                    newSportSchool.town == element.town &&
+                    newSportSchool.urlLogo == element.urlLogo &&
+                    newSportSchool.status == element.status);
+                if (existingSportSchool == null) {
                   _sportSchools.add(newSportSchool);
                 }
               }));
     }
+    return _sportSchools;
   }
 
   AppBar buildAppBar(BuildContext context) {
@@ -76,34 +80,37 @@ class _InscriptionListSportSchoolState extends State<InscriptionListSportSchool>
       buildDefaultAppBar: buildAppBar,
     );
   }
-
+  
   @override
   Widget build(BuildContext context) {
-    return Material(
-        child: Scaffold(
-            appBar: searchBar.build(context),
-            key: _scaffoldKey,
-            body: FutureBuilder<SportSchool>(
-              future: getAll(),
-              builder: (context, snapshot) {
-                return ListView.builder(
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      title: Text(
-                        _filtered[index].name,
-                        style: TextStyle(fontSize: 20.0),
-                      ),
-                      subtitle: Text(_filtered[index].town + ", " + _filtered[index].province,
-                          style: TextStyle(fontSize: 16.0)),
-                      leading: CircleAvatar(
-                        backgroundImage: NetworkImage(_filtered[index].urlLogo),
-                        radius: 24.0,
-                      ),
-                    );
-                  },
-                  itemCount: _filtered.length,
-                );
-              },
-            )));
+    return FutureBuilder<List<SportSchool>>(
+        future: getAll(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return Material(
+                child: Scaffold(
+                    appBar: searchBar.build(context),
+                    key: _scaffoldKey,
+                    body: ListView.builder(
+                      itemCount: snapshot.data.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          title: Text(
+                            snapshot.data[index].name,
+                            style: TextStyle(fontSize: 20.0),
+                          ),
+                          subtitle: Text(snapshot.data[index].town + ", " + snapshot.data[index].province,
+                              style: TextStyle(fontSize: 16.0)),
+                          leading: CircleAvatar(
+                            backgroundImage: NetworkImage(snapshot.data[index].urlLogo),
+                            radius: 24.0,
+                          ),
+                        );
+                      },
+                    )));
+          } else {
+            return CircularProgressIndicator();
+          }
+        });
   }
 }
