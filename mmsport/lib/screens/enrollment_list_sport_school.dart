@@ -1,18 +1,23 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_search_bar/flutter_search_bar.dart';
+import 'package:mmsport/constants/constants.dart';
 import 'package:mmsport/models/sportSchool.dart';
+import 'package:mmsport/navigations/navigations.dart';
 import 'package:search_app_bar/filter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class InscriptionListSportSchool extends StatefulWidget {
+class EnrollmentListSportSchool extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    return new _InscriptionListSportSchoolState();
+    return new _EnrollmentListSportSchoolState();
   }
 }
 
-class _InscriptionListSportSchoolState extends State<InscriptionListSportSchool> {
+class _EnrollmentListSportSchoolState extends State<EnrollmentListSportSchool> {
   final List<SportSchool> _sportSchools = [];
   List<SportSchool> _filtered = [];
   SearchBar searchBar;
@@ -59,14 +64,14 @@ class _InscriptionListSportSchoolState extends State<InscriptionListSportSchool>
     setState(() {
       _filtered = _sportSchools
           .where((s) =>
-              Filters.startsWith(s.name.toLowerCase(), value.toLowerCase()) ||
-              Filters.startsWith(s.province.toLowerCase(), value.toLowerCase()) ||
-              Filters.startsWith(s.town.toLowerCase(), value.toLowerCase()))
+      Filters.startsWith(s.name.toLowerCase(), value.toLowerCase()) ||
+          Filters.startsWith(s.province.toLowerCase(), value.toLowerCase()) ||
+          Filters.startsWith(s.town.toLowerCase(), value.toLowerCase()))
           .toList();
     });
   }
 
-  _InscriptionListSportSchoolState() {
+  _EnrollmentListSportSchoolState() {
     searchBar = new SearchBar(
       inBar: false,
       hintText: "Buscar...",
@@ -80,37 +85,42 @@ class _InscriptionListSportSchoolState extends State<InscriptionListSportSchool>
       buildDefaultAppBar: buildAppBar,
     );
   }
-  
+
+  // ignore: missing_return
+  Future<void> _saveSharedPreferenceAndGoToForm(SportSchool sportSchoolSelected){
+
+    setSportSchoolToEnrollIn(sportSchoolSelected);
+    navigateToEnrollmentCreateSocialProfileSportSchool(context);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<SportSchool>>(
-        future: getAll(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return Material(
-                child: Scaffold(
-                    appBar: searchBar.build(context),
-                    key: _scaffoldKey,
-                    body: ListView.builder(
-                      itemCount: snapshot.data.length,
-                      itemBuilder: (context, index) {
-                        return ListTile(
-                          title: Text(
-                            snapshot.data[index].name,
-                            style: TextStyle(fontSize: 20.0),
-                          ),
-                          subtitle: Text(snapshot.data[index].town + ", " + snapshot.data[index].province,
-                              style: TextStyle(fontSize: 16.0)),
-                          leading: CircleAvatar(
-                            backgroundImage: NetworkImage(snapshot.data[index].urlLogo),
-                            radius: 24.0,
-                          ),
-                        );
-                      },
-                    )));
-          } else {
-            return CircularProgressIndicator();
-          }
-        });
+    return Material(
+        child: Scaffold(
+            appBar: searchBar.build(context),
+            key: _scaffoldKey,
+            body: FutureBuilder<SportSchool>(
+              future: getAll(),
+              builder: (context, snapshot) {
+                return ListView.builder(
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      onTap: () =>_saveSharedPreferenceAndGoToForm(_filtered[index]),
+                      title: Text(
+                        _filtered[index].name,
+                        style: TextStyle(fontSize: 20.0),
+                      ),
+                      subtitle: Text(_filtered[index].town + ", " + _filtered[index].province,
+                          style: TextStyle(fontSize: 16.0)),
+                      leading: CircleAvatar(
+                        backgroundImage: NetworkImage(_filtered[index].urlLogo),
+                        radius: 24.0,
+                      ),
+                    );
+                  },
+                  itemCount: _filtered.length,
+                );
+              },
+            )));
   }
 }

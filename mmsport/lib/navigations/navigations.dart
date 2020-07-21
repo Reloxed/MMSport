@@ -4,7 +4,8 @@ import 'package:mmsport/screens/chats/chat_room.dart';
 import 'package:mmsport/screens/choose_social_profile.dart';
 import 'package:mmsport/screens/choose_sport_school.dart';
 import 'package:mmsport/screens/create_sport_school.dart';
-import 'package:mmsport/screens/inscription_list_sport_school.dart';
+import 'package:mmsport/screens/enrollment_create_social_profile_sport_school.dart';
+import 'package:mmsport/screens/enrollment_list_sport_school.dart';
 import 'package:mmsport/screens/login.dart';
 import 'package:mmsport/screens/register.dart';
 import 'package:mmsport/screens/homes/home.dart';
@@ -37,10 +38,14 @@ void navigateToChatMain(BuildContext context){
   Navigator.of(context).push(MaterialPageRoute(builder: (context) => ChatMain()));
 }
 
-void navigateToInscriptionListSportSchool(BuildContext context){
-  Navigator.of(context).push(MaterialPageRoute(builder: (context) => InscriptionListSportSchool()));
+void navigateToEnrollmentListSportSchool(BuildContext context){
+  Navigator.of(context).push(MaterialPageRoute(builder: (context) => EnrollmentListSportSchool()));
 }
 
 void navigateToChatRoom(BuildContext context){
   Navigator.of(context).push(MaterialPageRoute(builder: (context) => ChatRoom()));
+}
+
+void navigateToEnrollmentCreateSocialProfileSportSchool(BuildContext context){
+  Navigator.of(context).push(MaterialPageRoute(builder: (context) => EnrollmentCreateSocialProfileSportSchool()));
 }

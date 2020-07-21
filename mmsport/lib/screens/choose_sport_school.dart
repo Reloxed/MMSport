@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mmsport/constants/constants.dart';
 import 'package:mmsport/models/socialProfile.dart';
 import 'package:mmsport/models/sportSchool.dart';
 import 'package:mmsport/navigations/navigations.dart';
@@ -116,9 +117,9 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
               onPressed: null,
               tooltip: 'Inscribirme en una escuela',
               child: IconButton(
-                onPressed: () {
-                  navigateToInscriptionListSportSchool(context);
-                },
+                onPressed: () =>
+                  navigateToEnrollmentListSportSchool(context)
+                ,
                 icon: new IconTheme(
                     data: new IconThemeData(
                       color: Colors.white,
@@ -148,6 +149,7 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
   }
 
   void _logout() async {
+    deleteLoggedInUserId();
     await FirebaseAuth.instance.signOut();
     logout(context);
   }
@@ -168,6 +170,12 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
       count: sportSchools.keys.length,
       effect: WormEffect(dotColor: Colors.grey, activeDotColor: Colors.blueAccent), // your preferred effect
     );
+  }
+
+  _saveSharedPreferenceAndGoToForm(SportSchool sportSchoolSelected){
+
+    setSportSchoolToEnrollIn(sportSchoolSelected);
+    navigateToEnrollmentCreateSocialProfileSportSchool(context);
   }
 
   Widget _cardView(SportSchool sportSchool, int index) {
@@ -216,9 +224,9 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
                       child: Container(
                           margin: EdgeInsets.all(4.0),
                           child: OutlineButton.icon(
-                            onPressed: () {
-                              navigateToChooseSocialProfile(context);
-                            },
+                            onPressed: () =>
+                              _saveSharedPreferenceAndGoToForm(sportSchool)
+                            ,
                             icon: new IconTheme(
                                 data: new IconThemeData(
                                   color: Colors.blueAccent,
