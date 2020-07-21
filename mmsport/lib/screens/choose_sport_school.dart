@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mmsport/constants/constants.dart';
 import 'package:mmsport/models/socialProfile.dart';
 import 'package:mmsport/models/sportSchool.dart';
 import 'package:mmsport/navigations/navigations.dart';
@@ -149,6 +150,7 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
   }
 
   void _logout() async {
+    deleteLoggedInUserId();
     await FirebaseAuth.instance.signOut();
     logout(context);
   }

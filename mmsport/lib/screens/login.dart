@@ -20,8 +20,7 @@ class _LoginState extends State<Login> {
   String password;
 
   @override
-  void initState() {
-    // TODO: implement initState
+  void initState(){
     super.initState();
   }
 
