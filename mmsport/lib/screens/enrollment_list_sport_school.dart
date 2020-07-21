@@ -99,27 +99,31 @@ class _EnrollmentListSportSchoolState extends State<EnrollmentListSportSchool> {
         child: Scaffold(
             appBar: searchBar.build(context),
             key: _scaffoldKey,
-            body: FutureBuilder<SportSchool>(
+            body: FutureBuilder<List<SportSchool>>(
               future: getAll(),
               builder: (context, snapshot) {
+                if(snapshot.hasData){
                 return ListView.builder(
                   itemBuilder: (context, index) {
                     return ListTile(
-                      onTap: () =>_saveSharedPreferenceAndGoToForm(_filtered[index]),
+                      onTap: () =>_saveSharedPreferenceAndGoToForm(snapshot.data[index]),
                       title: Text(
-                        _filtered[index].name,
+                        snapshot.data[index].name,
                         style: TextStyle(fontSize: 20.0),
                       ),
-                      subtitle: Text(_filtered[index].town + ", " + _filtered[index].province,
+                      subtitle: Text(snapshot.data[index].town + ", " + snapshot.data[index].province,
                           style: TextStyle(fontSize: 16.0)),
                       leading: CircleAvatar(
-                        backgroundImage: NetworkImage(_filtered[index].urlLogo),
+                        backgroundImage: NetworkImage(snapshot.data[index].urlLogo),
                         radius: 24.0,
                       ),
                     );
                   },
-                  itemCount: _filtered.length,
+                  itemCount: snapshot.data.length,
                 );
+              } else {
+                  return CircularProgressIndicator();
+                }
               },
             )));
   }
