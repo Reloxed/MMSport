@@ -117,9 +117,9 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
               onPressed: null,
               tooltip: 'Inscribirme en una escuela',
               child: IconButton(
-                onPressed: () {
-                  navigateToInscriptionListSportSchool(context);
-                },
+                onPressed: () =>
+                  navigateToEnrollmentListSportSchool(context)
+                ,
                 icon: new IconTheme(
                     data: new IconThemeData(
                       color: Colors.white,
@@ -172,6 +172,12 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
     );
   }
 
+  _saveSharedPreferenceAndGoToForm(SportSchool sportSchoolSelected){
+
+    setSportSchoolToEnrollIn(sportSchoolSelected);
+    navigateToEnrollmentCreateSocialProfileSportSchool(context);
+  }
+
   Widget _cardView(SportSchool sportSchool, int index) {
     return Card(
         elevation: 2.0,
@@ -218,9 +224,9 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
                       child: Container(
                           margin: EdgeInsets.all(4.0),
                           child: OutlineButton.icon(
-                            onPressed: () {
-                              navigateToChooseSocialProfile(context);
-                            },
+                            onPressed: () =>
+                              _saveSharedPreferenceAndGoToForm(sportSchool)
+                            ,
                             icon: new IconTheme(
                                 data: new IconThemeData(
                                   color: Colors.blueAccent,

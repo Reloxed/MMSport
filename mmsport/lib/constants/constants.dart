@@ -35,3 +35,9 @@ void deleteLoggedInUserId() async{
   SharedPreferences preferences = await SharedPreferences.getInstance();
   preferences.remove("loggedInUserId");
 }
+
+void setSportSchoolToEnrollIn(SportSchool sportSchool) async{
+  SharedPreferences preferences = await SharedPreferences.getInstance();
+  String socialProfileToJson = jsonEncode(sportSchool.sportSchoolToJson());
+  preferences.setString("sportSchoolToEnrollIn", socialProfileToJson);
+}

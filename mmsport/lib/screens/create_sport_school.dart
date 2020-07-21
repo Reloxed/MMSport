@@ -397,7 +397,7 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
       "urlLogo": sportSchool.urlLogo
     });
     String sportSchoolId = ref.documentID;
-    await databaseReference.collection("sportSchools").document(ref.documentID).setData({"id": ref.documentID});
+    await databaseReference.collection("sportSchools").document(ref.documentID).setData({"id": ref.documentID}, merge: true);
     if(imageProfile != null) {
       await uploadPicProfile(context);
     }
@@ -415,7 +415,7 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
       "sportSchoolId": socialProfile.sportSchoolId,
       "groupId": socialProfile.groupId
     });
-    await databaseReference.collection("socialProfiles").document(ref2.documentID).setData({"id": ref.documentID});
+    await databaseReference.collection("socialProfiles").document(ref2.documentID).setData({"id": ref2.documentID}, merge: true);
   }
 
   String getRandomString(int length){
