@@ -1,9 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class ChatMessage{
   String message;
   String senderId;
-  String sentDate;
+  Timestamp sentDate;
 
-  ChatMessage(String message, String senderId, String sentDate){
+  ChatMessage(String message, String senderId, Timestamp sentDate){
     this.message = message;
     this.senderId = senderId;
     this.sentDate = sentDate;

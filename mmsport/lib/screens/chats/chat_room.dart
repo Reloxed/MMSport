@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:mmsport/models/chat_message.dart';
 import 'package:mmsport/models/chat_room.dart';
 import 'package:mmsport/models/socialProfile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,6 +17,7 @@ class _ChatRoom extends State<ChatRoom> {
   ChatRoomModel chosenChatRoom;
   SocialProfile socialProfileToChat;
   SocialProfile loggedSocialProfile;
+  TextEditingController _textController = TextEditingController();
 
   Future<ChatRoomModel> _loadDataChatRoom() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
@@ -28,6 +30,7 @@ class _ChatRoom extends State<ChatRoom> {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     Map loggedSocialProfileMap = jsonDecode(preferences.get("chosenSocialProfile"));
     loggedSocialProfile = SocialProfile.socialProfileFromMap(loggedSocialProfileMap);
+    loggedSocialProfile.id = loggedSocialProfileMap['id'];
     if (loggedSocialProfile.id == chosenChatRoom.users[0]) {
       DocumentSnapshot aux =
           await Firestore.instance.collection("socialProfiles").document(chosenChatRoom.users[1]).get();
@@ -82,20 +85,91 @@ class _ChatRoom extends State<ChatRoom> {
                                   width: MediaQuery.of(context).size.width * 0.55,
                                   child: Container(
                                       padding: EdgeInsets.all(10),
-                                      child: Text(
-                                        snapshot.data[1].name + " " + snapshot.data[1].firstSurname,
-                                        overflow: TextOverflow.ellipsis,
-                                        softWrap: true
-                                      )))
+                                      child: Text(snapshot.data[1].name + " " + snapshot.data[1].firstSurname,
+                                          overflow: TextOverflow.ellipsis, softWrap: true)))
                             ],
                           ),
                         ),
                       ),
                     ),
-                    body: Text(snapshot.data[0].id)));
+                    body: Column(children: <Widget>[
+                      Expanded(
+                          child: Container(
+                              decoration: BoxDecoration(color: Colors.black12),
+                              child: StreamBuilder(
+                                stream: Firestore.instance
+                                    .collection("chatRooms")
+                                    .document(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
+                                    .collection("messages")
+                                    .orderBy("sentDate")
+                                    .snapshots(),
+                                builder: (context, listSnapshot) {
+                                  if (listSnapshot.hasData && snapshot.hasData) {
+                                    return ListView.builder(
+                                        itemCount: listSnapshot.data.documents.length,
+                                        itemBuilder: (context, index) {
+                                          DocumentSnapshot document = listSnapshot.data.documents[index];
+                                          ChatMessage chatMessage = ChatMessage.chatMessageFromMap(document.data);
+                                          bool isMe = chatMessage.senderId == loggedSocialProfile.id;
+                                          return _buildMessage(chatMessage, isMe);
+                                        });
+                                  } else {
+                                    return CircularProgressIndicator();
+                                  }
+                                },
+                              ))),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 0.0),
+                        height: MediaQuery.of(context).size.height * 0.08,
+                        color: Colors.white,
+                        child: Row(
+                          children: <Widget>[
+                            Expanded(
+                              child: TextField(
+                                controller: _textController,
+                                textCapitalization: TextCapitalization.sentences,
+                                decoration: InputDecoration.collapsed(hintText: "Send a message"),
+                              ),
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.send),
+                              iconSize: 25.0,
+                              color: Colors.blueAccent,
+                              onPressed: () {
+                                ChatMessage chatMessage =
+                                    new ChatMessage(_textController.text, loggedSocialProfile.id, Timestamp.now());
+                                Firestore.instance
+                                    .collection("chatRooms")
+                                    .document(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
+                                    .collection("messages")
+                                    .add(chatMessage.chatMessageToJson()).then((value) => _textController.clear());
+                              },
+                            )
+                          ],
+                        ),
+                      )
+                    ])));
           } else {
             return CircularProgressIndicator();
           }
         });
+  }
+
+  Widget _buildMessage(ChatMessage message, bool isMe) {
+    return Container(
+      margin: isMe
+          ? EdgeInsets.only(top: 8.0, bottom: 8.0, left: MediaQuery.of(context).size.width * 0.25)
+          : EdgeInsets.only(top: 8.0, bottom: 8.0, right: MediaQuery.of(context).size.width * 0.25),
+      padding: EdgeInsets.symmetric(horizontal: 25.0, vertical: 15.0),
+      width: MediaQuery.of(context).size.width * 0.75,
+      decoration: BoxDecoration(
+          color: isMe ? Colors.blueAccent : Colors.white,
+          borderRadius: isMe
+              ? BorderRadius.only(topLeft: Radius.circular(15.0), bottomLeft: Radius.circular(15.0))
+              : BorderRadius.only(topRight: Radius.circular(15.0), bottomRight: Radius.circular(15.0))),
+      child: Text(message.message,
+          style:
+              isMe ? TextStyle(color: Colors.white, fontSize: 16.0) : TextStyle(color: Colors.black, fontSize: 16.0)),
+    );
   }
 }
