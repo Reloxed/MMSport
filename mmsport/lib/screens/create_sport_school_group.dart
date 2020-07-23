@@ -26,16 +26,18 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
   List<String> schedulesStartTimes = [];
   List<String> schedulesEndTimes = [];
   String groupName;
-  SocialProfile trainer;
+  SocialProfile selectedTrainer;
 
-  Future<List<SocialProfile>> loadTrainers() async{
+  Future<List<SocialProfile>> loadTrainers() async {
     List<SocialProfile> trainers = new List();
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String sportSchoolId = preferences.get("chosenSportSchool");
     await Firestore.instance
         .collection("socialProfiles")
-        .where('role', isEqualTo: 'TRAINER').where('sportSchoolId', isEqualTo: sportSchoolId)
-        .getDocuments().then((value) {
+        .where('role', isEqualTo: 'TRAINER')
+        .where('sportSchoolId', isEqualTo: sportSchoolId)
+        .getDocuments()
+        .then((value) {
       value.documents.forEach((element) async {
         SocialProfile trainer = SocialProfile.socialProfileFromMap(element.data);
         trainer.id = element.documentID;
@@ -163,20 +165,20 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
   }
 
   Widget selectTrainer() {
-    if (trainer != null) {
+    if (selectedTrainer != null) {
       return Column(children: <Widget>[
         CircleAvatar(
           radius: 56,
-          backgroundImage: NetworkImage(trainer.urlImage),
+          backgroundImage: NetworkImage(selectedTrainer.urlImage),
         ),
         Text(
-          trainer.name + " " + trainer.firstSurname + " " + trainer.secondSurname,
+          selectedTrainer.name + " " + selectedTrainer.firstSurname + " " + selectedTrainer.secondSurname,
           style: TextStyle(fontSize: 16, color: Colors.blueAccent),
         ),
       ]);
     } else {
       return RaisedButton(
-        onPressed: () => {showSchedulePickers()},
+        onPressed: () => {selectTrainerList()},
         elevation: 3.0,
         color: Colors.blueAccent,
         child: Text(
@@ -187,13 +189,11 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
     }
   }
 
-  Widget addSchedule(){
+  Widget addSchedule() {
     return Container(
         margin: EdgeInsets.all(4.0),
         child: OutlineButton.icon(
-          onPressed: () =>
-              showSchedulePickers()
-          ,
+          onPressed: () => showSchedulePickers(),
           icon: new IconTheme(
               data: new IconThemeData(
                 color: Colors.blueAccent,
@@ -221,13 +221,6 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
         selectedItem: daysOfTheWeek[0],
         onChanged: (value) => setState(() => selectedDay = value),
         onConfirmed: () => {showStartTimeSchedulePicker()});
-  }
-
-  void showTrainersPicker(){
-      FutureBuilder(
-        future: loadTrainers(),
-        builder: ,
-      );
   }
 
   void showStartTimeSchedulePicker() {
@@ -260,6 +253,148 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
         schedules.add(newSchedule);
       });
     }
+  }
+
+  void cicijeje() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return FutureBuilder(
+            future: loadTrainers(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                if (snapshot.data.length > 0) {
+                  return AlertDialog(
+                    content: ListView.builder(itemBuilder: (context, index) {
+                      return ListTile(
+                        onTap: () {
+                          setState(() {
+                            selectedTrainer = snapshot.data[index];
+                          });
+                          Navigator.of(context).pop();
+                        },
+                        title: Text(
+                          snapshot.data[index].name +
+                              " " +
+                              snapshot.data[index].firstSurname +
+                              " " +
+                              snapshot.data[index].secondSurname,
+                          style: TextStyle(fontSize: 16.0),
+                        ),
+                        leading: CircleAvatar(
+                          backgroundImage: NetworkImage(snapshot.data[index].urlImage),
+                          radius: 16.0,
+                        ),
+                      );
+                    }),
+                  );
+                } else {
+                  return AlertDialog(
+                    content: SafeArea(
+                      child: Center(
+                        child: Text(
+                          "No hay entrenadores en la escuela",
+                          style: TextStyle(fontSize: 16.0),
+                        ),
+                      ),
+                    ),
+                  );
+                }
+              } else {
+                return AlertDialog(
+                  content: SafeArea(
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+                );
+              }
+            },
+          );
+        });
+  }
+
+  Widget selectTrainerList() {
+    showModalBottomSheet(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(25.0),
+        ),
+        context: context,
+        isScrollControlled: true,
+        builder: (builder) {
+          return FutureBuilder(
+            future: loadTrainers(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                if (snapshot.data.length > 0) {
+                  return new Container(
+                    height: MediaQuery.of(context).size.height * 0.9,
+                    color: Colors.transparent, //could change this to Color(0xFF737373),
+                    //so you don't have to change MaterialApp canvasColor
+                    child: new Container(
+                        decoration: new BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: new BorderRadius.only(
+                                topLeft: const Radius.circular(25.0), topRight: const Radius.circular(25.0))),
+                        child: new Center(child: ListView.builder(itemBuilder: (context, index) {
+                          return ListTile(
+                            onTap: () {
+                              setState(() {
+                                selectedTrainer = snapshot.data[index];
+                              });
+                              Navigator.of(context).pop();
+                            },
+                            title: Text(
+                              snapshot.data[index].name +
+                                  " " +
+                                  snapshot.data[index].firstSurname +
+                                  " " +
+                                  snapshot.data[index].secondSurname,
+                              style: TextStyle(fontSize: 16.0),
+                            ),
+                            leading: CircleAvatar(
+                              backgroundImage: NetworkImage(snapshot.data[index].urlImage),
+                              radius: 16.0,
+                            ),
+                          );
+                        }))),
+                  );
+                } else {
+                  return new Container(
+                    height: MediaQuery.of(context).size.height * 0.9,
+                    color: Colors.transparent, //could change this to Color(0xFF737373),
+                    //so you don't have to change MaterialApp canvasColor
+                    child: new Container(
+                        decoration: new BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: new BorderRadius.only(
+                                topLeft: const Radius.circular(10.0), topRight: const Radius.circular(10.0))),
+                        child: Center(
+                          child: Text(
+                            "No hay entrenadores en la escuela",
+                            style: TextStyle(fontSize: 16.0),
+                          ),
+                        )),
+                  );
+                }
+              } else {
+                return new Container(
+                  height: MediaQuery.of(context).size.height * 0.9,
+                  color: Colors.transparent, //could change this to Color(0xFF737373),
+                  //so you don't have to change MaterialApp canvasColor
+                  child: new Container(
+                      decoration: new BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: new BorderRadius.only(
+                              topLeft: const Radius.circular(10.0), topRight: const Radius.circular(10.0))),
+                      child: Center(
+                        child: CircularProgressIndicator()
+                      )),
+                );
+              }
+            },
+          );
+        });
   }
 
   double fromTimeOfDayToDouble(TimeOfDay myTime) => myTime.hour + myTime.minute / 60.0;
