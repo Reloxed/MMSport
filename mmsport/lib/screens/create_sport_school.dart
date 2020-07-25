@@ -7,8 +7,10 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mmsport/components/dialogs.dart';
 import 'package:mmsport/models/socialProfile.dart';
 import 'package:mmsport/models/sportSchool.dart';
+import 'package:mmsport/navigations/navigations.dart';
 
 class CreateSportSchool extends StatefulWidget {
   @override
@@ -366,6 +368,7 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
           onPressed: () async {
             if (_formKey2.currentState.validate()) {
               _uploadAndCreate();
+              confirmDialogOnCreateSchool(context, "Escuela y perfil creados, espere a la confirmación de la administración.");
             }
           },
           elevation: 3.0,
