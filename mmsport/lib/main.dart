@@ -39,10 +39,6 @@ class MyApp extends StatelessWidget {
             return Container();
           }
         });
-
-    MaterialApp(
-      home: Login(),
-    );
   }
 
   Future<Map<String, bool>> checkSharedPreferences() async {

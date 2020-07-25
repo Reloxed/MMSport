@@ -10,7 +10,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:mmsport/components/dialogs.dart';
 import 'package:mmsport/models/socialProfile.dart';
 import 'package:mmsport/models/sportSchool.dart';
-import 'package:mmsport/navigations/navigations.dart';
 
 class CreateSportSchool extends StatefulWidget {
   @override
