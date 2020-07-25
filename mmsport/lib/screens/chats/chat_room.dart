@@ -101,12 +101,13 @@ class _ChatRoom extends State<ChatRoom> {
                                     .collection("chatRooms")
                                     .document(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
                                     .collection("messages")
-                                    .orderBy("sentDate")
+                                    .orderBy("sentDate", descending: true)
                                     .snapshots(),
                                 builder: (context, listSnapshot) {
                                   if (listSnapshot.hasData && snapshot.hasData) {
                                     return ListView.builder(
                                         itemCount: listSnapshot.data.documents.length,
+                                        reverse: true,
                                         itemBuilder: (context, index) {
                                           DocumentSnapshot document = listSnapshot.data.documents[index];
                                           ChatMessage chatMessage = ChatMessage.chatMessageFromMap(document.data);
