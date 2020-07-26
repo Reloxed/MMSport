@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_pickers/flutter_material_pickers.dart';
 import 'package:mmsport/components/dialogs.dart';
+import 'package:mmsport/models/group.dart';
 import 'package:mmsport/models/schedule.dart';
 import 'package:mmsport/models/socialProfile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -72,6 +73,7 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
                         Container(
                           margin: const EdgeInsets.only(top: 4.0),
                           child: ListView.builder(
+                            itemCount: schedules.length,
                             shrinkWrap: true,
                             itemBuilder: (context, index) {
                               return ListTile(
@@ -81,13 +83,13 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
                                   ),
                                   subtitle: Text(
                                       "De " +
-                                          schedules[index].startTimeSchedule.toString() +
+                                          schedules[index].startTimeSchedule.format(context) +
                                           " a " +
-                                          schedules[index].endTimeSchedule.toString(),
+                                          schedules[index].endTimeSchedule.format(context),
                                       style: TextStyle(fontSize: 16.0)),
                                   trailing: Ink(
                                     decoration: const ShapeDecoration(
-                                      color: Colors.lightBlue,
+                                      color: Colors.red,
                                       shape: BeveledRectangleBorder(),
                                     ),
                                     child: IconButton(
@@ -95,16 +97,12 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
                                       color: Colors.white,
                                       onPressed: () {
                                         setState(() {
-                                          schedules.removeAt(index);
-                                          schedulesDaysOfTheWeek.removeAt(index);
-                                          schedulesStartTimes.removeAt(index);
-                                          schedulesEndTimes.removeAt(index);
+                                          schedules.remove(schedules[index]);
                                         });
                                       },
                                     ),
                                   ));
                             },
-                            itemCount: schedules.length,
                           ),
                         ),
                         addSchedule()
@@ -151,7 +149,9 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
         alignment: Alignment.bottomCenter,
         child: RaisedButton(
           onPressed: () async {
-            if (_formKey.currentState.validate()) {}
+            if (_formKey.currentState.validate()) {
+              createGroup();
+            }
           },
           elevation: 3.0,
           color: Colors.blueAccent,
@@ -175,6 +175,15 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
           selectedTrainer.name + " " + selectedTrainer.firstSurname + " " + selectedTrainer.secondSurname,
           style: TextStyle(fontSize: 16, color: Colors.blueAccent),
         ),
+        RaisedButton(
+          onPressed: () => {selectTrainerList()},
+          elevation: 3.0,
+          color: Colors.blueAccent,
+          child: Text(
+            "CAMBIAR ENTRENADOR",
+            style: TextStyle(fontSize: 20, color: Colors.white),
+          ),
+        )
       ]);
     } else {
       return RaisedButton(
@@ -215,6 +224,7 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
 
   void showDayOfTheWeekPicker() {
     showMaterialScrollPicker(
+      buttonTextColor: Colors.blueAccent,
         context: context,
         title: "Selecciona el día",
         items: daysOfTheWeek,
@@ -253,65 +263,6 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
         schedules.add(newSchedule);
       });
     }
-  }
-
-  void cicijeje() {
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return FutureBuilder(
-            future: loadTrainers(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                if (snapshot.data.length > 0) {
-                  return AlertDialog(
-                    content: ListView.builder(itemBuilder: (context, index) {
-                      return ListTile(
-                        onTap: () {
-                          setState(() {
-                            selectedTrainer = snapshot.data[index];
-                          });
-                          Navigator.of(context).pop();
-                        },
-                        title: Text(
-                          snapshot.data[index].name +
-                              " " +
-                              snapshot.data[index].firstSurname +
-                              " " +
-                              snapshot.data[index].secondSurname,
-                          style: TextStyle(fontSize: 16.0),
-                        ),
-                        leading: CircleAvatar(
-                          backgroundImage: NetworkImage(snapshot.data[index].urlImage),
-                          radius: 16.0,
-                        ),
-                      );
-                    }),
-                  );
-                } else {
-                  return AlertDialog(
-                    content: SafeArea(
-                      child: Center(
-                        child: Text(
-                          "No hay entrenadores en la escuela",
-                          style: TextStyle(fontSize: 16.0),
-                        ),
-                      ),
-                    ),
-                  );
-                }
-              } else {
-                return AlertDialog(
-                  content: SafeArea(
-                    child: Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  ),
-                );
-              }
-            },
-          );
-        });
   }
 
   Widget selectTrainerList() {
@@ -368,7 +319,7 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
                         decoration: new BoxDecoration(
                             color: Colors.white,
                             borderRadius: new BorderRadius.only(
-                                topLeft: const Radius.circular(10.0), topRight: const Radius.circular(10.0))),
+                                topLeft: const Radius.circular(25.0), topRight: const Radius.circular(25.0))),
                         child: Center(
                           child: Text(
                             "No hay entrenadores en la escuela",
@@ -386,10 +337,8 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
                       decoration: new BoxDecoration(
                           color: Colors.white,
                           borderRadius: new BorderRadius.only(
-                              topLeft: const Radius.circular(10.0), topRight: const Radius.circular(10.0))),
-                      child: Center(
-                        child: CircularProgressIndicator()
-                      )),
+                              topLeft: const Radius.circular(25.0), topRight: const Radius.circular(25.0))),
+                      child: Center(child: CircularProgressIndicator())),
                 );
               }
             },
@@ -398,4 +347,29 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
   }
 
   double fromTimeOfDayToDouble(TimeOfDay myTime) => myTime.hour + myTime.minute / 60.0;
+
+  void createGroup() async {
+    if (selectedTrainer == null) {
+      String message = "Debe de seleccionar un entrenador";
+      errorDialog(context, message);
+    } else if (schedules.isEmpty) {
+      String message = "Debe de añadir los horarios del grupo";
+      errorDialog(context, message);
+    } else if (selectedTrainer != null && schedules.isNotEmpty) {
+      final databaseReference = Firestore.instance;
+      SharedPreferences preferences = await SharedPreferences.getInstance();
+      String sportSchoolId = preferences.getString("chosenSportSchool");
+      Group newGroup = Group(groupName, schedules, sportSchoolId, selectedTrainer.id);
+      DocumentReference ref = await databaseReference.collection("groups").add({
+        "name": newGroup.name,
+        "schedule": newGroup.schedule,
+        "sportSchoolId": newGroup.sportSchoolId,
+        "trainerId": newGroup.trainerId
+      });
+      await databaseReference
+          .collection("groups")
+          .document(ref.documentID)
+          .setData({"id": ref.documentID}, merge: true);
+    }
+  }
 }
