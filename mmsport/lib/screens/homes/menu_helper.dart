@@ -68,8 +68,10 @@ import 'package:mmsport/navigations/navigations.dart';
       navigateToChatMain(context);
     } else if (i == 2) {
       // TODO: Navigate to my group
-    } else if (i == 3) {
+    } else if (i == 3 && (role == "TRAINER" || role == "STUDENT")) {
       // TODO: Navigate to calendar
+    } else if (i == 3 && role == "DIRECTOR") {
+      navigateToAcceptRejectProfiles(context);
     } else if (i == 4) {
       // TODO: Navigate to edit profile
     }

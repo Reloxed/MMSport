@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mmsport/screens/acceptreject/accept_reject_profiles.dart';
 import 'package:mmsport/screens/chats/chat_main.dart';
 import 'package:mmsport/screens/chats/chat_room.dart';
 import 'package:mmsport/screens/choose_social_profile.dart';
@@ -48,4 +49,8 @@ void navigateToChatRoom(BuildContext context){
 
 void navigateToEnrollmentCreateSocialProfileSportSchool(BuildContext context){
   Navigator.of(context).push(MaterialPageRoute(builder: (context) => EnrollmentCreateSocialProfileSportSchool()));
+}
+
+void navigateToAcceptRejectProfiles(BuildContext context){
+  Navigator.of(context).push(MaterialPageRoute(builder: (context) => AcceptRejectProfiles()));
 }
