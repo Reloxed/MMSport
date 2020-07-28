@@ -36,6 +36,10 @@ import 'package:mmsport/navigations/navigations.dart';
         _menuItem("Administrar grupos", Icons.group_add, "DIRECTOR", 4, context),
         _menuItem("Editar perfil", Icons.person, "DIRECTOR", 5, context),
       ];
+    } else if (role == "ADMIN"){
+      return [
+        _menuItem("Aceptar/rechazar escuelas", Icons.check, "ADMIN", 1, context)
+      ];
     }
   }
 

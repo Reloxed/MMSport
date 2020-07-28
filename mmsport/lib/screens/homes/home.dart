@@ -32,7 +32,12 @@ class _Home extends State<Home> {
   Future<SocialProfile> _loadSocialProfile() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     Map aux = await jsonDecode(preferences.get("chosenSocialProfile"));
-    chosenSocialProfile = SocialProfile.socialProfileFromMap(aux);
+    if(aux['role'] == "ADMIN"){
+      chosenSocialProfile.role = "ADMIN";
+    } else {
+      chosenSocialProfile = SocialProfile.socialProfileFromMap(aux);
+      chosenSocialProfile.id = aux['id'];
+    }
     return chosenSocialProfile;
   }
 
@@ -56,33 +61,52 @@ class _Home extends State<Home> {
                       centerTitle: true,
                       title: Center(
                           child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: <Widget>[
-                        Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
-                          CircleAvatar(radius: 40, backgroundImage: NetworkImage(snapshots.data[0].urlLogo)),
-                          SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.58,
-                              child: Container(
-                                  padding: EdgeInsets.all(10.0),
-                                  child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: <Widget>[
-                                        Text(
-                                          snapshots.data[0].name,
-                                          style: TextStyle(color: Colors.white, fontSize: 30),
-                                          overflow: TextOverflow.ellipsis,
-                                          softWrap: true,
-                                        ),
-                                        Text(
-                                            snapshots.data[1].name +
-                                                " " +
-                                                snapshots.data[1].firstSurname +
-                                                " " +
-                                                snapshots.data[1].secondSurname,
-                                            style: TextStyle(color: Colors.white, fontStyle: FontStyle.italic),
-                                            overflow: TextOverflow.ellipsis,
-                                            softWrap: true)
-                                      ]))),
-                        ]),
+                        snapshots.data[1].role == "ADMIN"
+                            ? Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
+                                CircleAvatar(radius: 40, backgroundImage: NetworkImage(snapshots.data[1].urlImage)),
+                                SizedBox(
+                                    width: MediaQuery.of(context).size.width * 0.58,
+                                    child: Container(
+                                        padding: EdgeInsets.all(10.0),
+                                        child: Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: <Widget>[
+                                              Text(
+                                                snapshots.data[1].role,
+                                                style: TextStyle(color: Colors.white, fontSize: 30),
+                                                overflow: TextOverflow.ellipsis,
+                                                softWrap: true,
+                                              ),
+                                            ]))),
+                              ])
+                            : Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
+                                CircleAvatar(radius: 40, backgroundImage: NetworkImage(snapshots.data[0].urlLogo)),
+                                SizedBox(
+                                    width: MediaQuery.of(context).size.width * 0.58,
+                                    child: Container(
+                                        padding: EdgeInsets.all(10.0),
+                                        child: Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: <Widget>[
+                                              Text(
+                                                snapshots.data[0].name,
+                                                style: TextStyle(color: Colors.white, fontSize: 30),
+                                                overflow: TextOverflow.ellipsis,
+                                                softWrap: true,
+                                              ),
+                                              Text(
+                                                  snapshots.data[1].name +
+                                                      " " +
+                                                      snapshots.data[1].firstSurname +
+                                                      " " +
+                                                      snapshots.data[1].secondSurname,
+                                                  style: TextStyle(color: Colors.white, fontStyle: FontStyle.italic),
+                                                  overflow: TextOverflow.ellipsis,
+                                                  softWrap: true)
+                                            ]))),
+                              ]),
                         PopupMenuButton<int>(
                             itemBuilder: (context) => [
                                   PopupMenuItem(
