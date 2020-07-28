@@ -4,12 +4,17 @@ import 'package:mmsport/screens/choose_sport_school.dart';
 import 'package:mmsport/screens/homes/home.dart';
 import 'package:mmsport/screens/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart';
 
 void main() {
+  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+  ));
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
