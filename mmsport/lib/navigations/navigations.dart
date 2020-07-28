@@ -5,6 +5,7 @@ import 'package:mmsport/screens/chats/chat_room.dart';
 import 'package:mmsport/screens/choose_social_profile.dart';
 import 'package:mmsport/screens/choose_sport_school.dart';
 import 'package:mmsport/screens/create_sport_school.dart';
+import 'package:mmsport/screens/create_sport_school_group.dart';
 import 'package:mmsport/screens/enrollment_create_social_profile_sport_school.dart';
 import 'package:mmsport/screens/enrollment_list_sport_school.dart';
 import 'package:mmsport/screens/login.dart';
@@ -53,4 +54,8 @@ void navigateToEnrollmentCreateSocialProfileSportSchool(BuildContext context){
 
 void navigateToAcceptRejectProfiles(BuildContext context){
   Navigator.of(context).push(MaterialPageRoute(builder: (context) => AcceptRejectProfiles()));
+}
+
+void navigateToCreateSportSchoolGroup(BuildContext context){
+  Navigator.of(context).push(MaterialPageRoute(builder: (context) => CreateSportSchoolGroup()));
 }

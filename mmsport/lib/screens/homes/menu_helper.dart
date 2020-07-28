@@ -33,7 +33,7 @@ import 'package:mmsport/navigations/navigations.dart';
         _menuItem("Chats", Icons.chat, "DIRECTOR", 1, context),
         _menuItem("Mis grupos", Icons.group, "DIRECTOR", 2, context),
         _menuItem("Aceptar/rechazar perfiles", Icons.check, "DIRECTOR", 3, context),
-        _menuItem("Administrar grupos", Icons.group_add, "DIRECTOR", 4, context),
+        _menuItem("Crear grupo", Icons.group_add, "DIRECTOR", 4, context),
         _menuItem("Editar perfil", Icons.person, "DIRECTOR", 5, context),
       ];
     } else if (role == "ADMIN"){
@@ -76,8 +76,13 @@ import 'package:mmsport/navigations/navigations.dart';
       // TODO: Navigate to calendar
     } else if (i == 3 && role == "DIRECTOR") {
       navigateToAcceptRejectProfiles(context);
-    } else if (i == 4) {
+    }
+    else if (i == 4 && role == "DIRECTOR") {
+      navigateToCreateSportSchoolGroup(context);
+    }
+    else if (i == 4) {
       // TODO: Navigate to edit profile
     }
+
   }
 
