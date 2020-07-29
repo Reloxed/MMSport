@@ -10,4 +10,9 @@ class Schedule{
     this.startTimeSchedule = startTimeSchedule;
     this.endTimeSchedule = endTimeSchedule;
   }
+
+  static Schedule scheduleFromMapWithId(Map<String, dynamic> map){
+
+    return new Group.groupWithId(map['name'], map['schedule'], map['sportSchoolId'], map['trainerId'], map['id']);
+  }
 }
