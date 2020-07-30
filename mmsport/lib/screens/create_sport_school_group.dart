@@ -224,7 +224,7 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
 
   void showDayOfTheWeekPicker() {
     showMaterialScrollPicker(
-      buttonTextColor: Colors.blueAccent,
+        buttonTextColor: Colors.blueAccent,
         context: context,
         title: "Selecciona el día",
         items: daysOfTheWeek,
@@ -265,7 +265,7 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
     }
   }
 
-  Widget selectTrainerList() {
+  void selectTrainerList() {
     showModalBottomSheet(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(25.0),

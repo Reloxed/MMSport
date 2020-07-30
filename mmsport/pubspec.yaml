@@ -36,6 +36,7 @@ dependencies:
   flutter_search_bar: ^2.1.0
   shared_preferences: ^0.5.8
   flutter_material_pickers: ^1.7.1
+  flutter_speed_dial: ^1.2.5
 
 
 

@@ -13,6 +13,6 @@ class Schedule{
 
   static Schedule scheduleFromMapWithId(Map<String, dynamic> map){
 
-    return new Group.groupWithId(map['name'], map['schedule'], map['sportSchoolId'], map['trainerId'], map['id']);
+    return new Schedule(map['dayOfTheWeek'], map['startTimeSchedule'], map['endTimeSchedule']);
   }
 }
