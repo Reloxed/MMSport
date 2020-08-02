@@ -6,6 +6,7 @@ import 'package:mmsport/models/socialProfile.dart';
 import 'package:mmsport/models/sportSchool.dart';
 import 'package:mmsport/navigations/navigations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mmsport/components/dialogs.dart';
 
 class ChooseSocialProfile extends StatefulWidget {
   @override
@@ -65,7 +66,7 @@ class _ChooseSocialProfileState extends State<ChooseSocialProfile> {
             ),
           ));
         } else {
-          return CircularProgressIndicator();
+          return loadingHome();
         }
       },
     );

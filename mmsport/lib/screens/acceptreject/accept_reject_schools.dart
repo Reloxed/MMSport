@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mmsport/models/socialProfile.dart';
 import 'package:mmsport/models/sportSchool.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mmsport/components/dialogs.dart';
 
 class AcceptRejectSchools extends StatefulWidget {
   @override
@@ -73,7 +73,7 @@ class _AcceptRejectSchoolsState extends State<AcceptRejectSchools> {
                     }
                   });
             } else {
-              return CircularProgressIndicator();
+              return loading();
             }
           },
         ),

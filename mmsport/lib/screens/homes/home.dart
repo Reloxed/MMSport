@@ -10,6 +10,7 @@ import 'package:mmsport/navigations/navigations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'menu_helper.dart';
 import 'package:mmsport/screens/homes/menu_helper.dart';
+import 'package:mmsport/components/dialogs.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -141,7 +142,7 @@ class _Home extends State<Home> {
               body: menuGrid(context, snapshots.data[1].role),
             );
           } else {
-            return CircularProgressIndicator();
+            return loadingHome();
           }
         });
   }

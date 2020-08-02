@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mmsport/components/dialogs.dart';
 import 'package:mmsport/models/socialProfile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -26,8 +27,8 @@ class _AcceptRejectProfilesState extends State<AcceptRejectProfiles> {
     profilesPending.clear();
     await Firestore.instance.collection("socialProfiles")
         .where("sportSchoolId", isEqualTo: chosenSocialProfile.sportSchoolId)
-        .where("status", isEqualTo: "PENDING").snapshots().listen((event) =>
-        event.documents.forEach((element) {
+        .where("status", isEqualTo: "PENDING").getDocuments().then((value) =>
+        value.documents.forEach((element) {
           SocialProfile auxProfile = SocialProfile.socialProfileFromMap(element.data);
           auxProfile.id = element.data['id'];
           profilesPending.add(auxProfile);
@@ -67,7 +68,7 @@ class _AcceptRejectProfilesState extends State<AcceptRejectProfiles> {
                     }
                   });
             } else {
-              return CircularProgressIndicator();
+              return loading();
             }
           },
         ),
@@ -105,6 +106,12 @@ class _AcceptRejectProfilesState extends State<AcceptRejectProfiles> {
                   Text(profile.secondSurname, style: TextStyle(fontSize: 15))
                 ],
               ),
+              Row(
+                children: <Widget>[
+                  Text("Rol: ", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),),
+                  Text(profile.role, style: TextStyle(fontSize: 15))
+                ],
+              )
             ],
           ),
           Row(

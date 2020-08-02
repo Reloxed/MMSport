@@ -137,7 +137,7 @@ class _ChatMain extends State<ChatMain> {
                               },
                             );
                           } else {
-                            return Center(child: loading());
+                            return loading();
                           }
                         },
                       ),

@@ -52,6 +52,21 @@ dynamic loading(){
   );
 }
 
+dynamic loadingHome(){
+  return Scaffold(
+    body: Center(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Image.asset("assets/logo/loading_gif.gif"),
+          Text("Un momento, por favor...", style: TextStyle(fontSize: 20))
+        ],
+      ),
+    ),
+  );
+}
+
 dynamic confirmDialogOnCreateSchool(BuildContext context, String message) {
   return showDialog(
       context: context,

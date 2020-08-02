@@ -10,6 +10,7 @@ import 'package:mmsport/models/sportSchool.dart';
 import 'package:mmsport/navigations/navigations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:mmsport/components/dialogs.dart';
 
 class ChooseSportSchool extends StatefulWidget {
   @override
@@ -129,7 +130,7 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
             ),
           ));
         } else {
-          return CircularProgressIndicator();
+          return loadingHome();
         }
       },
     );
