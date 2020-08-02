@@ -44,6 +44,7 @@ void main() {
     expect(aux, true);
   });
 
+  // Validación de campo
   test('Validación de campo - String vacío', () {
     bool aux = FormValidators.validateNotEmpty('');
     expect(aux, false);

@@ -6,6 +6,7 @@ import 'package:mmsport/models/chat_room.dart';
 import 'package:mmsport/models/socialProfile.dart';
 import 'package:mmsport/navigations/navigations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mmsport/components/dialogs.dart';
 
 class ChatMain extends StatefulWidget {
   State<ChatMain> createState() {
@@ -136,7 +137,7 @@ class _ChatMain extends State<ChatMain> {
                               },
                             );
                           } else {
-                            return CircularProgressIndicator();
+                            return Center(child: loading());
                           }
                         },
                       ),
@@ -165,12 +166,12 @@ class _ChatMain extends State<ChatMain> {
                                     }
                                   });
                             } else {
-                              return CircularProgressIndicator();
+                              return loading();
                             }
                           }),
                     ])));
           } else {
-            return CircularProgressIndicator();
+            return loading();
           }
         });
   }

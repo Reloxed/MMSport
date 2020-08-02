@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mmsport/components/dialogs.dart';
+import 'package:mmsport/components/form_validators.dart';
 import 'package:mmsport/models/socialProfile.dart';
 import 'package:mmsport/models/sportSchool.dart';
 
@@ -44,10 +45,7 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
                 padding: EdgeInsets.symmetric(horizontal: 30),
                 child: PageView(
                   controller: _controller,
-                  children: <Widget>[
-                    _sportSchoolForm(),
-                    _directorProfileForm()
-                  ],
+                  children: <Widget>[_sportSchoolForm(), _directorProfileForm()],
                 ))));
   }
 
@@ -97,11 +95,11 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
                   child: ClipOval(
                       child: (imageSchool != null)
                           ? Image.file(
-                        imageSchool,
-                        fit: BoxFit.cover,
-                        width: 150,
-                        height: 150,
-                      )
+                              imageSchool,
+                              fit: BoxFit.cover,
+                              width: 150,
+                              height: 150,
+                            )
                           : Icon(Icons.camera_alt, size: 100.0))),
             )));
   }
@@ -116,7 +114,7 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
         children: <Widget>[
           TextFormField(
             validator: (v) {
-              if (v.isEmpty)
+              if (FormValidators.validateNotEmpty(v) == false)
                 return "Este campo no puede estar vacío";
               else
                 return null;
@@ -141,7 +139,7 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
         children: <Widget>[
           TextFormField(
             validator: (v) {
-              if (v.isEmpty)
+              if (FormValidators.validateNotEmpty(v) == false)
                 return "Este campo no puede estar vacío";
               else
                 return null;
@@ -166,7 +164,7 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
         children: <Widget>[
           TextFormField(
             validator: (v) {
-              if (v.isEmpty)
+              if (FormValidators.validateNotEmpty(v) == false)
                 return "Este campo no puede estar vacío";
               else
                 return null;
@@ -190,7 +188,7 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
         children: <Widget>[
           TextFormField(
             validator: (v) {
-              if (v.isEmpty)
+              if (FormValidators.validateNotEmpty(v) == false)
                 return "Este campo no puede estar vacío";
               else
                 return null;
@@ -215,8 +213,10 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
         child: RaisedButton(
           onPressed: () async {
             // ignore: unrelated_type_equality_checks
-            if (_formKey.currentState.validate() && imageSchool != "") {
+            if (_formKey.currentState.validate() && imageSchool != null) {
               _controller.animateToPage(1, duration: const Duration(milliseconds: 400), curve: Curves.easeInOut);
+            } else {
+              errorDialog(context, "Hay errores, corríjalos.");
             }
           },
           elevation: 3.0,
@@ -234,30 +234,30 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
 
   Widget _directorProfileForm() {
     return Form(
-      key: _formKey2,
+        key: _formKey2,
         autovalidate: false,
         child: ListView(
-      children: <Widget>[
-        _profileImage(),
-        Center(
-            child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            _nameProfileField(),
-            _firstSurnameProfileField(),
-            _secondSurnameProfileField(),
+            _profileImage(),
+            Center(
+                child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                _nameProfileField(),
+                _firstSurnameProfileField(),
+                _secondSurnameProfileField(),
+              ],
+            )),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                _finishButton(),
+              ],
+            ),
           ],
-        )),
-        Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            _finishButton(),
-          ],
-        ),
-      ],
-    ));
+        ));
   }
 
   // Profile image for the director
@@ -280,11 +280,11 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
                   child: ClipOval(
                       child: (imageProfile != null)
                           ? Image.file(
-                        imageProfile,
-                        fit: BoxFit.cover,
-                        width: 150,
-                        height: 150,
-                      )
+                              imageProfile,
+                              fit: BoxFit.cover,
+                              width: 150,
+                              height: 150,
+                            )
                           : Icon(Icons.camera_alt, size: 100.0))),
             )));
   }
@@ -298,7 +298,7 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
         children: <Widget>[
           TextFormField(
             validator: (v) {
-              if (v.isEmpty)
+              if (FormValidators.validateNotEmpty(v) == false)
                 return "Este campo no puede estar vacío";
               else
                 return null;
@@ -321,7 +321,7 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
         children: <Widget>[
           TextFormField(
             validator: (v) {
-              if (v.isEmpty)
+              if (FormValidators.validateNotEmpty(v) == false)
                 return "Este campo no puede estar vacío";
               else
                 return null;
@@ -344,7 +344,10 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
         children: <Widget>[
           TextFormField(
             validator: (v) {
-              return null;
+              if (FormValidators.validateNotEmpty(v) == false)
+                return "Este campo no puede estar vacío";
+              else
+                return null;
             },
             obscureText: false,
             decoration: InputDecoration(border: OutlineInputBorder(), labelText: "Segundo apellido"),
@@ -365,9 +368,14 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
         alignment: Alignment.bottomCenter,
         child: RaisedButton(
           onPressed: () async {
-            if (_formKey2.currentState.validate()) {
+            if (_formKey2.currentState.validate() && imageProfile != null) {
+              loadingDialog(context);
               _uploadAndCreate();
-              confirmDialogOnCreateSchool(context, "Escuela y perfil creados, espere a la confirmación de la administración.");
+              Navigator.of(context, rootNavigator: true).pop();
+              confirmDialogOnCreateSchool(
+                  context, "Escuela y perfil creados, espere a la confirmación de la administración.");
+            } else {
+              errorDialog(context, "Hay errores, corríjalos.");
             }
           },
           elevation: 3.0,
@@ -384,11 +392,11 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
   // Auxiliary method to create the sport school and its director social profile.
 
   void _uploadAndCreate() async {
-    if(imageSchool != null) {
+    if (imageSchool != null) {
       await uploadPicSchool(context);
     }
-    SportSchool sportSchool = new SportSchool(nameSportSchool, addressSportSchool, townSportSchool, provinceSportSchool,
-        "PENDING", urlLogo);
+    SportSchool sportSchool =
+        new SportSchool(nameSportSchool, addressSportSchool, townSportSchool, provinceSportSchool, "PENDING", urlLogo);
     final databaseReference = Firestore.instance;
     DocumentReference ref = await databaseReference.collection("sportSchools").add({
       "name": sportSchool.name,
@@ -399,8 +407,11 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
       "urlLogo": sportSchool.urlLogo
     });
     String sportSchoolId = ref.documentID;
-    await databaseReference.collection("sportSchools").document(ref.documentID).setData({"id": ref.documentID}, merge: true);
-    if(imageProfile != null) {
+    await databaseReference
+        .collection("sportSchools")
+        .document(ref.documentID)
+        .setData({"id": ref.documentID}, merge: true);
+    if (imageProfile != null) {
       await uploadPicProfile(context);
     }
     FirebaseUser firebaseUser = await FirebaseAuth.instance.currentUser();
@@ -417,10 +428,13 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
       "sportSchoolId": socialProfile.sportSchoolId,
       "groupId": socialProfile.groupId
     });
-    await databaseReference.collection("socialProfiles").document(ref2.documentID).setData({"id": ref2.documentID}, merge: true);
+    await databaseReference
+        .collection("socialProfiles")
+        .document(ref2.documentID)
+        .setData({"id": ref2.documentID}, merge: true);
   }
 
-  String getRandomString(int length){
+  String getRandomString(int length) {
     const _chars = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890";
     Random _rnd = Random();
 

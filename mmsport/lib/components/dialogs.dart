@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:mmsport/navigations/navigations.dart';
 
@@ -14,13 +13,8 @@ dynamic errorDialog(BuildContext context, String message) {
             ),
             child: Icon(Icons.error),
           ),
-          content: SingleChildScrollView(
-              child: ListBody(children: <Widget>[
-                Center(child: Text(message))
-              ])),
-          shape: RoundedRectangleBorder(
-              borderRadius:
-              BorderRadius.all(Radius.circular(15.0))),
+          content: SingleChildScrollView(child: ListBody(children: <Widget>[Center(child: Text(message))])),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0))),
           actions: <Widget>[
             FlatButton(
               color: Colors.white,
@@ -35,6 +29,29 @@ dynamic errorDialog(BuildContext context, String message) {
       });
 }
 
+dynamic loadingDialog(BuildContext context) {
+  return showDialog(context: context, barrierDismissible: false, builder: (BuildContext builder){
+    return AlertDialog(
+      title: Image.asset("assets/logo/loading_gif.gif"),
+      content: Text("Un momento, por favor...", style: TextStyle(fontSize: 20)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0))),
+    );
+  });
+}
+
+dynamic loading(){
+  return Center(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Image.asset("assets/logo/loading_gif.gif"),
+        Text("Un momento, por favor...", style: TextStyle(fontSize: 20))
+      ],
+    ),
+  );
+}
+
 dynamic confirmDialogOnCreateSchool(BuildContext context, String message) {
   return showDialog(
       context: context,
@@ -47,13 +64,8 @@ dynamic confirmDialogOnCreateSchool(BuildContext context, String message) {
             ),
             child: Icon(Icons.check),
           ),
-          content: SingleChildScrollView(
-              child: ListBody(children: <Widget>[
-                Center(child: Text(message))
-              ])),
-          shape: RoundedRectangleBorder(
-              borderRadius:
-              BorderRadius.all(Radius.circular(15.0))),
+          content: SingleChildScrollView(child: ListBody(children: <Widget>[Center(child: Text(message))])),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0))),
           actions: <Widget>[
             FlatButton(
               color: Colors.white,

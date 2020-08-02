@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mmsport/components/dialogs.dart';
+import 'package:mmsport/components/form_validators.dart';
 import 'package:mmsport/navigations/navigations.dart';
 
 class Register extends StatefulWidget {
@@ -98,9 +99,9 @@ class _RegisterState extends State<Register> {
         children: <Widget>[
           TextFormField(
             validator: (v) {
-              if (v.isEmpty)
+              if (FormValidators.validateEmptyEmail(v) == false)
                 return "Este campo no puede estar vacío";
-              else if (!emailRegex.hasMatch(v)) {
+              else if (FormValidators.validateValidEmail(v) == false) {
                 return "El email no es válido";
               } else
                 return null;
@@ -124,9 +125,9 @@ class _RegisterState extends State<Register> {
           TextFormField(
             controller: _password,
             validator: (v) {
-              if (v.isEmpty)
+              if (FormValidators.validateEmptyPassword(v) == false)
                 return "Este campo no puede estar vacío";
-              else if (v.length < 5)
+              else if (FormValidators.validateShortPassword(v) == false)
                 return "La contraseña tiene que tener más de 5 caracteres";
               else
                 return null;
@@ -150,7 +151,7 @@ class _RegisterState extends State<Register> {
           TextFormField(
             controller: _confirmPassword,
             validator: (v) {
-              if (v.isEmpty)
+              if (FormValidators.validateEmptyPassword(v) == false)
                 return "Este campo no puede estar vacío";
               else if (v != _password.text)
                 return "Las contraseñas no coinciden";
