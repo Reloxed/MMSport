@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +8,7 @@ import 'package:mmsport/components/dialogs.dart';
 import 'package:mmsport/models/group.dart';
 import 'package:mmsport/models/schedule.dart';
 import 'package:mmsport/models/socialProfile.dart';
+import 'package:mmsport/models/sportSchool.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CreateSportSchoolGroup extends StatefulWidget {
@@ -32,11 +35,12 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
   Future<List<SocialProfile>> loadTrainers() async {
     List<SocialProfile> trainers = new List();
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    String sportSchoolId = preferences.get("chosenSportSchool");
+    Map aux = jsonDecode(preferences.get("chosenSportSchool"));
+    SportSchool sportSchool = SportSchool.sportSchoolFromMap(aux);
     await Firestore.instance
         .collection("socialProfiles")
         .where('role', isEqualTo: 'TRAINER')
-        .where('sportSchoolId', isEqualTo: sportSchoolId)
+        .where('sportSchoolId', isEqualTo: sportSchool.id)
         .getDocuments()
         .then((value) {
       value.documents.forEach((element) async {
@@ -224,7 +228,7 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
 
   void showDayOfTheWeekPicker() {
     showMaterialScrollPicker(
-      buttonTextColor: Colors.blueAccent,
+        buttonTextColor: Colors.blueAccent,
         context: context,
         title: "Selecciona el día",
         items: daysOfTheWeek,
@@ -265,7 +269,7 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
     }
   }
 
-  Widget selectTrainerList() {
+  void selectTrainerList() {
     showModalBottomSheet(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(25.0),
@@ -287,28 +291,31 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
                             color: Colors.white,
                             borderRadius: new BorderRadius.only(
                                 topLeft: const Radius.circular(25.0), topRight: const Radius.circular(25.0))),
-                        child: new Center(child: ListView.builder(itemBuilder: (context, index) {
-                          return ListTile(
-                            onTap: () {
-                              setState(() {
-                                selectedTrainer = snapshot.data[index];
-                              });
-                              Navigator.of(context).pop();
-                            },
-                            title: Text(
-                              snapshot.data[index].name +
-                                  " " +
-                                  snapshot.data[index].firstSurname +
-                                  " " +
-                                  snapshot.data[index].secondSurname,
-                              style: TextStyle(fontSize: 16.0),
-                            ),
-                            leading: CircleAvatar(
-                              backgroundImage: NetworkImage(snapshot.data[index].urlImage),
-                              radius: 16.0,
-                            ),
-                          );
-                        }))),
+                        child: new Center(
+                            child: ListView.builder(
+                                itemCount: snapshot.data.length,
+                                itemBuilder: (context, index) {
+                                  return ListTile(
+                                    onTap: () {
+                                      setState(() {
+                                        selectedTrainer = snapshot.data[index];
+                                      });
+                                      Navigator.of(context).pop();
+                                    },
+                                    title: Text(
+                                      snapshot.data[index].name +
+                                          " " +
+                                          snapshot.data[index].firstSurname +
+                                          " " +
+                                          snapshot.data[index].secondSurname,
+                                      style: TextStyle(fontSize: 16.0),
+                                    ),
+                                    leading: CircleAvatar(
+                                      backgroundImage: NetworkImage(snapshot.data[index].urlImage),
+                                      radius: 16.0,
+                                    ),
+                                  );
+                                }))),
                   );
                 } else {
                   return new Container(
@@ -358,11 +365,16 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
     } else if (selectedTrainer != null && schedules.isNotEmpty) {
       final databaseReference = Firestore.instance;
       SharedPreferences preferences = await SharedPreferences.getInstance();
-      String sportSchoolId = preferences.getString("chosenSportSchool");
-      Group newGroup = Group(groupName, schedules, sportSchoolId, selectedTrainer.id);
+      Map aux = jsonDecode(preferences.get("chosenSportSchool"));
+      SportSchool sportSchool = SportSchool.sportSchoolFromMap(aux);
+      Group newGroup = Group(groupName, schedules, sportSchool.id, selectedTrainer.id);
+      List<Map<String, dynamic>> groupSchedules = new List();
+      for(Schedule actual in newGroup.schedule){
+        groupSchedules.add(actual.scheduleToJson());
+      }
       DocumentReference ref = await databaseReference.collection("groups").add({
         "name": newGroup.name,
-        "schedule": newGroup.schedule,
+        "schedule": groupSchedules,
         "sportSchoolId": newGroup.sportSchoolId,
         "trainerId": newGroup.trainerId
       });
@@ -370,6 +382,11 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
           .collection("groups")
           .document(ref.documentID)
           .setData({"id": ref.documentID}, merge: true);
+      await databaseReference
+          .collection("socialProfiles")
+          .document(newGroup.trainerId)
+          .setData({"groupId": ref.documentID}, merge: true);
+
     }
   }
 }

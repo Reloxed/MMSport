@@ -1,3 +1,4 @@
+import 'package:mmsport/models/group.dart';
 import 'package:mmsport/models/socialProfile.dart';
 import 'package:mmsport/models/sportSchool.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -42,4 +43,10 @@ void setSportSchoolToEnrollIn(SportSchool sportSchool) async{
   SharedPreferences preferences = await SharedPreferences.getInstance();
   String socialProfileToJson = jsonEncode(sportSchool.sportSchoolToJson());
   preferences.setString("sportSchoolToEnrollIn", socialProfileToJson);
+}
+
+void setSportSchoolGroupToView(Group group) async{
+  SharedPreferences preferences = await SharedPreferences.getInstance();
+  String socialProfileToJson = jsonEncode(group.groupToJson());
+  preferences.setString("sportSchoolGroupToView", socialProfileToJson);
 }
