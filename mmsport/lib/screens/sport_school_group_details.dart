@@ -1,12 +1,16 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_pickers/flutter_material_pickers.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:mmsport/components/dialogs.dart';
+import 'package:mmsport/constants/constants.dart';
 import 'package:mmsport/models/group.dart';
 import 'package:mmsport/models/schedule.dart';
 import 'package:mmsport/models/socialProfile.dart';
+import 'package:mmsport/models/sportSchool.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SportSchoolGroupDetails extends StatefulWidget {
@@ -20,42 +24,34 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
   final _formKey = GlobalKey<FormState>();
   bool _editMode = false;
 
-  List<SocialProfile> filteredStudents;
-  TextEditingController filterController = new TextEditingController();
-  String filter;
-
   List<String> daysOfTheWeek = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
   String selectedDay;
   TimeOfDay selectedStartTimeSchedule = TimeOfDay.now();
   TimeOfDay selectedEndTimeSchedule = TimeOfDay.now();
-  List<Schedule> schedulesEdited = [];
+  List<Schedule> schedulesEdited;
   Group groupEdited;
   List<SocialProfile> studentsEdited;
   SocialProfile selectedTrainerEdited;
-  List<SocialProfile> studentsToEnroll;
-  List<SocialProfile> studentsToEnrollSelected = [];
+  List<SocialProfile> studentsToEnroll = [];
+  List<SocialProfile> studentsGroupWithouEdit = [];
 
   @override
   void initState() {
     super.initState();
-    filterController.addListener(() {
-      setState(() {
-        filter = filterController.text;
-      });
-    });
   }
 
   Future<List<SocialProfile>> loadTrainers() async {
     List<SocialProfile> trainers = new List();
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    String sportSchoolId = preferences.get("chosenSportSchool");
+    Map aux = jsonDecode(preferences.get("chosenSportSchool"));
+    SportSchool sportSchool = SportSchool.sportSchoolFromMap(aux);
     await Firestore.instance
         .collection("socialProfiles")
         .where('role', isEqualTo: 'TRAINER')
-        .where('sportSchoolId', isEqualTo: sportSchoolId)
+        .where('sportSchoolId', isEqualTo: sportSchool.id)
         .getDocuments()
         .then((value) {
-      value.documents.forEach((element) async {
+      value.documents.forEach((element) {
         SocialProfile trainer = SocialProfile.socialProfileFromMap(element.data);
         trainer.id = element.documentID;
         trainers.add(trainer);
@@ -64,66 +60,69 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
     return trainers;
   }
 
-  Future<Group> loadGroup() async {
+  Future<Group> _loadGroup() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    Group group = Group.groupFromMapWithId(preferences.get("chosenGroup"));
+    Group group = Group.groupFromMapWithId(jsonDecode(preferences.get("sportSchoolGroupToView")));
     return group;
   }
 
-  Future<List<Schedule>> loadSchedule() async {
+  Future<List<Schedule>> _loadSchedule() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    Group group = Group.groupFromMapWithId(preferences.get("chosenGroup"));
+    Group group = Group.groupFromMapWithId(jsonDecode(preferences.get("sportSchoolGroupToView")));
     return group.schedule;
   }
 
-  Future<SocialProfile> loadTrainer() async {
+  Future<SocialProfile> _loadTrainer() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    Group group = Group.groupFromMapWithId(preferences.get("chosenGroup"));
+    Group group = Group.groupFromMapWithId(jsonDecode(preferences.get("sportSchoolGroupToView")));
     SocialProfile trainer;
     await Firestore.instance.collection("socialProfiles").document(group.trainerId).get().then((value) {
       trainer = SocialProfile.socialProfileFromMap(value.data);
+      trainer.id = value.documentID;
     });
 
     return trainer;
   }
 
-  Future<List<SocialProfile>> loadStudents() async {
-    List<SocialProfile> students;
+  Future<List<SocialProfile>> _loadStudents() async {
+    List<SocialProfile> students = new List();
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    Group group = Group.groupFromMapWithId(preferences.get("chosenGroup"));
+    Group group = Group.groupFromMapWithId(jsonDecode(preferences.get("sportSchoolGroupToView")));
     await Firestore.instance
         .collection("socialProfiles")
         .where('role', isEqualTo: 'STUDENT')
         .where('groupId', isEqualTo: group.id)
         .getDocuments()
         .then((value) {
-      value.documents.forEach((element) async {
+      value.documents.forEach((element) {
         SocialProfile newStudent = SocialProfile.socialProfileFromMap(element.data);
+        newStudent.id = element.documentID;
         students.add(newStudent);
       });
     });
-
+    studentsGroupWithouEdit = students;
     return students;
   }
 
   Future<List<SocialProfile>> loadStudentsToJoin() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    Group group = Group.groupFromMapWithId(preferences.get("chosenGroup"));
+    Group group = Group.groupFromMapWithId(jsonDecode(preferences.get("sportSchoolGroupToView")));
     await Firestore.instance
         .collection("socialProfiles")
         .where('role', isEqualTo: 'STUDENT')
         .where('sportSchoolId', isEqualTo: group.sportSchoolId)
         .getDocuments()
         .then((value) {
-      value.documents.forEach((element) async {
+      value.documents.forEach((element) {
         SocialProfile newStudent = SocialProfile.socialProfileFromMap(element.data);
-        SocialProfile first = studentsToEnroll.firstWhere((element) => element.id == newStudent.id);
+        newStudent.id = element.documentID;
+        SocialProfile first;
+        first = studentsToEnroll.firstWhere((element) => element.id == newStudent.id, orElse: () => null);
         if (newStudent.groupId != group.id && first == null) {
           studentsToEnroll.add(newStudent);
         }
       });
     });
-    filteredStudents = studentsToEnroll;
 
     return studentsToEnroll;
   }
@@ -131,20 +130,15 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
   @override
   Widget build(BuildContext context) {
     return Material(
-        child: FutureBuilder(
-      future: Future.wait([loadGroup(), loadTrainer(), loadStudents(), loadSchedule()]),
+        child: FutureBuilder<List<dynamic>>(
+      future: Future.wait([_loadGroup(), _loadTrainer(), _loadStudents(), _loadSchedule()]),
       builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshots) {
-        studentsToEnrollSelected = [];
         if (snapshots.hasData) {
           Group group = snapshots.data[0];
           SocialProfile groupTrainer = snapshots.data[1];
           List<SocialProfile> groupStudents = snapshots.data[2];
           List<Schedule> schedules = snapshots.data[3];
           if (_editMode) {
-            groupEdited = group;
-            selectedTrainerEdited = groupTrainer;
-            studentsEdited = groupStudents;
-            schedulesEdited = schedules;
             return Scaffold(
                 body: Center(
                   child: SingleChildScrollView(
@@ -219,9 +213,6 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
                     SpeedDialChild(
                         onTap: () async {
                           editGroup();
-                          setState(() {
-                            _editMode = false;
-                          });
                         },
                         child: Icon(
                           Icons.save,
@@ -303,6 +294,10 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
                   onPressed: () {
                     setState(() {
                       _editMode = true;
+                      schedulesEdited = schedules;
+                      studentsEdited = groupStudents;
+                      selectedTrainerEdited = groupTrainer;
+                      groupEdited = group;
                     });
                   },
                   tooltip: 'Editar',
@@ -390,7 +385,7 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
         );
       }
     } else {
-      if (students.length == 0) {
+      if (students.length == 0 || students == null) {
         return Center(
           child: Text("No hay ningún alumno en este grupo", style: TextStyle(fontSize: 24.0)),
         );
@@ -518,7 +513,7 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
     return Container(
         margin: EdgeInsets.all(4.0),
         child: OutlineButton.icon(
-          onPressed: () => showSchedulePickers(),
+          onPressed: () => addStudentsList(),
           icon: new IconTheme(
               data: new IconThemeData(
                 color: Colors.blueAccent,
@@ -534,145 +529,18 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
         ));
   }
 
-  void addStudentsList() {
-    showModalBottomSheet(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(25.0),
-        ),
-        context: context,
-        isScrollControlled: true,
-        builder: (builder) {
-          return FutureBuilder(
-            future: loadStudentsToJoin(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                if (snapshot.data.length > 0) {
-                  return new Container(
-                    height: MediaQuery.of(context).size.height * 0.9,
-                    color: Colors.transparent, //could change this to Color(0xFF737373),
-                    //so you don't have to change MaterialApp canvasColor
-                    child: Column(
-                      children: <Widget>[
-                        new Padding(
-                          padding: new EdgeInsets.only(top: 20.0),
-                        ),
-                        new TextField(
-                          decoration: new InputDecoration(
-                            labelText: "Search something",
-                          ),
-                          controller: filterController,
-                        ),
-                        new Expanded(
-                            child: Container(
-                                decoration: new BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: new BorderRadius.only(
-                                        topLeft: const Radius.circular(25.0), topRight: const Radius.circular(25.0))),
-                                child: new Center(child: ListView.builder(itemBuilder: (context, index) {
-                                  if (filter.isEmpty || filter == null) {
-                                    return CheckboxListTile(
-                                      selected: studentsToEnrollSelected.contains(snapshot.data[index]),
-                                      value: studentsToEnrollSelected.contains(snapshot.data[index]),
-                                      onChanged: (bool value) {
-                                        if (value) {
-                                          setState(() {
-                                            studentsToEnrollSelected.add(snapshot.data[index]);
-                                          });
-                                        } else {
-                                          setState(() {
-                                            studentsToEnrollSelected.remove(snapshot.data[index]);
-                                          });
-                                        }
-                                      },
-                                      title: Text(
-                                        snapshot.data[index].name +
-                                            " " +
-                                            snapshot.data[index].firstSurname +
-                                            " " +
-                                            snapshot.data[index].secondSurname,
-                                        style: TextStyle(fontSize: 16.0),
-                                      ),
-                                      secondary: CircleAvatar(
-                                        backgroundImage: NetworkImage(snapshot.data[index].urlImage),
-                                        radius: 16.0,
-                                      ),
-                                    );
-                                  } else {
-                                    String completedName = snapshot.data[index].name +
-                                        " " +
-                                        snapshot.data[index].firstSurname +
-                                        " " +
-                                        snapshot.data[index].secondSurname;
-                                    if (completedName.toLowerCase().contains(filter)) {
-                                      return CheckboxListTile(
-                                        selected: studentsToEnrollSelected.contains(snapshot.data[index]),
-                                        value: studentsToEnrollSelected.contains(snapshot.data[index]),
-                                        onChanged: (bool value) {
-                                          if (value) {
-                                            setState(() {
-                                              studentsToEnrollSelected.add(snapshot.data[index]);
-                                            });
-                                          } else {
-                                            setState(() {
-                                              studentsToEnrollSelected.remove(snapshot.data[index]);
-                                            });
-                                          }
-                                        },
-                                        title: Text(
-                                          snapshot.data[index].name +
-                                              " " +
-                                              snapshot.data[index].firstSurname +
-                                              " " +
-                                              snapshot.data[index].secondSurname,
-                                          style: TextStyle(fontSize: 16.0),
-                                        ),
-                                        secondary: CircleAvatar(
-                                          backgroundImage: NetworkImage(snapshot.data[index].urlImage),
-                                          radius: 16.0,
-                                        ),
-                                      );
-                                    } else {
-                                      return Container();
-                                    }
-                                  }
-                                }))))
-                      ],
-                    ),
-                  );
-                } else {
-                  return new Container(
-                    height: MediaQuery.of(context).size.height * 0.9,
-                    color: Colors.transparent, //could change this to Color(0xFF737373),
-                    //so you don't have to change MaterialApp canvasColor
-                    child: new Container(
-                        decoration: new BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: new BorderRadius.only(
-                                topLeft: const Radius.circular(25.0), topRight: const Radius.circular(25.0))),
-                        child: Center(
-                          child: Text(
-                            "No hay alumnos en la escuela",
-                            style: TextStyle(fontSize: 16.0),
-                          ),
-                        )),
-                  );
-                }
-              } else {
-                return new Container(
-                  height: MediaQuery.of(context).size.height * 0.9,
-                  color: Colors.transparent, //could change this to Color(0xFF737373),
-                  //so you don't have to change MaterialApp canvasColor
-                  child: new Container(
-                      decoration: new BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: new BorderRadius.only(
-                              topLeft: const Radius.circular(25.0), topRight: const Radius.circular(25.0))),
-                      child: Center(child: CircularProgressIndicator())),
-                );
-              }
+  Future addStudentsList() async {
+    await Navigator.of(context)
+        .push(new MaterialPageRoute<List<SocialProfile>>(
+            builder: (BuildContext context) {
+              return new AddStudentsToGroupDialog(
+                studentsEdited: this.studentsEdited,
+              );
             },
-          );
-        });
+            fullscreenDialog: true))
+        .then((value) => setState(() {
+              studentsEdited = value;
+            }));
   }
 
   void showSchedulePickers() {
@@ -744,28 +612,31 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
                             color: Colors.white,
                             borderRadius: new BorderRadius.only(
                                 topLeft: const Radius.circular(25.0), topRight: const Radius.circular(25.0))),
-                        child: new Center(child: ListView.builder(itemBuilder: (context, index) {
-                          return ListTile(
-                            onTap: () {
-                              setState(() {
-                                selectedTrainerEdited = snapshot.data[index];
-                              });
-                              Navigator.of(context).pop();
-                            },
-                            title: Text(
-                              snapshot.data[index].name +
-                                  " " +
-                                  snapshot.data[index].firstSurname +
-                                  " " +
-                                  snapshot.data[index].secondSurname,
-                              style: TextStyle(fontSize: 16.0),
-                            ),
-                            leading: CircleAvatar(
-                              backgroundImage: NetworkImage(snapshot.data[index].urlImage),
-                              radius: 16.0,
-                            ),
-                          );
-                        }))),
+                        child: new Center(
+                            child: ListView.builder(
+                                itemCount: snapshot.data.length,
+                                itemBuilder: (context, index) {
+                                  return ListTile(
+                                    onTap: () {
+                                      setState(() {
+                                        selectedTrainerEdited = snapshot.data[index];
+                                      });
+                                      Navigator.of(context).pop();
+                                    },
+                                    title: Text(
+                                      snapshot.data[index].name +
+                                          " " +
+                                          snapshot.data[index].firstSurname +
+                                          " " +
+                                          snapshot.data[index].secondSurname,
+                                      style: TextStyle(fontSize: 16.0),
+                                    ),
+                                    leading: CircleAvatar(
+                                      backgroundImage: NetworkImage(snapshot.data[index].urlImage),
+                                      radius: 16.0,
+                                    ),
+                                  );
+                                }))),
                   );
                 } else {
                   return new Container(
@@ -816,8 +687,12 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
       groupEdited.schedule = schedulesEdited;
       groupEdited.trainerId = selectedTrainerEdited.id;
       final databaseReference = Firestore.instance;
+      List<Map<String, dynamic>> groupSchedules = new List();
+      for (Schedule actual in groupEdited.schedule) {
+        groupSchedules.add(actual.scheduleToJson());
+      }
       await databaseReference.collection("groups").document(groupEdited.id).setData(
-          {"name": groupEdited.name, "schedule": groupEdited.schedule, "trainerId": groupEdited.trainerId},
+          {"name": groupEdited.name, "schedule": groupSchedules, "trainerId": groupEdited.trainerId},
           merge: true).whenComplete(() async {
         for (SocialProfile actualStudent in studentsEdited) {
           await databaseReference
@@ -825,6 +700,20 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
               .document(actualStudent.id)
               .setData({"groupId": groupEdited.id}, merge: true);
         }
+        for(SocialProfile actualStudent in studentsGroupWithouEdit){
+          SocialProfile first =
+          studentsEdited.firstWhere((element) => element.id == actualStudent.id, orElse: () => null);
+          if (first == null) {
+            await databaseReference
+                .collection("socialProfiles")
+                .document(actualStudent.id)
+                .setData({"groupId": ""}, merge: true);
+          }
+        }
+      });
+      setSportSchoolGroupToView(groupEdited);
+      setState(() {
+        _editMode = false;
       });
     }
   }
