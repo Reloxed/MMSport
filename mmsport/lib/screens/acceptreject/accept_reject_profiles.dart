@@ -167,6 +167,14 @@ class _AcceptRejectProfilesState extends State<AcceptRejectProfiles> {
 
                   });
                 },
+              ),
+              FlatButton(
+                color: Colors.white,
+                textColor: Colors.blueAccent,
+                child: Text("Cancelar"),
+                onPressed: () async {
+                  Navigator.pop(context, true);
+                },
               )
             ],
           );
@@ -201,6 +209,14 @@ class _AcceptRejectProfilesState extends State<AcceptRejectProfiles> {
                   setState(() {
 
                   });
+                },
+              ),
+              FlatButton(
+                color: Colors.white,
+                textColor: Colors.blueAccent,
+                child: Text("Cancelar"),
+                onPressed: () async {
+                  Navigator.pop(context, true);
                 },
               )
             ],

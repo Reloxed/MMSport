@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mmsport/components/dialogs.dart';
 import 'package:mmsport/components/form_validators.dart';
 import 'package:mmsport/navigations/navigations.dart';
+import 'package:mmsport/components/dialogs.dart';
 
 class Register extends StatefulWidget {
   @override
@@ -176,12 +177,12 @@ class _RegisterState extends State<Register> {
           onPressed: () async {
             try {
               if (_formKey.currentState.validate()) {
+                loadingDialog(context);
                 final FirebaseUser newUser = (await _auth.createUserWithEmailAndPassword(
                   email: email,
                   password: password,
-                ))
-                    .user;
-
+                )).user;
+                Navigator.of(context, rootNavigator: true).pop();
                 if (newUser != null) {
                   if (hasSchoolSport == "Sí") {
                     navigateToCreateSchool(context);

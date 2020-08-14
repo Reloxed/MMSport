@@ -96,6 +96,7 @@ dynamic confirmDialogOnCreateSchool(BuildContext context, String message) {
               textColor: Colors.blueAccent,
               onPressed: () {
                 logout(context);
+                Navigator.of(context, rootNavigator: true).pop();
               },
               child: Text("Entendido"),
             )
@@ -299,6 +300,7 @@ class SelectTrainerGroupDialogState extends State<SelectTrainerGroupDialog> {
       await Firestore.instance
           .collection("socialProfiles")
           .where('role', isEqualTo: 'TRAINER')
+          .where('role', isEqualTo: 'DIRECTOR')
           .where('sportSchoolId', isEqualTo: group.sportSchoolId)
           .getDocuments()
           .then((value) {

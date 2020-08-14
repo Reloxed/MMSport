@@ -443,7 +443,7 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
 
   // Auxiliary method to upload image of school to FirebaseStorage
   Future uploadPicSchool(BuildContext context) async {
-    String fileName = nameProfile + firstSurnameProfile + secondSurnameProfile;
+    String fileName = nameSportSchool;
     StorageReference storageReference = FirebaseStorage.instance.ref().child(fileName + getRandomString(12));
     StorageUploadTask uploadTask = storageReference.putFile(imageSchool);
     StorageTaskSnapshot taskSnapshot = await uploadTask.onComplete;
