@@ -7,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mmsport/models/socialProfile.dart';
 import 'package:mmsport/models/sportSchool.dart';
@@ -27,6 +28,8 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
   String secondSurnameProfile;
   String urlProfile;
   File imageProfile;
+
+  String socialProfileRole = "";
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +57,7 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
                     _nameProfileField(),
                     _firstSurnameProfileField(),
                     _secondSurnameProfileField(),
+                    chooseTypeOfSocialProfile()
                   ],
                 )),
             Column(
@@ -192,15 +196,24 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
   void _uploadAndCreate() async {
     final databaseReference = Firestore.instance;
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    String jsonString =  preferences.getString("sportSchoolToEnrollIn");
+    String jsonString = preferences.getString("sportSchoolToEnrollIn");
     SportSchool sportSchool = SportSchool.sportSchoolFromMap(jsonDecode(jsonString));
     String sportSchoolId = sportSchool.id;
-    if(imageProfile != null) {
+    if (imageProfile != null) {
       await uploadPicProfile(context);
     }
     FirebaseUser firebaseUser = await FirebaseAuth.instance.currentUser();
-    SocialProfile socialProfile = new SocialProfile("", firebaseUser.uid, nameProfile, firstSurnameProfile,
-        secondSurnameProfile, "STUDENT", "PENDING", urlProfile, sportSchoolId, "");
+    SocialProfile socialProfile = new SocialProfile(
+        "",
+        firebaseUser.uid,
+        nameProfile,
+        firstSurnameProfile,
+        secondSurnameProfile,
+        socialProfileRole,
+        "PENDING",
+        urlProfile,
+        sportSchoolId,
+        "");
     DocumentReference ref = await databaseReference.collection("socialProfiles").add({
       "userAccountId": socialProfile.userAccountId,
       "name": socialProfile.name,
@@ -212,10 +225,11 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
       "sportSchoolId": socialProfile.sportSchoolId,
       "groupId": socialProfile.groupId
     });
-    await databaseReference.collection("socialProfiles").document(ref.documentID).setData({"id": ref.documentID}, merge: true);
+    await databaseReference.collection("socialProfiles").document(ref.documentID).setData(
+        {"id": ref.documentID}, merge: true);
   }
 
-  String getRandomString(int length){
+  String getRandomString(int length) {
     const _chars = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890";
     Random _rnd = Random();
 
@@ -231,5 +245,49 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
     StorageTaskSnapshot taskSnapshot = await uploadTask.onComplete;
     var url = await taskSnapshot.ref.getDownloadURL();
     urlProfile = url;
+  }
+
+  void _handleRadioValueChange(dynamic value) {
+    if(value == "Alumno"){
+      setState(() {
+        socialProfileRole = "STUDENT";
+      });
+    }
+    else{
+      setState(() {
+        socialProfileRole = "TRAINER";
+      });
+    }
+  }
+
+  // ignore: missing_return
+  String _checkSelectedRadioButton(dynamic v) {
+    if (v == "") {
+      return "Debe de seleccionar una opción";
+    }
+  }
+
+  Widget chooseTypeOfSocialProfile() {
+    return Container(
+      margin: const EdgeInsets.only(top: 4.0),
+      child: FormBuilderRadio(
+        decoration: InputDecoration(),
+        initialValue: "",
+        attribute: "¿Eres entrenador o alumno?",
+        leadingInput: true,
+        onChanged: _handleRadioValueChange,
+        validators: [_checkSelectedRadioButton],
+        options: ["Entrenador", "Alumno"]
+            .map((lang) =>
+            FormBuilderFieldOption(
+              value: lang,
+              child: Text(
+                '$lang',
+                style: TextStyle(fontSize: 16.0),
+              ),
+            ))
+            .toList(growable: false),
+      ),
+    );
   }
 }

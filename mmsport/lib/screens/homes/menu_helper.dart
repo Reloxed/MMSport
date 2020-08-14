@@ -70,8 +70,8 @@ import 'package:mmsport/navigations/navigations.dart';
     //TODO: Añadir roles a los navigator necesarios
     if (i == 1) {
       navigateToChatMain(context);
-    } else if (i == 2) {
-      // TODO: Navigate to my group
+    } else if (i == 2 && role == "DIRECTOR") {
+      navigateToListSportSchoolGroups(context);
     } else if (i == 3 && (role == "TRAINER" || role == "STUDENT")) {
       // TODO: Navigate to calendar
     } else if (i == 3 && role == "DIRECTOR") {
