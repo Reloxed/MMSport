@@ -539,7 +539,9 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
             },
             fullscreenDialog: true))
         .then((value) => setState(() {
-              studentsEdited = value;
+          if(value != null){
+            studentsEdited = value;
+          }
             }));
   }
 
@@ -590,88 +592,20 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
     }
   }
 
-  void selectTrainerList() {
-    showModalBottomSheet(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(25.0),
-        ),
-        context: context,
-        isScrollControlled: true,
-        builder: (builder) {
-          return FutureBuilder(
-            future: loadTrainers(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                if (snapshot.data.length > 0) {
-                  return new Container(
-                    height: MediaQuery.of(context).size.height * 0.9,
-                    color: Colors.transparent, //could change this to Color(0xFF737373),
-                    //so you don't have to change MaterialApp canvasColor
-                    child: new Container(
-                        decoration: new BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: new BorderRadius.only(
-                                topLeft: const Radius.circular(25.0), topRight: const Radius.circular(25.0))),
-                        child: new Center(
-                            child: ListView.builder(
-                                itemCount: snapshot.data.length,
-                                itemBuilder: (context, index) {
-                                  return ListTile(
-                                    onTap: () {
-                                      setState(() {
-                                        selectedTrainerEdited = snapshot.data[index];
-                                      });
-                                      Navigator.of(context).pop();
-                                    },
-                                    title: Text(
-                                      snapshot.data[index].name +
-                                          " " +
-                                          snapshot.data[index].firstSurname +
-                                          " " +
-                                          snapshot.data[index].secondSurname,
-                                      style: TextStyle(fontSize: 16.0),
-                                    ),
-                                    leading: CircleAvatar(
-                                      backgroundImage: NetworkImage(snapshot.data[index].urlImage),
-                                      radius: 16.0,
-                                    ),
-                                  );
-                                }))),
-                  );
-                } else {
-                  return new Container(
-                    height: MediaQuery.of(context).size.height * 0.9,
-                    color: Colors.transparent, //could change this to Color(0xFF737373),
-                    //so you don't have to change MaterialApp canvasColor
-                    child: new Container(
-                        decoration: new BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: new BorderRadius.only(
-                                topLeft: const Radius.circular(25.0), topRight: const Radius.circular(25.0))),
-                        child: Center(
-                          child: Text(
-                            "No hay entrenadores en la escuela",
-                            style: TextStyle(fontSize: 16.0),
-                          ),
-                        )),
-                  );
-                }
-              } else {
-                return new Container(
-                  height: MediaQuery.of(context).size.height * 0.9,
-                  color: Colors.transparent, //could change this to Color(0xFF737373),
-                  //so you don't have to change MaterialApp canvasColor
-                  child: new Container(
-                      decoration: new BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: new BorderRadius.only(
-                              topLeft: const Radius.circular(25.0), topRight: const Radius.circular(25.0))),
-                      child: Center(child: CircularProgressIndicator())),
-                );
-              }
-            },
+  void selectTrainerList() async{
+    await Navigator.of(context)
+        .push(new MaterialPageRoute<SocialProfile>(
+        builder: (BuildContext context) {
+          return new SelectTrainerGroupDialog(
+            trainerSelected: this.selectedTrainerEdited,
           );
-        });
+        },
+        fullscreenDialog: true))
+        .then((value) => setState(() {
+          if(value != null){
+            selectedTrainerEdited = value;
+          }
+    }));
   }
 
   double fromTimeOfDayToDouble(TimeOfDay myTime) => myTime.hour + myTime.minute / 60.0;
