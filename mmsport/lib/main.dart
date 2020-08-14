@@ -5,6 +5,7 @@ import 'package:mmsport/screens/homes/home.dart';
 import 'package:mmsport/screens/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
+import 'package:mmsport/components/dialogs.dart';
 
 void main() {
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
@@ -18,32 +19,38 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Map<String, bool>>(
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+    home: FutureBuilder<Map<String, bool>>(
         future: checkSharedPreferences(),
         // ignore: missing_return
         builder: (BuildContext context, AsyncSnapshot<Map<String, bool>> snapshot) {
           if (snapshot.hasData) {
             if (snapshot.data['chosenSocialProfile'] == true) {
               return MaterialApp(
+                debugShowCheckedModeBanner: false,
                 home: Home(),
               );
             } else if (snapshot.data['chosenSportSchool'] == true) {
               return MaterialApp(
+                debugShowCheckedModeBanner: false,
                 home: ChooseSocialProfile(),
               );
             } else if (snapshot.data['loggedInUserId'] == true) {
               return MaterialApp(
+                debugShowCheckedModeBanner: false,
                 home: ChooseSportSchool(),
               );
             } else if (snapshot.data['loggedInUserId'] == false) {
               return MaterialApp(
+                debugShowCheckedModeBanner: false,
                 home: Login(),
               );
             }
           } else {
-            return Container();
+            return loadingHome();
           }
-        });
+        }));
   }
 
   Future<Map<String, bool>> checkSharedPreferences() async {

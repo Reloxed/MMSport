@@ -35,6 +35,7 @@ dynamic errorDialog(BuildContext context, String message) {
       });
 }
 
+// Muestra un dialog con el loading, usado en los momentos que se guardan datos en la BBDD
 dynamic loadingDialog(BuildContext context) {
   return showDialog(context: context, barrierDismissible: false, builder: (BuildContext builder){
     return AlertDialog(
@@ -45,6 +46,7 @@ dynamic loadingDialog(BuildContext context) {
   });
 }
 
+// Muestra el loading directamente en la pantalla, por ejemplo dentro de un scaffold
 dynamic loading(){
   return Center(
     child: Column(
@@ -58,6 +60,7 @@ dynamic loading(){
   );
 }
 
+// Muestra una pantalla completa de loading, se usa en el home
 dynamic loadingHome(){
   return Scaffold(
     body: Center(
