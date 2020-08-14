@@ -266,3 +266,117 @@ class AddStudentsToGroupDialogState extends State<AddStudentsToGroupDialog> {
             }));
   }
 }
+
+class SelectTrainerGroupDialog extends StatefulWidget {
+  final SocialProfile trainerSelected;
+
+  SelectTrainerGroupDialog({Key key, @required this.trainerSelected}) : super(key: key);
+
+  @override
+  SelectTrainerGroupDialogState createState() => new SelectTrainerGroupDialogState(trainerSelected);
+}
+
+class SelectTrainerGroupDialogState extends State<SelectTrainerGroupDialog> {
+  List<SocialProfile> groupTrainers;
+  SocialProfile trainerSelected;
+  bool firstLoad;
+
+  SelectTrainerGroupDialogState(SocialProfile trainerSelected) {
+    this.trainerSelected = trainerSelected;
+  }
+
+  @override
+  void initState(){
+    super.initState();
+    groupTrainers = [];
+    firstLoad = true;
+  }
+
+  Future<List<SocialProfile>> loadTrainers() async {
+    if(firstLoad){
+      SharedPreferences preferences = await SharedPreferences.getInstance();
+      Group group = Group.groupFromMapWithId(jsonDecode(preferences.get("sportSchoolGroupToView")));
+      await Firestore.instance
+          .collection("socialProfiles")
+          .where('role', isEqualTo: 'TRAINER')
+          .where('sportSchoolId', isEqualTo: group.sportSchoolId)
+          .getDocuments()
+          .then((value) {
+        value.documents.forEach((element) {
+          SocialProfile newTrainer = SocialProfile.socialProfileFromMap(element.data);
+          newTrainer.id = element.data['id'];
+          if(trainerSelected != null){
+            if(trainerSelected.id == newTrainer.id){
+              trainerSelected = newTrainer;
+            }
+          }
+          groupTrainers.add(newTrainer);
+        });
+      });
+    }
+    return groupTrainers;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+        child: FutureBuilder<List<SocialProfile>>(
+            future: loadTrainers(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return Scaffold(
+                    appBar: new AppBar(
+                      title: const Text('Seleccione al entrenador'),
+                      actions: [
+                        new IconButton(
+                          onPressed: () {
+                            Navigator.of(context).pop(trainerSelected);
+                          },
+                          icon: Icon(Icons.check),
+                          color: Colors.white,
+                        )],
+                    ),
+                    body: Center(
+                      child: SafeArea(
+                        child: Column(
+                          children: <Widget>[
+                            Expanded(
+                              child: ListView.builder(
+                                  itemCount: snapshot.data.length,
+                                  itemBuilder: (context, index) {
+                                    return RadioListTile<SocialProfile>(
+                                      value: snapshot.data[index],
+                                      groupValue: trainerSelected,
+                                      selected: identical(trainerSelected, snapshot.data[index]),
+                                      onChanged: (SocialProfile value) {
+                                        setState(() {
+                                          firstLoad = false;
+                                          trainerSelected = value;
+                                        });
+                                      },
+                                      title: Text(
+                                        snapshot.data[index].name +
+                                            " " +
+                                            snapshot.data[index].firstSurname +
+                                            " " +
+                                            snapshot.data[index].secondSurname,
+                                        style: TextStyle(fontSize: 16.0),
+                                      ),
+                                      secondary: CircleAvatar(
+                                        backgroundImage: NetworkImage(snapshot.data[index].urlImage),
+                                        radius: 16.0,
+                                      ),
+                                    );
+                                  }),
+                            )
+                          ],
+                        ),
+                      ),
+                    ));
+              } else {
+                return Center(child: CircularProgressIndicator());
+              }
+            }));
+  }
+}
+
