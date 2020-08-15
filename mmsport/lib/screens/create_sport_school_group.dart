@@ -40,6 +40,7 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
     await Firestore.instance
         .collection("socialProfiles")
         .where('role', isEqualTo: 'TRAINER')
+        .where('role', isEqualTo: 'DIRECTOR')
         .where('sportSchoolId', isEqualTo: sportSchool.id)
         .getDocuments()
         .then((value) {

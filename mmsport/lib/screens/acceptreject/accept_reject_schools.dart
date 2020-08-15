@@ -207,6 +207,14 @@ class _AcceptRejectSchoolsState extends State<AcceptRejectSchools> {
                   Navigator.pop(context, true);
                   setState(() {});
                 },
+              ),
+              FlatButton(
+                color: Colors.white,
+                textColor: Colors.blueAccent,
+                child: Text("Cancelar"),
+                onPressed: () async {
+                  Navigator.pop(context, true);
+                },
               )
             ],
           );
@@ -240,6 +248,14 @@ class _AcceptRejectSchoolsState extends State<AcceptRejectSchools> {
                   await Firestore.instance.collection("socialProfiles").document(socialProfile.id).delete();
                   Navigator.pop(context, true);
                   setState(() {});
+                },
+              ),
+              FlatButton(
+                color: Colors.white,
+                textColor: Colors.blueAccent,
+                child: Text("Cancelar"),
+                onPressed: () async {
+                  Navigator.pop(context, true);
                 },
               )
             ],

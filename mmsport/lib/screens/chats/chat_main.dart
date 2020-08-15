@@ -67,7 +67,7 @@ class _ChatMain extends State<ChatMain> {
             .collection("chatRooms")
             .document(id + "_" + chosenSocialProfile.id)
             .collection("messages")
-            .orderBy("sentData", descending: true)
+            .orderBy("sentDate", descending: true)
             .snapshots()
             .first
             .then((value) => lastMessage = value.documents[0].data['message']);
@@ -105,7 +105,7 @@ class _ChatMain extends State<ChatMain> {
                         bottom: TabBar(tabs: <Widget>[
                           Container(
                               child: Tab(
-                            text: "Chats",
+                            text: "Chats abiertos",
                           )),
                           Container(
                               child: Tab(
