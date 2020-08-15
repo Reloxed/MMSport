@@ -23,6 +23,7 @@ class SportSchoolGroupDetails extends StatefulWidget {
 class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
   final _formKey = GlobalKey<FormState>();
   bool _editMode = false;
+  bool notAllowedToEdit = true;
 
   List<String> daysOfTheWeek = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
   String selectedDay;
@@ -62,6 +63,11 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
 
   Future<Group> _loadGroup() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
+    Map profileLogged = await jsonDecode(preferences.get("chosenSocialProfile"));
+    SocialProfile logged = SocialProfile.socialProfileFromMap(profileLogged);
+    if (logged.role == 'DIRECTOR') {
+      notAllowedToEdit = false;
+    }
     Group group = Group.groupFromMapWithId(jsonDecode(preferences.get("sportSchoolGroupToView")));
     return group;
   }
@@ -131,187 +137,198 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
   Widget build(BuildContext context) {
     return Material(
         child: FutureBuilder<List<dynamic>>(
-      future: Future.wait([_loadGroup(), _loadTrainer(), _loadStudents(), _loadSchedule()]),
-      builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshots) {
-        if (snapshots.hasData) {
-          Group group = snapshots.data[0];
-          SocialProfile groupTrainer = snapshots.data[1];
-          List<SocialProfile> groupStudents = snapshots.data[2];
-          List<Schedule> schedules = snapshots.data[3];
-          if (_editMode) {
-            return Scaffold(
-                body: Center(
-                  child: SingleChildScrollView(
-                      padding: EdgeInsets.symmetric(horizontal: 30),
-                      child: Form(
-                          key: _formKey,
-                          autovalidate: false,
-                          child: Column(
-                            children: <Widget>[
-                              Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: <Widget>[
-                                    _groupNameField("Nombre del grupo", groupEdited),
-                                    Container(
-                                      margin: const EdgeInsets.only(top: 4.0),
-                                      child: selectTrainer(),
+          future: Future.wait([_loadGroup(), _loadTrainer(), _loadStudents(), _loadSchedule()]),
+          builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshots) {
+            if (snapshots.hasData) {
+              Group group = snapshots.data[0];
+              SocialProfile groupTrainer = snapshots.data[1];
+              List<SocialProfile> groupStudents = snapshots.data[2];
+              List<Schedule> schedules = snapshots.data[3];
+              if (_editMode) {
+                return Scaffold(
+                    body: Center(
+                      child: SingleChildScrollView(
+                          padding: EdgeInsets.symmetric(horizontal: 30),
+                          child: Form(
+                              key: _formKey,
+                              autovalidate: false,
+                              child: Column(
+                                children: <Widget>[
+                                  Center(
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: <Widget>[
+                                        _groupNameField("Nombre del grupo", groupEdited),
+                                        Container(
+                                          margin: const EdgeInsets.only(top: 4.0),
+                                          child: selectTrainer(),
+                                        ),
+                                        Container(
+                                          margin: const EdgeInsets.only(top: 4.0),
+                                          child: ListView.builder(
+                                            itemCount: schedulesEdited.length,
+                                            shrinkWrap: true,
+                                            itemBuilder: (context, index) {
+                                              return ListTile(
+                                                  title: Text(
+                                                    schedulesEdited[index].dayOfTheWeek,
+                                                    style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+                                                  ),
+                                                  subtitle: Text(
+                                                      "De " +
+                                                          schedulesEdited[index].startTimeSchedule.format(context) +
+                                                          " a " +
+                                                          schedulesEdited[index].endTimeSchedule.format(context),
+                                                      style: TextStyle(fontSize: 16.0)),
+                                                  trailing: Ink(
+                                                    decoration: const ShapeDecoration(
+                                                      color: Colors.red,
+                                                      shape: BeveledRectangleBorder(),
+                                                    ),
+                                                    child: IconButton(
+                                                      icon: Icon(Icons.delete),
+                                                      color: Colors.white,
+                                                      onPressed: () {
+                                                        setState(() {
+                                                          schedulesEdited.remove(schedulesEdited[index]);
+                                                        });
+                                                      },
+                                                    ),
+                                                  ));
+                                            },
+                                          ),
+                                        ),
+                                        addSchedule(),
+                                        Container(
+                                          margin: const EdgeInsets.only(top: 4.0),
+                                          child: studentsList(studentsEdited),
+                                        ),
+                                        addSStudentsButton(),
+                                      ],
                                     ),
-                                    Container(
-                                      margin: const EdgeInsets.only(top: 4.0),
-                                      child: ListView.builder(
-                                        itemCount: schedulesEdited.length,
-                                        shrinkWrap: true,
-                                        itemBuilder: (context, index) {
-                                          return ListTile(
+                                  ),
+                                ],
+                              ))),
+                    ),
+                    floatingActionButton: SpeedDial(
+                      curve: Curves.bounceIn,
+                      animatedIcon: AnimatedIcons.menu_close,
+                      animatedIconTheme: IconThemeData(size: 22.0),
+                      children: [
+                        SpeedDialChild(
+                            onTap: () async {
+                              editGroup();
+                            },
+                            child: Icon(
+                              Icons.save,
+                              color: Colors.white,
+                            ),
+                            label: 'Guardar',
+                            backgroundColor: Colors.blueAccent),
+                        SpeedDialChild(
+                            onTap: () {
+                              setState(() {
+                                _editMode = false;
+                              });
+                            },
+                            child: Icon(
+                              Icons.clear,
+                              color: Colors.white,
+                            ),
+                            label: 'Cancelar',
+                            backgroundColor: Colors.red),
+                      ],
+                    ));
+              } else {
+                return Scaffold(
+                    body: Center(
+                        child: SingleChildScrollView(
+                          padding: EdgeInsets.symmetric(horizontal: 30),
+                          child: Center(
+                              child: Column(
+                                children: <Widget>[
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: <Widget>[
+                                      Text(group.name, style: TextStyle(fontSize: 26.0, fontWeight: FontWeight.bold)),
+                                      Container(
+                                        margin: const EdgeInsets.only(top: 4.0),
+                                        child: Column(children: <Widget>[
+                                          CircleAvatar(
+                                            radius: 56,
+                                            backgroundImage: NetworkImage(groupTrainer.urlImage),
+                                          ),
+                                          Text(
+                                            groupTrainer.name + " " + groupTrainer.firstSurname + " " +
+                                                groupTrainer.secondSurname,
+                                            style: TextStyle(fontSize: 16, color: Colors.blueAccent),
+                                          )
+                                        ]),
+                                      ),
+                                      Container(
+                                        margin: const EdgeInsets.only(top: 4.0),
+                                        child: ListView.builder(
+                                          itemCount: schedules.length,
+                                          shrinkWrap: true,
+                                          itemBuilder: (context, index) {
+                                            return ListTile(
                                               title: Text(
-                                                schedulesEdited[index].dayOfTheWeek,
+                                                schedules[index].dayOfTheWeek,
                                                 style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
                                               ),
                                               subtitle: Text(
                                                   "De " +
-                                                      schedulesEdited[index].startTimeSchedule.format(context) +
+                                                      schedules[index].startTimeSchedule.format(context) +
                                                       " a " +
-                                                      schedulesEdited[index].endTimeSchedule.format(context),
+                                                      schedules[index].endTimeSchedule.format(context),
                                                   style: TextStyle(fontSize: 16.0)),
-                                              trailing: Ink(
-                                                decoration: const ShapeDecoration(
-                                                  color: Colors.red,
-                                                  shape: BeveledRectangleBorder(),
-                                                ),
-                                                child: IconButton(
-                                                  icon: Icon(Icons.delete),
-                                                  color: Colors.white,
-                                                  onPressed: () {
-                                                    setState(() {
-                                                      schedulesEdited.remove(schedulesEdited[index]);
-                                                    });
-                                                  },
-                                                ),
-                                              ));
-                                        },
+                                            );
+                                          },
+                                        ),
                                       ),
-                                    ),
-                                    addSchedule(),
-                                    Container(
-                                      margin: const EdgeInsets.only(top: 4.0),
-                                      child: studentsList(studentsEdited),
-                                    ),
-                                    addSStudentsButton(),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ))),
-                ),
-                floatingActionButton: SpeedDial(
-                  curve: Curves.bounceIn,
-                  animatedIcon: AnimatedIcons.menu_close,
-                  animatedIconTheme: IconThemeData(size: 22.0),
-                  children: [
-                    SpeedDialChild(
-                        onTap: () async {
-                          editGroup();
-                        },
-                        child: Icon(
-                          Icons.save,
-                          color: Colors.white,
-                        ),
-                        label: 'Guardar',
-                        backgroundColor: Colors.blueAccent),
-                    SpeedDialChild(
-                        onTap: () {
-                          setState(() {
-                            _editMode = false;
-                          });
-                        },
-                        child: Icon(
-                          Icons.clear,
-                          color: Colors.white,
-                        ),
-                        label: 'Cancelar',
-                        backgroundColor: Colors.red),
-                  ],
-                ));
-          } else {
-            return Scaffold(
-              body: Center(
-                  child: SingleChildScrollView(
-                padding: EdgeInsets.symmetric(horizontal: 30),
-                child: Center(
-                    child: Column(
-                  children: <Widget>[
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        Text(group.name, style: TextStyle(fontSize: 26.0, fontWeight: FontWeight.bold)),
-                        Container(
-                          margin: const EdgeInsets.only(top: 4.0),
-                          child: Column(children: <Widget>[
-                            CircleAvatar(
-                              radius: 56,
-                              backgroundImage: NetworkImage(groupTrainer.urlImage),
-                            ),
-                            Text(
-                              groupTrainer.name + " " + groupTrainer.firstSurname + " " + groupTrainer.secondSurname,
-                              style: TextStyle(fontSize: 16, color: Colors.blueAccent),
-                            )
-                          ]),
-                        ),
-                        Container(
-                          margin: const EdgeInsets.only(top: 4.0),
-                          child: ListView.builder(
-                            itemCount: schedules.length,
-                            shrinkWrap: true,
-                            itemBuilder: (context, index) {
-                              return ListTile(
-                                title: Text(
-                                  schedules[index].dayOfTheWeek,
-                                  style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
-                                ),
-                                subtitle: Text(
-                                    "De " +
-                                        schedules[index].startTimeSchedule.format(context) +
-                                        " a " +
-                                        schedules[index].endTimeSchedule.format(context),
-                                    style: TextStyle(fontSize: 16.0)),
-                              );
-                            },
-                          ),
-                        ),
-                        Container(
-                          margin: const EdgeInsets.only(top: 4.0),
-                          child: studentsList(groupStudents),
-                        ),
-                      ],
-                    ),
-                  ],
-                )),
-              )),
-              floatingActionButton: FloatingActionButton(
-                  onPressed: () {
-                    setState(() {
-                      _editMode = true;
-                      schedulesEdited = schedules;
-                      studentsEdited = groupStudents;
-                      selectedTrainerEdited = groupTrainer;
-                      groupEdited = group;
-                    });
-                  },
-                  tooltip: 'Editar',
-                  child: Icon(
-                    Icons.edit,
-                    color: Colors.white,
-                  )),
-            );
-          }
-        } else {
-          return Container();
-        }
-      },
-    ));
+                                      Container(
+                                        margin: const EdgeInsets.only(top: 4.0),
+                                        child: studentsList(groupStudents),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              )),
+                        )),
+                    floatingActionButton: editButton(schedules, groupStudents, groupTrainer, group)
+                );
+              }
+            } else {
+              return Container();
+            }
+          },
+        ));
+  }
+
+  Widget editButton(List<Schedule> schedules, List<SocialProfile> groupStudents, SocialProfile groupTrainer,
+      Group group) {
+    if (notAllowedToEdit) {
+      return SizedBox.shrink();
+    }
+    else {
+      return FloatingActionButton(
+          onPressed: () {
+            setState(() {
+              _editMode = true;
+              schedulesEdited = schedules;
+              studentsEdited = groupStudents;
+              selectedTrainerEdited = groupTrainer;
+              groupEdited = group;
+            });
+          },
+          tooltip: 'Editar',
+          child: Icon(
+            Icons.edit,
+            color: Colors.white,
+          ));
+    }
   }
 
   Widget studentsList(List<SocialProfile> students) {
@@ -532,17 +549,18 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
   Future addStudentsList() async {
     await Navigator.of(context)
         .push(new MaterialPageRoute<List<SocialProfile>>(
-            builder: (BuildContext context) {
-              return new AddStudentsToGroupDialog(
-                studentsEdited: this.studentsEdited,
-              );
-            },
-            fullscreenDialog: true))
-        .then((value) => setState(() {
-          if(value != null){
+        builder: (BuildContext context) {
+          return new AddStudentsToGroupDialog(
+            studentsEdited: this.studentsEdited,
+          );
+        },
+        fullscreenDialog: true))
+        .then((value) =>
+        setState(() {
+          if (value != null) {
             studentsEdited = value;
           }
-            }));
+        }));
   }
 
   void showSchedulePickers() {
@@ -592,7 +610,7 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
     }
   }
 
-  void selectTrainerList() async{
+  void selectTrainerList() async {
     await Navigator.of(context)
         .push(new MaterialPageRoute<SocialProfile>(
         builder: (BuildContext context) {
@@ -601,11 +619,12 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
           );
         },
         fullscreenDialog: true))
-        .then((value) => setState(() {
-          if(value != null){
+        .then((value) =>
+        setState(() {
+          if (value != null) {
             selectedTrainerEdited = value;
           }
-    }));
+        }));
   }
 
   double fromTimeOfDayToDouble(TimeOfDay myTime) => myTime.hour + myTime.minute / 60.0;
@@ -634,7 +653,7 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
               .document(actualStudent.id)
               .setData({"groupId": groupEdited.id}, merge: true);
         }
-        for(SocialProfile actualStudent in studentsGroupWithouEdit){
+        for (SocialProfile actualStudent in studentsGroupWithouEdit) {
           SocialProfile first =
           studentsEdited.firstWhere((element) => element.id == actualStudent.id, orElse: () => null);
           if (first == null) {

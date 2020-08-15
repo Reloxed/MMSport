@@ -8,7 +8,6 @@ import 'package:mmsport/models/group.dart';
 import 'package:mmsport/models/schedule.dart';
 import 'package:mmsport/models/socialProfile.dart';
 import 'package:mmsport/models/sportSchool.dart';
-import 'package:mmsport/navigations/navigations.dart';
 import 'package:mmsport/screens/sport_school_group_details.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -20,7 +19,6 @@ class ListSportSchoolGroups extends StatefulWidget {
 }
 
 class _ListSportSchoolGroupsState extends State<ListSportSchoolGroups> {
-
   Future<SportSchool> _getSportSchool() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     SportSchool sportSchool = SportSchool.sportSchoolFromMap(jsonDecode(preferences.get("chosenSportSchool")));
@@ -40,30 +38,60 @@ class _ListSportSchoolGroupsState extends State<ListSportSchoolGroups> {
     Map<Group, SocialProfile> res = new Map<Group, SocialProfile>();
     SharedPreferences preferences = await SharedPreferences.getInstance();
     SportSchool _sportSchool = SportSchool.sportSchoolFromMap(await jsonDecode(preferences.get("chosenSportSchool")));
+    Map profileLogged = await jsonDecode(preferences.get("chosenSocialProfile"));
+    SocialProfile logged = SocialProfile.socialProfileFromMap(profileLogged);
     List<Group> allGroups = new List();
-    await Firestore.instance
-        .collection("groups")
-        .where('sportSchoolId', isEqualTo: _sportSchool.id)
-        .getDocuments()
-        .then((value) {
-      value.documents.forEach((element) async {
-        List<Schedule> groupSchedule = [];
-        element.data['schedule'].forEach((codedSchedule) {
-          groupSchedule.add(Schedule.scheduleFromMap(codedSchedule));
+    if (logged.role == 'DIRECTOR') {
+      await Firestore.instance
+          .collection("groups")
+          .where('sportSchoolId', isEqualTo: _sportSchool.id)
+          .getDocuments()
+          .then((value) {
+        value.documents.forEach((element) async {
+          List<Schedule> groupSchedule = [];
+          element.data['schedule'].forEach((codedSchedule) {
+            groupSchedule.add(Schedule.scheduleFromMap(codedSchedule));
+          });
+          Group newGroup = Group.groupFromMapWithIdFromFirebase(element.data, groupSchedule);
+          allGroups.add(newGroup);
         });
-        Group newGroup = Group.groupFromMapWithIdFromFirebase(element.data, groupSchedule);
-        allGroups.add(newGroup);
       });
-    });
-    for (Group element in allGroups) {
-      await Firestore.instance.collection('socialProfiles').document(element.trainerId).get().then((document) {
-        if (document.exists) {
-          SocialProfile newTrainer = SocialProfile.socialProfileFromMap(document.data);
-          newTrainer.id = document.documentID;
-          res[element] = newTrainer;
-        }
+      for (Group element in allGroups) {
+        await Firestore.instance.collection('socialProfiles').document(element.trainerId).get().then((document) {
+          if (document.exists) {
+            SocialProfile newTrainer = SocialProfile.socialProfileFromMap(document.data);
+            newTrainer.id = document.documentID;
+            res[element] = newTrainer;
+          }
+        });
+      }
+    } else if (logged.role == 'TRAINER') {
+      await Firestore.instance
+          .collection("groups")
+          .where('sportSchoolId', isEqualTo: _sportSchool.id)
+          .where('trainerId', isEqualTo: logged.id)
+          .getDocuments()
+          .then((value) {
+        value.documents.forEach((element) async {
+          List<Schedule> groupSchedule = [];
+          element.data['schedule'].forEach((codedSchedule) {
+            groupSchedule.add(Schedule.scheduleFromMap(codedSchedule));
+          });
+          Group newGroup = Group.groupFromMapWithIdFromFirebase(element.data, groupSchedule);
+          allGroups.add(newGroup);
+        });
       });
+      for (Group element in allGroups) {
+        await Firestore.instance.collection('socialProfiles').document(element.trainerId).get().then((document) {
+          if (document.exists) {
+            SocialProfile newTrainer = SocialProfile.socialProfileFromMap(document.data);
+            newTrainer.id = document.documentID;
+            res[element] = newTrainer;
+          }
+        });
+      }
     }
+
     return res;
   }
 
@@ -125,9 +153,9 @@ class _ListSportSchoolGroupsState extends State<ListSportSchoolGroups> {
                     return ListTile(
                         onTap: () {
                           setSportSchoolGroupToView(snapshots.data[0].keys.elementAt(index));
-                          Navigator.of(context).push(MaterialPageRoute(builder: (context) => SportSchoolGroupDetails())).then((value) => setState(
-                              (){}
-                          ));
+                          Navigator.of(context)
+                              .push(MaterialPageRoute(builder: (context) => SportSchoolGroupDetails()))
+                              .then((value) => setState(() {}));
                         },
                         title: Text(
                           snapshots.data[0].keys.elementAt(index).name,
@@ -143,9 +171,9 @@ class _ListSportSchoolGroupsState extends State<ListSportSchoolGroups> {
                     return ListTile(
                         onTap: () {
                           setSportSchoolGroupToView(snapshots.data[0].keys.elementAt(index));
-                          Navigator.of(context).push(MaterialPageRoute(builder: (context) => SportSchoolGroupDetails())).then((value) => setState(
-                                  (){}
-                          ));
+                          Navigator.of(context)
+                              .push(MaterialPageRoute(builder: (context) => SportSchoolGroupDetails()))
+                              .then((value) => setState(() {}));
                         },
                         title: Text(
                           snapshots.data[0].keys.elementAt(index).name,
