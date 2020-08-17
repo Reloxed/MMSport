@@ -13,6 +13,7 @@ import 'package:mmsport/screens/register.dart';
 import 'package:mmsport/screens/homes/home.dart';
 import 'package:mmsport/screens/sport_school_group_details.dart';
 import 'package:mmsport/screens/sport_school_groups_list.dart';
+import 'package:mmsport/screens/calendar_event.dart';
 
 void navigateToRegister(BuildContext context){
   Navigator.push(context, MaterialPageRoute(builder: (context) => Register()));
@@ -68,4 +69,8 @@ void navigateToListSportSchoolGroups(BuildContext context){
 
 void navigateToSportSchoolGroupDetails(BuildContext context){
   Navigator.of(context).push(MaterialPageRoute(builder: (context) => SportSchoolGroupDetails())).then((value) => null);
+}
+
+void navigateToCalendarEvent(BuildContext context){
+  Navigator.of(context).push(MaterialPageRoute(builder: (context) => CalendarEvent()));
 }

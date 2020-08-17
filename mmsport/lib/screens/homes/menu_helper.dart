@@ -41,6 +41,7 @@ List<Widget> _menuItems(BuildContext context, String role) {
       _menuItem("Aceptar/rechazar perfiles", Icons.check, "DIRECTOR", 3, context),
       _menuItem("Crear grupo", Icons.group_add, "DIRECTOR", 4, context),
       _menuItem("Editar perfil", Icons.person, "DIRECTOR", 5, context),
+      _menuItem("Calendario", Icons.calendar_today, "DIRECTOR", 6, context),
     ];
   } else if (role == "ADMIN") {
     return [_menuItem("Aceptar/rechazar escuelas", Icons.check, "ADMIN", 1, context)];
@@ -102,5 +103,7 @@ void _navigatorHelper(String role, int i, BuildContext context) async {
     navigateToCreateSportSchoolGroup(context);
   } else if (i == 4) {
     // TODO: Navigate to edit profile
+  } else if (i == 6 && role == "DIRECTOR") {
+    navigateToCalendarEvent(context);
   }
 }
