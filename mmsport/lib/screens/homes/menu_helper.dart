@@ -100,9 +100,11 @@ void _navigatorHelper(String role, int i, BuildContext context) async {
     navigateToAcceptRejectProfiles(context);
   } else if (i == 4 && role == "DIRECTOR") {
     navigateToCreateSportSchoolGroup(context);
-  } else if (i == 4) {
-    // TODO: Navigate to edit profile
-  }else if(i == 6 && role == "DIRECTOR"){
+  } else if (i == 4 && (role == "TRAINER" || role == "STUDENT")) {
+    navigateToEditSocialProfile(context);
+  } else if (i == 5 && role == "DIRECTOR") {
+    navigateToEditSocialProfile(context);
+  } else if(i == 6 && role == "DIRECTOR"){
     navigateToRemoveSocialProfiles(context);
     }
 }
