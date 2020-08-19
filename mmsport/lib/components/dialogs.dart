@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:mmsport/models/group.dart';
 import 'package:mmsport/models/socialProfile.dart';
+import 'package:mmsport/models/sportSchool.dart';
 import 'package:mmsport/navigations/navigations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -137,11 +138,12 @@ class AddStudentsToGroupDialogState extends State<AddStudentsToGroupDialog> {
   Future<List<SocialProfile>> loadStudentsToJoin() async {
     if(firstLoad){
       SharedPreferences preferences = await SharedPreferences.getInstance();
-      Group group = Group.groupFromMapWithId(jsonDecode(preferences.get("sportSchoolGroupToView")));
+      Map aux = jsonDecode(preferences.get("chosenSportSchool"));
+      SportSchool sportSchool = SportSchool.sportSchoolFromMap(aux);
       await Firestore.instance
           .collection("socialProfiles")
           .where('role', isEqualTo: 'STUDENT')
-          .where('sportSchoolId', isEqualTo: group.sportSchoolId)
+          .where('sportSchoolId', isEqualTo: sportSchool.id)
           .getDocuments()
           .then((value) {
         value.documents.forEach((element) {

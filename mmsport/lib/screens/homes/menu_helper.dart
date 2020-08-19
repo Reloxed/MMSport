@@ -1,6 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:mmsport/navigations/navigations.dart';
+import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:mmsport/constants/constants.dart';
+import 'package:mmsport/models/group.dart';
+import 'package:mmsport/models/schedule.dart';
+import 'package:mmsport/navigations/navigations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
   Widget menuGrid(BuildContext context, String role) {
     return GridView.count(
@@ -65,27 +71,38 @@ import 'package:mmsport/navigations/navigations.dart';
             _navigatorHelper(role, i, context);
           },
         ));
-  }
 
-  void _navigatorHelper(String role, int i, BuildContext context) {
-    //TODO: Añadir roles a los navigator necesarios
-    if (i == 1) {
-      navigateToChatMain(context);
-    } else if (i == 2 && role == "DIRECTOR") {
-      navigateToListSportSchoolGroups(context);
-    } else if (i == 3 && (role == "TRAINER" || role == "STUDENT")) {
-      // TODO: Navigate to calendar
-    } else if (i == 3 && role == "DIRECTOR") {
-      navigateToAcceptRejectProfiles(context);
-    }
-    else if (i == 4 && role == "DIRECTOR") {
-      navigateToCreateSportSchoolGroup(context);
-    }
-    else if (i == 4) {
-      // TODO: Navigate to edit profile
-    }else if(i == 6 && role == "DIRECTOR"){
-      navigateToRemoveSocialProfiles(context);
-    }
+}
 
-  }
-
+void _navigatorHelper(String role, int i, BuildContext context) async {
+  //TODO: Añadir roles a los navigator necesarios
+  if (i == 1) {
+    navigateToChatMain(context);
+  } else if (i == 2 && role == "DIRECTOR") {
+    navigateToListSportSchoolGroups(context);
+  } else if (i == 2 && role == "TRAINER") {
+    navigateToListSportSchoolGroups(context);
+  } else if (i == 2 && role == "STUDENT") {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    Map aux = await jsonDecode(preferences.get("chosenSocialProfile"));
+    await Firestore.instance.collection("groups").document(aux['groupId']).get().then((value) {
+      List<Schedule> groupSchedule = [];
+      value.data['schedule'].forEach((codedSchedule) {
+        groupSchedule.add(Schedule.scheduleFromMap(codedSchedule));
+      });
+      Group group = Group.groupFromMapWithIdFromFirebase(value.data, groupSchedule);
+      setSportSchoolGroupToView(group);
+      navigateToSportSchoolGroupDetails(context);
+    });
+  } else if (i == 3 && (role == "TRAINER" || role == "STUDENT")) {
+    // TODO: Navigate to calendar
+  } else if (i == 3 && role == "DIRECTOR") {
+    navigateToAcceptRejectProfiles(context);
+  } else if (i == 4 && role == "DIRECTOR") {
+    navigateToCreateSportSchoolGroup(context);
+  } else if (i == 4) {
+    // TODO: Navigate to edit profile
+  }else if(i == 6 && role == "DIRECTOR"){
+    navigateToRemoveSocialProfiles(context);
+    }
+}
