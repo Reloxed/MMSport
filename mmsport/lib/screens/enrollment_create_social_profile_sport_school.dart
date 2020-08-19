@@ -239,7 +239,12 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
   // Auxiliary method to upload image of profile to FirebaseStorage
 
   Future uploadPicProfile(BuildContext context) async {
-    String fileName = nameProfile + firstSurnameProfile + secondSurnameProfile;
+    String fileName;
+    if(secondSurnameProfile != null) {
+      fileName = nameProfile + firstSurnameProfile + secondSurnameProfile;
+    } else {
+      fileName = nameProfile + firstSurnameProfile;
+    }
     StorageReference storageReference = FirebaseStorage.instance.ref().child(fileName + getRandomString(12));
     StorageUploadTask uploadTask = storageReference.putFile(imageProfile);
     StorageTaskSnapshot taskSnapshot = await uploadTask.onComplete;

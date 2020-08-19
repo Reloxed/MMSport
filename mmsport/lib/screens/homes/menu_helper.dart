@@ -35,6 +35,7 @@ import 'package:mmsport/navigations/navigations.dart';
         _menuItem("Aceptar/rechazar perfiles", Icons.check, "DIRECTOR", 3, context),
         _menuItem("Crear grupo", Icons.group_add, "DIRECTOR", 4, context),
         _menuItem("Editar perfil", Icons.person, "DIRECTOR", 5, context),
+        _menuItem("Eliminar perfiles", Icons.delete, "DIRECTOR", 6, context)
       ];
     } else if (role == "ADMIN"){
       return [
@@ -82,6 +83,8 @@ import 'package:mmsport/navigations/navigations.dart';
     }
     else if (i == 4) {
       // TODO: Navigate to edit profile
+    }else if(i == 6 && role == "DIRECTOR"){
+      navigateToRemoveSocialProfiles(context);
     }
 
   }

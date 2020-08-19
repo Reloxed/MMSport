@@ -97,12 +97,20 @@ class _Home extends State<Home> {
                                                 overflow: TextOverflow.ellipsis,
                                                 softWrap: true,
                                               ),
+                                              snapshots.data[1].secondSurname != null ?
                                               Text(
                                                   snapshots.data[1].name +
                                                       " " +
                                                       snapshots.data[1].firstSurname +
                                                       " " +
                                                       snapshots.data[1].secondSurname,
+                                                  style: TextStyle(color: Colors.white, fontStyle: FontStyle.italic),
+                                                  overflow: TextOverflow.ellipsis,
+                                                  softWrap: true):
+                                              Text(
+                                                  snapshots.data[1].name +
+                                                      " " +
+                                                      snapshots.data[1].firstSurname,
                                                   style: TextStyle(color: Colors.white, fontStyle: FontStyle.italic),
                                                   overflow: TextOverflow.ellipsis,
                                                   softWrap: true)

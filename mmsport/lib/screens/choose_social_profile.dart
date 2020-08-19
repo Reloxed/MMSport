@@ -92,16 +92,25 @@ class _ChooseSocialProfileState extends State<ChooseSocialProfile> {
                     alignment: Alignment.center,
                     child: Container(
                       margin: EdgeInsets.all(10.0),
-                      child: CircleAvatar(
-                          radius: 85,
-                          child: ClipOval(
-                            child: Image.network(
-                              socialProfile.urlImage,
-                              fit: BoxFit.cover,
-                              width: 150,
-                              height: 150,
-                            ),
-                          )),
+                      child: socialProfile.urlImage != null
+                          ? CircleAvatar(
+                              radius: 85,
+                              child: ClipOval(
+                                child: Image.network(
+                                  socialProfile.urlImage,
+                                  fit: BoxFit.cover,
+                                  width: 150,
+                                  height: 150,
+                                ),
+                              ))
+                          : CircleAvatar(
+                              radius: 85,
+                              child: ClipOval(
+                                child: Icon(
+                                  Icons.person,
+                                  size: 150,
+                                )
+                              )),
                     )),
                 Container(
                     margin: EdgeInsets.all(5.0),
@@ -115,12 +124,14 @@ class _ChooseSocialProfileState extends State<ChooseSocialProfile> {
                       socialProfile.firstSurname,
                       style: TextStyle(fontSize: 20.0),
                     )),
-                Container(
-                    margin: EdgeInsets.all(5.0),
-                    child: Text(
-                      socialProfile.secondSurname,
-                      style: TextStyle(fontSize: 20.0),
-                    ))
+                socialProfile.secondSurname != null
+                    ? Container(
+                        margin: EdgeInsets.all(5.0),
+                        child: Text(
+                          socialProfile.secondSurname,
+                          style: TextStyle(fontSize: 20.0),
+                        ))
+                    : Container(child: Text(""))
               ],
             )));
   }
