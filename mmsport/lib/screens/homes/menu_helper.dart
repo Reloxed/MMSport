@@ -77,7 +77,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void _navigatorHelper(String role, int i, BuildContext context) async {
   //TODO: Añadir roles a los navigator necesarios
-  if (i == 1) {
+  if (i == 1 && role != "ADMIN") {
     navigateToChatMain(context);
   } else if (i == 1 && role == "ADMIN") {
     navigateToAcceptRejectSchools(context);

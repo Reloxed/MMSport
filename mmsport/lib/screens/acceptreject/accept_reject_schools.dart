@@ -19,26 +19,30 @@ class _AcceptRejectSchoolsState extends State<AcceptRejectSchools> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   Future<Map<SportSchool, SocialProfile>> getSchoolsAndDirectorsPending() async {
+    List<SportSchool> sportSchools = [];
     await Firestore.instance
         .collection("sportSchools")
         .where("status", isEqualTo: "PENDING")
         .getDocuments()
         .then((value) {
-      value.documents.forEach((element) async {
+      value.documents.forEach((element) {
         SportSchool sportSchoolAux = SportSchool.sportSchoolFromMap(element.data);
         sportSchoolAux.id = element.data['id'];
-        await Firestore.instance
-            .collection("socialProfiles")
-            .where("sportSchoolId", isEqualTo: sportSchoolAux.id)
-            .where("role", isEqualTo: "DIRECTOR")
-            .getDocuments()
-            .then((value) {
-          SocialProfile auxProfile = SocialProfile.socialProfileFromMap(value.documents[0].data);
-          auxProfile.id = value.documents[0].data['id'];
-          schoolsPending.putIfAbsent(sportSchoolAux, () => auxProfile);
-        });
+        sportSchools.add(sportSchoolAux);
       });
     });
+    for(SportSchool school in sportSchools){
+      await Firestore.instance
+          .collection("socialProfiles")
+          .where("sportSchoolId", isEqualTo: school.id)
+          .where("role", isEqualTo: "DIRECTOR")
+          .getDocuments()
+          .then((value) {
+        SocialProfile auxProfile = SocialProfile.socialProfileFromMap(value.documents[0].data);
+        auxProfile.id = value.documents[0].data['id'];
+        schoolsPending.putIfAbsent(school, () => auxProfile);
+      });
+    }
     return schoolsPending;
   }
 
@@ -207,7 +211,9 @@ class _AcceptRejectSchoolsState extends State<AcceptRejectSchools> {
                       .document(socialProfile.id)
                       .setData(aux, merge: true);
                   Navigator.pop(context, true);
-                  setState(() {});
+                  setState(() {
+                    schoolsPending.clear();
+                  });
                 },
               ),
               FlatButton(
@@ -249,7 +255,9 @@ class _AcceptRejectSchoolsState extends State<AcceptRejectSchools> {
                   await Firestore.instance.collection("sportSchools").document(sportSchool.id).delete();
                   await Firestore.instance.collection("socialProfiles").document(socialProfile.id).delete();
                   Navigator.pop(context, true);
-                  setState(() {});
+                  setState(() {
+                    schoolsPending.clear();
+                  });
                 },
               ),
               FlatButton(
