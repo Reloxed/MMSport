@@ -25,17 +25,18 @@ class _AcceptRejectProfilesState extends State<AcceptRejectProfiles> {
     chosenSocialProfile = SocialProfile.socialProfileFromMap(aux);
     chosenSocialProfile.id = aux['id'];
     profilesPending.clear();
-    await Firestore.instance.collection("socialProfiles")
+    await Firestore.instance
+        .collection("socialProfiles")
         .where("sportSchoolId", isEqualTo: chosenSocialProfile.sportSchoolId)
-        .where("status", isEqualTo: "PENDING").getDocuments().then((value) =>
-        value.documents.forEach((element) {
-          SocialProfile auxProfile = SocialProfile.socialProfileFromMap(element.data);
-          auxProfile.id = element.data['id'];
-          profilesPending.add(auxProfile);
-        }));
+        .where("status", isEqualTo: "PENDING")
+        .getDocuments()
+        .then((value) => value.documents.forEach((element) {
+              SocialProfile auxProfile = SocialProfile.socialProfileFromMap(element.data);
+              auxProfile.id = element.data['id'];
+              profilesPending.add(auxProfile);
+            }));
     return profilesPending;
   }
-
 
   @override
   void initState() {
@@ -57,7 +58,7 @@ class _AcceptRejectProfilesState extends State<AcceptRejectProfiles> {
               return ListView.builder(
                   itemCount: snapshot.data.length,
                   itemBuilder: (context, index) {
-                    if(snapshot.hasData) {
+                    if (snapshot.hasData) {
                       return _listProfile(snapshot.data[index]);
                     } else {
                       return Container(
@@ -103,12 +104,15 @@ class _AcceptRejectProfilesState extends State<AcceptRejectProfiles> {
                 children: <Widget>[
                   Text("Apellidos: ", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
                   Text(profile.firstSurname + " ", style: TextStyle(fontSize: 15)),
-                  Text(profile.secondSurname, style: TextStyle(fontSize: 15))
+                  profile.secondSurname != null ? Text(profile.secondSurname, style: TextStyle(fontSize: 15)) : Text("")
                 ],
               ),
               Row(
                 children: <Widget>[
-                  Text("Rol: ", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),),
+                  Text(
+                    "Rol: ",
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  ),
                   Text(profile.role, style: TextStyle(fontSize: 15))
                 ],
               )
@@ -146,13 +150,13 @@ class _AcceptRejectProfilesState extends State<AcceptRejectProfiles> {
             content: SingleChildScrollView(
               child: ListBody(
                 children: <Widget>[
-                  Center(child: Text("Se va a aceptar el perfil, ¿estás seguro?"),)
+                  Center(
+                    child: Text("Se va a aceptar el perfil, ¿estás seguro?"),
+                  )
                 ],
               ),
             ),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(15.0))
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0))),
             actions: <Widget>[
               FlatButton(
                 color: Colors.white,
@@ -163,9 +167,7 @@ class _AcceptRejectProfilesState extends State<AcceptRejectProfiles> {
                   aux.putIfAbsent("status", () => "ACCEPTED");
                   await Firestore.instance.collection("socialProfiles").document(profile.id).setData(aux, merge: true);
                   Navigator.pop(context, true);
-                  setState(() {
-
-                  });
+                  setState(() {});
                 },
               ),
               FlatButton(
@@ -191,13 +193,13 @@ class _AcceptRejectProfilesState extends State<AcceptRejectProfiles> {
             content: SingleChildScrollView(
               child: ListBody(
                 children: <Widget>[
-                  Center(child: Text("Se va a rechazar el perfil, ¿estás seguro?"),)
+                  Center(
+                    child: Text("Se va a rechazar el perfil, ¿estás seguro?"),
+                  )
                 ],
               ),
             ),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(15.0))
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0))),
             actions: <Widget>[
               FlatButton(
                 color: Colors.white,
@@ -206,9 +208,7 @@ class _AcceptRejectProfilesState extends State<AcceptRejectProfiles> {
                 onPressed: () async {
                   await Firestore.instance.collection("socialProfiles").document(profile.id).delete();
                   Navigator.pop(context, true);
-                  setState(() {
-
-                  });
+                  setState(() {});
                 },
               ),
               FlatButton(

@@ -45,7 +45,8 @@ import 'package:shared_preferences/shared_preferences.dart';
       ];
     } else if (role == "ADMIN"){
       return [
-        _menuItem("Aceptar/rechazar escuelas", Icons.check, "ADMIN", 1, context)
+        _menuItem("Aceptar/rechazar escuelas", Icons.check, "ADMIN", 1, context),
+        _menuItem("Eliminar escuelas", Icons.delete, "ADMIN", 2, context)
       ];
     }
   }
@@ -78,6 +79,10 @@ void _navigatorHelper(String role, int i, BuildContext context) async {
   //TODO: Añadir roles a los navigator necesarios
   if (i == 1) {
     navigateToChatMain(context);
+  } else if (i == 1 && role == "ADMIN") {
+    navigateToAcceptRejectSchools(context);
+  } else if (i == 2 && role == "ADMIN") {
+    //TODO: Navigate to delete schools
   } else if (i == 2 && role == "DIRECTOR") {
     navigateToListSportSchoolGroups(context);
   } else if (i == 2 && role == "TRAINER") {

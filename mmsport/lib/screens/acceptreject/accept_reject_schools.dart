@@ -144,7 +144,9 @@ class _AcceptRejectSchoolsState extends State<AcceptRejectSchools> {
                 children: <Widget>[
                   Text("Apellidos: ", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
                   Text(socialProfile.firstSurname + " ", style: TextStyle(fontSize: 15)),
-                  Text(socialProfile.secondSurname + " ", style: TextStyle(fontSize: 15))
+                  socialProfile.secondSurname != null
+                      ? Text(socialProfile.secondSurname + " ", style: TextStyle(fontSize: 15))
+                      : Text("")
                 ],
               ),
             ],

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +22,7 @@ class _LoginState extends State<Login> {
   String password;
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
   }
 
@@ -58,8 +59,7 @@ class _LoginState extends State<Login> {
 
   Widget _logoImage() {
     return Container(
-        padding: EdgeInsets.symmetric(vertical: 50),
-        child: Image.asset("assets/logo/Logo_MMSport_sin_fondo.png"));
+        padding: EdgeInsets.symmetric(vertical: 50), child: Image.asset("assets/logo/Logo_MMSport_sin_fondo.png"));
     //return Image.asset("assets/logo/Logo_MMSport_sin_fondo.png");
   }
 
@@ -78,10 +78,8 @@ class _LoginState extends State<Login> {
               } else
                 return null;
             },
-            decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: "Correo electrónico",
-                prefixIcon: Icon(icon)),
+            decoration:
+                InputDecoration(border: OutlineInputBorder(), labelText: "Correo electrónico", prefixIcon: Icon(icon)),
             onChanged: (value) => email = value,
           )
         ],
@@ -105,10 +103,7 @@ class _LoginState extends State<Login> {
                 return null;
             },
             obscureText: true,
-            decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: "Contraseña",
-                prefixIcon: Icon(icon)),
+            decoration: InputDecoration(border: OutlineInputBorder(), labelText: "Contraseña", prefixIcon: Icon(icon)),
             onChanged: (value) => password = value,
           )
         ],
@@ -118,7 +113,7 @@ class _LoginState extends State<Login> {
 
   Widget _button() {
     return Container(
-      margin: EdgeInsets.only(top: 16),
+        margin: EdgeInsets.only(top: 16),
         padding: EdgeInsets.symmetric(horizontal: 30),
         child: Align(
           alignment: Alignment.bottomCenter,
@@ -126,13 +121,19 @@ class _LoginState extends State<Login> {
             onPressed: () async {
               try {
                 if (_formKey.currentState.validate()) {
-                  final FirebaseUser user = (await _auth.signInWithEmailAndPassword(
-                      email: email, password: password)).user;
+                  final FirebaseUser user =
+                      (await _auth.signInWithEmailAndPassword(email: email, password: password)).user;
 
-                  if (user != null){
+                  if (user != null) {
                     SharedPreferences preferences = await SharedPreferences.getInstance();
                     preferences.setString("loggedInUserId", user.uid);
-                    navigateToChooseSportSchool(context);
+                    await Firestore.instance
+                        .collection("admins")
+                        .where("userId", isEqualTo: user.uid)
+                        .getDocuments()
+                        .then((value) => value.documents.length != 0
+                            ? navigateToHome(context)
+                            : navigateToChooseSportSchool(context));
                   }
                 }
               } catch (e) {
@@ -163,24 +164,21 @@ class _LoginState extends State<Login> {
     return Container(
         padding: EdgeInsets.symmetric(vertical: 20),
         child: Align(
-          alignment: Alignment.bottomCenter,
-        child: Column(children: <Widget>[
-          new Text(
-            "¿Aún no te has registrado?",
-            style: TextStyle(fontSize: 15, color: Colors.black),
-          ),
-          new GestureDetector(
-            onTap: () {
-              navigateToRegister(context);
-            },
-            child: new Text(
-              "¡Regístrate!",
-              style: TextStyle(
-                  fontSize: 15,
-                  color: Colors.black,
-                  decoration: TextDecoration.underline),
-            ),
-          )
-        ])));
+            alignment: Alignment.bottomCenter,
+            child: Column(children: <Widget>[
+              new Text(
+                "¿Aún no te has registrado?",
+                style: TextStyle(fontSize: 15, color: Colors.black),
+              ),
+              new GestureDetector(
+                onTap: () {
+                  navigateToRegister(context);
+                },
+                child: new Text(
+                  "¡Regístrate!",
+                  style: TextStyle(fontSize: 15, color: Colors.black, decoration: TextDecoration.underline),
+                ),
+              )
+            ])));
   }
 }

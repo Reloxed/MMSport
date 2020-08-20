@@ -86,8 +86,7 @@ class _RegisterState extends State<Register> {
 
   Widget _logoImage() {
     return Container(
-        padding: EdgeInsets.symmetric(vertical: 50),
-        child: Image.asset("assets/logo/Logo_MMSport_sin_fondo.png"));
+        padding: EdgeInsets.symmetric(vertical: 50), child: Image.asset("assets/logo/Logo_MMSport_sin_fondo.png"));
   }
 
   Widget _emailField(String hintText) {
@@ -181,13 +180,14 @@ class _RegisterState extends State<Register> {
                 final FirebaseUser newUser = (await _auth.createUserWithEmailAndPassword(
                   email: email,
                   password: password,
-                )).user;
+                ))
+                    .user;
                 Navigator.of(context, rootNavigator: true).pop();
                 if (newUser != null) {
                   if (hasSchoolSport == "Sí") {
                     navigateToCreateSchool(context);
                   } else {
-
+                    acceptDialogRegister(context, "¡Bienvenido! Ya puedes iniciar sesión");
                   }
                 }
               }
@@ -202,9 +202,7 @@ class _RegisterState extends State<Register> {
               } else {
                 message = "Ha ocurrido un error";
               }
-              setState(() {
-                errorDialog(context, message);
-              });
+              errorDialog(context, message);
             }
           },
           elevation: 3.0,
