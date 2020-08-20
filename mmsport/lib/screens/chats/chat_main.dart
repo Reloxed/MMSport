@@ -73,13 +73,13 @@ class _ChatMain extends State<ChatMain> {
             .then((value) => lastMessage = value.documents[0].data['message']);
       }
       bool contains = false;
-      for(SocialProfile p in openChats.keys){
-        if(auxProfile.id == p.id){
+      for (SocialProfile p in openChats.keys) {
+        if (auxProfile.id == p.id) {
           contains = true;
           break;
         }
       }
-      if(contains == false){
+      if (contains == false) {
         openChats.putIfAbsent(auxProfile, () => lastMessage);
       }
     }
@@ -182,10 +182,18 @@ class _ChatMain extends State<ChatMain> {
           padding: EdgeInsets.all(10.0),
           child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: <Widget>[
             Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
-              CircleAvatar(
+              socialProfile.urlImage != null
+                  ? CircleAvatar(
+                      radius: 30,
+                      backgroundImage: NetworkImage(socialProfile.urlImage),
+                    )
+                  : CircleAvatar(
                 radius: 30,
-                backgroundImage: NetworkImage(socialProfile.urlImage),
-              ),
+                      child: ClipOval(
+                          child: Icon(
+                      Icons.person,
+                      size: 50,
+                    ))),
               SizedBox(
                   width: MediaQuery.of(context).size.width * 0.7,
                   child: Container(
@@ -194,15 +202,18 @@ class _ChatMain extends State<ChatMain> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
-                            Text(
-                                socialProfile.name +
-                                    " " +
-                                    socialProfile.firstSurname +
-                                    " " +
-                                    socialProfile.secondSurname,
-                                overflow: TextOverflow.ellipsis,
-                                softWrap: true,
-                                style: TextStyle(fontSize: 21)),
+                            socialProfile.secondSurname != null
+                                ? Text(
+                                    socialProfile.name +
+                                        " " +
+                                        socialProfile.firstSurname +
+                                        " " +
+                                        socialProfile.secondSurname,
+                                    overflow: TextOverflow.ellipsis,
+                                    softWrap: true,
+                                    style: TextStyle(fontSize: 21))
+                                : Text(socialProfile.name + " " + socialProfile.firstSurname,
+                                    overflow: TextOverflow.ellipsis, softWrap: true, style: TextStyle(fontSize: 21)),
                             Text(lastMessage,
                                 overflow: TextOverflow.ellipsis, softWrap: true, style: TextStyle(fontSize: 13))
                           ]))),
@@ -258,10 +269,18 @@ class _ChatMain extends State<ChatMain> {
           padding: EdgeInsets.all(10.0),
           child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: <Widget>[
             Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
-              CircleAvatar(
+              socialProfile["urlImage"] != null
+                  ? CircleAvatar(
+                      radius: 30,
+                      backgroundImage: NetworkImage(socialProfile["urlImage"]),
+                    )
+                  : CircleAvatar(
                 radius: 30,
-                backgroundImage: NetworkImage(socialProfile["urlImage"]),
-              ),
+                      child: ClipOval(
+                          child: Icon(
+                      Icons.person,
+                      size: 50,
+                    ))),
               SizedBox(
                   width: MediaQuery.of(context).size.width * 0.7,
                   child: Container(
@@ -270,15 +289,18 @@ class _ChatMain extends State<ChatMain> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
-                            Text(
-                                socialProfile["name"] +
-                                    " " +
-                                    socialProfile["firstSurname"] +
-                                    " " +
-                                    socialProfile["secondSurname"],
-                                overflow: TextOverflow.ellipsis,
-                                softWrap: true,
-                                style: TextStyle(fontSize: 21)),
+                            socialProfile["secondSurname"] != null
+                                ? Text(
+                                    socialProfile["name"] +
+                                        " " +
+                                        socialProfile["firstSurname"] +
+                                        " " +
+                                        socialProfile["secondSurname"],
+                                    overflow: TextOverflow.ellipsis,
+                                    softWrap: true,
+                                    style: TextStyle(fontSize: 21))
+                                : Text(socialProfile["name"] + " " + socialProfile["firstSurname"],
+                                    overflow: TextOverflow.ellipsis, softWrap: true, style: TextStyle(fontSize: 21)),
                           ]))),
               Container(child: Icon(Icons.chevron_right))
             ]),

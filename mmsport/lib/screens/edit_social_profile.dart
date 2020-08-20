@@ -5,75 +5,91 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mmsport/components/dialogs.dart';
+import 'package:mmsport/components/form_validators.dart';
 import 'package:mmsport/models/socialProfile.dart';
-import 'package:mmsport/models/sportSchool.dart';
+import 'package:mmsport/navigations/navigations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class EnrollmentCreateSocialProfileSportSchool extends StatefulWidget {
+class EditSocialProfile extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() {
-    return new _EnrollmentCreateSocialProfileSportSchoolState();
+  State createState() {
+    return new _EditSocialProfileState();
   }
 }
 
-class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCreateSocialProfileSportSchool> {
+class _EditSocialProfileState extends State<EditSocialProfile> {
   final _formKey = new GlobalKey<FormState>();
+  SocialProfile chosenSocialProfile;
 
   String nameProfile;
   String firstSurnameProfile;
   String secondSurnameProfile;
   String urlProfile;
+
   File imageProfile;
 
-  String socialProfileRole = "";
+  Future<SocialProfile> getChosenProfile() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    Map aux = jsonDecode(preferences.get("chosenSocialProfile"));
+    chosenSocialProfile = SocialProfile.socialProfileFromMap(aux);
+    chosenSocialProfile.id = aux['id'];
+    return chosenSocialProfile;
+  }
 
-  @override
   Widget build(BuildContext context) {
     return Material(
         child: Scaffold(
-            body: Container(
-                padding: EdgeInsets.symmetric(horizontal: 30),
-                child: _studentProfileForm())));
+            body: FutureBuilder(
+              future: getChosenProfile(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  nameProfile = snapshot.data.name;
+                  firstSurnameProfile = snapshot.data.firstSurname;
+                  secondSurnameProfile = snapshot.data.secondSurname;
+                  urlProfile = snapshot.data.urlImage;
+                  return Container(
+                      padding: EdgeInsets.symmetric(horizontal: 30), child: _directorProfileForm(snapshot.data));
+                } else {
+                  return loading();
+                }
+              },
+            )));
   }
 
-  // Parent widget for the second page (director profile creation)
-
-  Widget _studentProfileForm() {
+  Widget _directorProfileForm(SocialProfile socialProfile) {
     return Form(
         key: _formKey,
         autovalidate: false,
         child: ListView(
           children: <Widget>[
-            _profileImage(),
+            _profileImage(socialProfile.urlImage),
             Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
-                    _nameProfileField(),
-                    _firstSurnameProfileField(),
-                    _secondSurnameProfileField(),
-                    chooseTypeOfSocialProfile()
+                    _nameProfileField(socialProfile.name),
+                    _firstSurnameProfileField(socialProfile.firstSurname),
+                    _secondSurnameProfileField(socialProfile.secondSurname),
                   ],
                 )),
             Column(
               mainAxisAlignment: MainAxisAlignment.end,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
-                _finishButton(),
+                _finishButton(socialProfile),
               ],
             ),
           ],
         ));
   }
 
-  // Profile image for the director
+// Profile image for the director
 
-  Widget _profileImage() {
+  Widget _profileImage(String urlImage) {
     return Container(
         padding: EdgeInsets.symmetric(vertical: 30.0),
         child: InkWell(
@@ -96,24 +112,32 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
                         width: 150,
                         height: 150,
                       )
+                          : urlImage != null
+                          ? Image.network(
+                        urlImage,
+                        fit: BoxFit.cover,
+                        width: 150,
+                        height: 150,
+                      )
                           : Icon(Icons.camera_alt, size: 100.0))),
             )));
   }
 
-  // Director's name
+// Director's name
 
-  Widget _nameProfileField() {
+  Widget _nameProfileField(String name) {
     return Container(
       margin: const EdgeInsets.only(top: 8.0),
       child: Column(
         children: <Widget>[
           TextFormField(
             validator: (v) {
-              if (v.isEmpty)
+              if (FormValidators.validateNotEmpty(v) == false)
                 return "Este campo no puede estar vacío";
               else
                 return null;
             },
+            initialValue: name,
             obscureText: false,
             decoration: InputDecoration(border: OutlineInputBorder(), labelText: "Nombre"),
             onChanged: (value) => nameProfile = value,
@@ -123,20 +147,21 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
     );
   }
 
-  // Director's first surname
+// Director's first surname
 
-  Widget _firstSurnameProfileField() {
+  Widget _firstSurnameProfileField(String firstSurname) {
     return Container(
       margin: const EdgeInsets.only(top: 8.0),
       child: Column(
         children: <Widget>[
           TextFormField(
             validator: (v) {
-              if (v.isEmpty)
+              if (FormValidators.validateNotEmpty(v) == false)
                 return "Este campo no puede estar vacío";
               else
                 return null;
             },
+            initialValue: firstSurname,
             obscureText: false,
             decoration: InputDecoration(border: OutlineInputBorder(), labelText: "Primer apellido"),
             onChanged: (value) => firstSurnameProfile = value,
@@ -146,9 +171,9 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
     );
   }
 
-  // Director's second surname
+// Director's second surname
 
-  Widget _secondSurnameProfileField() {
+  Widget _secondSurnameProfileField(String secondSurname) {
     return Container(
       margin: const EdgeInsets.only(top: 8.0),
       child: Column(
@@ -157,6 +182,7 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
             validator: (v) {
               return null;
             },
+            initialValue: secondSurname != null ? secondSurname : "",
             obscureText: false,
             decoration: InputDecoration(border: OutlineInputBorder(), labelText: "Segundo apellido"),
             onChanged: (value) => secondSurnameProfile = value,
@@ -166,9 +192,9 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
     );
   }
 
-  // Button to finish the process
+// Button to finish the process
 
-  Widget _finishButton() {
+  Widget _finishButton(SocialProfile oldProfile) {
     return Container(
       margin: EdgeInsets.only(top: 16),
       padding: EdgeInsets.symmetric(horizontal: 30),
@@ -177,13 +203,18 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
         child: RaisedButton(
           onPressed: () async {
             if (_formKey.currentState.validate()) {
-              _uploadAndCreate();
+              loadingDialog(context);
+              _uploadAndCreate(oldProfile);
+              Navigator.of(context, rootNavigator: true).pop();
+              navigateToHome(context);
+            } else {
+              errorDialog(context, "Hay errores, corríjalos.");
             }
           },
           elevation: 3.0,
           color: Colors.blueAccent,
           child: Text(
-            "INSCRIBIRSE",
+            "FINALIZAR",
             style: TextStyle(fontSize: 20, color: Colors.white),
           ),
         ),
@@ -191,42 +222,32 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
     );
   }
 
-  // Auxiliary method to create the sport school and its director social profile.
-
-  void _uploadAndCreate() async {
-    final databaseReference = Firestore.instance;
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    String jsonString = preferences.getString("sportSchoolToEnrollIn");
-    SportSchool sportSchool = SportSchool.sportSchoolFromMap(jsonDecode(jsonString));
-    String sportSchoolId = sportSchool.id;
+  void _uploadAndCreate(SocialProfile oldProfile) async {
     if (imageProfile != null) {
+      StorageReference ref = await FirebaseStorage.instance.getReferenceFromUrl(oldProfile.urlImage);
+      await ref.delete();
       await uploadPicProfile(context);
     }
-    FirebaseUser firebaseUser = await FirebaseAuth.instance.currentUser();
-    SocialProfile socialProfile = new SocialProfile(
-        "",
-        firebaseUser.uid,
+    await Firestore.instance.collection("socialProfiles").document(oldProfile.id).setData({
+      "name": nameProfile,
+      "firstSurname": firstSurnameProfile,
+      "secondSurname": secondSurnameProfile,
+      "urlImage": urlProfile,
+    }, merge: true);
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    SocialProfile newProfile = SocialProfile(
+        oldProfile.id,
+        oldProfile.userAccountId,
         nameProfile,
         firstSurnameProfile,
         secondSurnameProfile,
-        socialProfileRole,
-        "PENDING",
+        oldProfile.role,
+        oldProfile.status,
         urlProfile,
-        sportSchoolId,
-        "");
-    DocumentReference ref = await databaseReference.collection("socialProfiles").add({
-      "userAccountId": socialProfile.userAccountId,
-      "name": socialProfile.name,
-      "firstSurname": socialProfile.firstSurname,
-      "secondSurname": socialProfile.secondSurname,
-      "role": socialProfile.role,
-      "status": socialProfile.status,
-      "urlImage": socialProfile.urlImage,
-      "sportSchoolId": socialProfile.sportSchoolId,
-      "groupId": socialProfile.groupId
-    });
-    await databaseReference.collection("socialProfiles").document(ref.documentID).setData(
-        {"id": ref.documentID}, merge: true);
+        oldProfile.sportSchoolId,
+        oldProfile.groupId);
+    String newProfileToJson = jsonEncode(newProfile.socialProfileToJson());
+    preferences.setString("chosenSocialProfile", newProfileToJson);
   }
 
   String getRandomString(int length) {
@@ -236,11 +257,9 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
     return String.fromCharCodes(Iterable.generate(length, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
   }
 
-  // Auxiliary method to upload image of profile to FirebaseStorage
-
   Future uploadPicProfile(BuildContext context) async {
     String fileName;
-    if(secondSurnameProfile != null) {
+    if (secondSurnameProfile != null) {
       fileName = nameProfile + firstSurnameProfile + secondSurnameProfile;
     } else {
       fileName = nameProfile + firstSurnameProfile;
@@ -250,49 +269,5 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
     StorageTaskSnapshot taskSnapshot = await uploadTask.onComplete;
     var url = await taskSnapshot.ref.getDownloadURL();
     urlProfile = url;
-  }
-
-  void _handleRadioValueChange(dynamic value) {
-    if(value == "Alumno"){
-      setState(() {
-        socialProfileRole = "STUDENT";
-      });
-    }
-    else{
-      setState(() {
-        socialProfileRole = "TRAINER";
-      });
-    }
-  }
-
-  // ignore: missing_return
-  String _checkSelectedRadioButton(dynamic v) {
-    if (v == "") {
-      return "Debe de seleccionar una opción";
-    }
-  }
-
-  Widget chooseTypeOfSocialProfile() {
-    return Container(
-      margin: const EdgeInsets.only(top: 4.0),
-      child: FormBuilderRadio(
-        decoration: InputDecoration(),
-        initialValue: "",
-        attribute: "¿Eres entrenador o alumno?",
-        leadingInput: true,
-        onChanged: _handleRadioValueChange,
-        validators: [_checkSelectedRadioButton],
-        options: ["Entrenador", "Alumno"]
-            .map((lang) =>
-            FormBuilderFieldOption(
-              value: lang,
-              child: Text(
-                '$lang',
-                style: TextStyle(fontSize: 16.0),
-              ),
-            ))
-            .toList(growable: false),
-      ),
-    );
   }
 }

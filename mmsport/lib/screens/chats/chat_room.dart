@@ -78,10 +78,18 @@ class _ChatRoom extends State<ChatRoom> {
                           title: Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: <Widget>[
-                              CircleAvatar(
-                                radius: 30,
-                                backgroundImage: NetworkImage(snapshot.data[1].urlImage),
-                              ),
+                              snapshot.data[1].urlImage != null
+                                  ? CircleAvatar(
+                                      radius: 30,
+                                      backgroundImage: NetworkImage(snapshot.data[1].urlImage),
+                                    )
+                                  : CircleAvatar(
+                                      radius: 30,
+                                      child: ClipOval(
+                                          child: Icon(
+                                        Icons.person,
+                                        size: 50,
+                                      ))),
                               SizedBox(
                                   width: MediaQuery.of(context).size.width * 0.55,
                                   child: Container(
@@ -144,7 +152,8 @@ class _ChatRoom extends State<ChatRoom> {
                                     .collection("chatRooms")
                                     .document(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
                                     .collection("messages")
-                                    .add(chatMessage.chatMessageToJson()).then((value) => _textController.clear());
+                                    .add(chatMessage.chatMessageToJson())
+                                    .then((value) => _textController.clear());
                               },
                             )
                           ],
