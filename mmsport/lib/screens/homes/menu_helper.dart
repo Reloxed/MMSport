@@ -82,7 +82,7 @@ void _navigatorHelper(String role, int i, BuildContext context) async {
   } else if (i == 1 && role == "ADMIN") {
     navigateToAcceptRejectSchools(context);
   } else if (i == 2 && role == "ADMIN") {
-    //TODO: Navigate to delete schools
+    navigateToRemoveSportSchools(context);
   } else if (i == 2 && role == "DIRECTOR") {
     navigateToListSportSchoolGroups(context);
   } else if (i == 2 && role == "TRAINER") {

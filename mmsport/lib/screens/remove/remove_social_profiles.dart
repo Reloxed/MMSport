@@ -2,11 +2,9 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter_search_bar/flutter_search_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:mmsport/components/dialogs.dart';
 import 'package:mmsport/models/socialProfile.dart';
-import 'package:search_app_bar/filter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class RemoveSocialProfiles extends StatefulWidget {
@@ -22,7 +20,6 @@ class _RemoveSocialProfilesState extends State<RemoveSocialProfiles> {
   List<SocialProfile> _trainers = [];
   List<SocialProfile> _filteredTrainers = [];
   TextEditingController controller = new TextEditingController();
-  SearchBar searchBar;
   int focusedTab = 0;
   bool firstLoad = true;
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
@@ -116,7 +113,7 @@ class _RemoveSocialProfilesState extends State<RemoveSocialProfiles> {
 
   AppBar buildAppBar(BuildContext context) {
     return new AppBar(
-        title: new Text('Buscar'),
+        title: new Text('Eliminar perfiles'),
         bottom: TabBar(tabs: <Widget>[
           Container(
               child: Tab(
@@ -335,6 +332,14 @@ class _RemoveSocialProfilesState extends State<RemoveSocialProfiles> {
                   Navigator.of(context, rootNavigator: true).pop();
                 },
                 child: Text("Entendido"),
+              ),
+              FlatButton(
+                color: Colors.white,
+                textColor: Colors.blueAccent,
+                child: Text("Cancelar"),
+                onPressed: () {
+                  Navigator.of(context, rootNavigator: true).pop();
+                },
               )
             ],
           );

@@ -13,7 +13,8 @@ import 'package:mmsport/screens/enrollment_list_sport_school.dart';
 import 'package:mmsport/screens/login.dart';
 import 'package:mmsport/screens/register.dart';
 import 'package:mmsport/screens/homes/home.dart';
-import 'package:mmsport/screens/remove_social_profiles.dart';
+import 'package:mmsport/screens/remove/remove_sport_schools.dart';
+import 'file:///F:/Universidad/MMSPORT/mmsport/lib/screens/remove/remove_social_profiles.dart';
 import 'package:mmsport/screens/sport_school_group_details.dart';
 import 'package:mmsport/screens/sport_school_groups_list.dart';
 
@@ -83,4 +84,8 @@ void navigateToRemoveSocialProfiles(BuildContext context){
 
 void navigateToEditSocialProfile(BuildContext context){
   Navigator.of(context).push(MaterialPageRoute(builder: (context) => EditSocialProfile())).then((value) => null);
+}
+
+void navigateToRemoveSportSchools(BuildContext context){
+  Navigator.of(context).push(MaterialPageRoute(builder: (context) => RemoveSportSchools())).then((value) => null);
 }
