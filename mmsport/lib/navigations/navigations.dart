@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:mmsport/constants/constants.dart';
+import 'package:mmsport/models/event.dart';
 import 'package:mmsport/screens/acceptreject/accept_reject_profiles.dart';
+import 'package:mmsport/screens/add_calendar_event.dart';
 import 'package:mmsport/screens/chats/chat_main.dart';
 import 'package:mmsport/screens/chats/chat_room.dart';
 import 'package:mmsport/screens/choose_social_profile.dart';
 import 'package:mmsport/screens/choose_sport_school.dart';
 import 'package:mmsport/screens/create_sport_school.dart';
 import 'package:mmsport/screens/create_sport_school_group.dart';
+import 'package:mmsport/screens/edit_calendar_event.dart';
 import 'package:mmsport/screens/enrollment_create_social_profile_sport_school.dart';
 import 'package:mmsport/screens/enrollment_list_sport_school.dart';
 import 'package:mmsport/screens/login.dart';
@@ -73,4 +77,13 @@ void navigateToSportSchoolGroupDetails(BuildContext context){
 
 void navigateToCalendarEvent(BuildContext context){
   Navigator.of(context).push(MaterialPageRoute(builder: (context) => CalendarEvent()));
+}
+
+Future<dynamic> navigateToAddCalendarEvent(BuildContext context){
+  return Navigator.of(context).push(MaterialPageRoute(builder: (context) => AddCalendarEvent()));
+}
+
+Future<dynamic> navigateToEditCalendarEvent(BuildContext context, Event event){
+  setEventToEdit(event);
+  return Navigator.of(context).push(MaterialPageRoute(builder: (context) => EditCalendarEvent()));
 }

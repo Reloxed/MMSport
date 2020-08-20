@@ -6,6 +6,7 @@ import 'package:mmsport/screens/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
 import 'package:mmsport/components/dialogs.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
@@ -20,6 +21,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+        localizationsDelegates: [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: [
+          const Locale('es', 'ES')
+        ],
       debugShowCheckedModeBanner: false,
     home: FutureBuilder<Map<String, bool>>(
         future: checkSharedPreferences(),

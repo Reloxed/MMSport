@@ -25,12 +25,12 @@ void main() {
 
   // Validación de contraseña
   test('Validación de contraseña - Contraseña vacía', () {
-    bool aux = FormValidators.validateEmptyPassword('');
+    bool aux = FormValidators.validateEmptyText('');
     expect(aux, false);
   });
 
   test('Validación de contraseña - Contraseña nula', () {
-    bool aux = FormValidators.validateEmptyPassword(null);
+    bool aux = FormValidators.validateEmptyText(null);
     expect(aux, false);
   });
 

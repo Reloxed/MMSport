@@ -10,14 +10,14 @@ import 'package:mmsport/models/event.dart';
 import 'package:mmsport/models/sportSchool.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class AddCalendarEvent extends StatefulWidget {
+class EditCalendarEvent extends StatefulWidget {
   @override
-  _AddCalendarEventState createState() {
-    return new _AddCalendarEventState();
+  _EditCalendarEventState createState() {
+    return new _EditCalendarEventState();
   }
 }
 
-class _AddCalendarEventState extends State<AddCalendarEvent> {
+class _EditCalendarEventState extends State<EditCalendarEvent> {
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController _dayController = TextEditingController();
@@ -28,6 +28,25 @@ class _AddCalendarEventState extends State<AddCalendarEvent> {
   TimeOfDay selectedStartTimeEvent;
   TimeOfDay selectedEndTimeEvent;
   String eventName;
+  String _id;
+  bool firstLoad = true;
+
+  Future<Event> loadEvent() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    Event _event = Event.eventFromMap(await jsonDecode(preferences.get("eventToEdit")));
+    if(firstLoad){
+      selectedDay = _event.day;
+      _dayController.text = formatDateTime(selectedDay);
+      selectedStartTimeEvent = _event.startTimeEvent;
+      _startTimeController.text = selectedStartTimeEvent.format(context);
+      selectedEndTimeEvent = _event.endTimeEvent;
+      _endTimeController.text = selectedEndTimeEvent.format(context);
+      eventName = _event.eventName;
+      _id = _event.id;
+      firstLoad = false;
+    }
+    return _event;
+  }
 
   @override
   void initState() {
@@ -37,28 +56,44 @@ class _AddCalendarEventState extends State<AddCalendarEvent> {
   @override
   Widget build(BuildContext context) {
     return Material(
-        child: Scaffold(
-            body: SingleChildScrollView(
-                padding: EdgeInsets.symmetric(horizontal: 30),
-                child: Form(
-                    key: _formKey,
-                    autovalidate: false,
-                    child: Column(
-                      children: <Widget>[
-                        Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: <Widget>[_eventName(), _selectDateField(), _selectStartTime(), _selectEndTime()],
-                          ),
-                        ),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[_createEvent()],
-                        ),
-                      ],
-                    )))));
+        child: FutureBuilder<Event>(
+          future: loadEvent(),
+            builder: (BuildContext context, AsyncSnapshot<Event> snapshot) {
+              if(snapshot.hasData){
+                return Scaffold(
+                    body: SingleChildScrollView(
+                        padding: EdgeInsets.symmetric(horizontal: 30),
+                        child: Form(
+                            key: _formKey,
+                            autovalidate: false,
+                            child: Column(
+                              children: <Widget>[
+                                Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: <Widget>[
+                                      _eventName(),
+                                      _selectDateField(),
+                                      _selectStartTime(),
+                                      _selectEndTime()
+                                    ],
+                                  ),
+                                ),
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: <Widget>[_editEvent()],
+                                ),
+                              ],
+                            ))));
+              }
+              else{
+                return Container();
+              }
+            }
+        )
+    );
   }
 
   Widget _eventName() {
@@ -68,6 +103,7 @@ class _AddCalendarEventState extends State<AddCalendarEvent> {
       child: Column(
         children: <Widget>[
           TextFormField(
+            initialValue: eventName,
             validator: (v) {
               if (FormValidators.validateEmptyText(v) == false)
                 return "Este campo no puede estar vacío";
@@ -118,9 +154,11 @@ class _AddCalendarEventState extends State<AddCalendarEvent> {
   Future<void> showDateTimeDialog(BuildContext context) async {
     DateTime selectedTime = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: selectedDay,
       firstDate: DateTime.now(),
-      lastDate: new DateTime(DateTime.now().year + 2),
+      lastDate: new DateTime(DateTime
+          .now()
+          .year + 2),
       helpText: "Seleccione el día del evento",
       cancelText: "Cancelar",
       confirmText: "Confirmar",
@@ -238,7 +276,7 @@ class _AddCalendarEventState extends State<AddCalendarEvent> {
   Future<void> showEndTimeDialog(BuildContext context) async {
     TimeOfDay selectedTime = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.now(),
+      initialTime: selectedEndTimeEvent,
       cancelText: 'Cancelar',
       confirmText: 'Confirmar',
       helpText: 'Seleccione la hora de fin',
@@ -270,7 +308,7 @@ class _AddCalendarEventState extends State<AddCalendarEvent> {
     }
   }
 
-  Widget _createEvent() {
+  Widget _editEvent() {
     return Container(
         margin: EdgeInsets.only(top: 16),
         padding: EdgeInsets.symmetric(horizontal: 30),
@@ -278,31 +316,31 @@ class _AddCalendarEventState extends State<AddCalendarEvent> {
           alignment: Alignment.bottomCenter,
           child: RaisedButton(
             onPressed: () {
-              createEvent();
+              editEvent();
             },
             elevation: 3.0,
             color: Colors.blueAccent,
             child: Text(
-              "CREAR EVENTO",
+              "GUARDAR CAMBIOS",
               style: TextStyle(fontSize: 20, color: Colors.white),
             ),
           ),
         ));
   }
 
-  void createEvent() async {
+  void editEvent() async {
     if (_formKey.currentState.validate()) {
       SharedPreferences preferences = await SharedPreferences.getInstance();
       SportSchool _sportSchool = SportSchool.sportSchoolFromMap(await jsonDecode(preferences.get("chosenSportSchool")));
       Event newEvent = Event(eventName, selectedDay, selectedStartTimeEvent, selectedEndTimeEvent, _sportSchool.id);
       final databaseReference = Firestore.instance;
-      DocumentReference ref = await databaseReference.collection("events").add({
+      await databaseReference.collection("events").document(_id).setData({
         "eventName": newEvent.eventName,
         "day": formatDateTime(newEvent.day),
         "startTimeEvent": timeOfDayToString(newEvent.startTimeEvent, context),
         "endTimeEvent": timeOfDayToString(newEvent.endTimeEvent, context),
         "sportSchoolId": newEvent.sportSchoolId
-      });
+      }, merge: true);
     }
   }
 }

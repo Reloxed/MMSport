@@ -10,7 +10,7 @@ class FormValidators {
     return !emailRegex.hasMatch(email) ? false : true;
   }
 
-  static bool validateEmptyPassword(String password){
+  static bool validateEmptyText(String password){
     return password == null || password.trim().isEmpty ? false : true;
   }
 

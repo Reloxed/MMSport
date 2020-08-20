@@ -6,24 +6,41 @@ import 'package:mmsport/components/utils.dart';
 
 @JsonSerializable(nullable: false)
 class Event{
+  String id;
+  String eventName;
   DateTime day;
   TimeOfDay startTimeEvent;
   TimeOfDay endTimeEvent;
+  String sportSchoolId;
 
-  Event(DateTime day, TimeOfDay startTimeEvent, TimeOfDay endTimeEvent){
+  Event(String eventName, DateTime day, TimeOfDay startTimeEvent, TimeOfDay endTimeEvent, String sportSchoolId){
+    this.eventName = eventName;
     this.day = day;
     this.startTimeEvent = startTimeEvent;
     this.endTimeEvent = endTimeEvent;
+    this.sportSchoolId = sportSchoolId;
   }
 
-  static Event scheduleFromMap(Map<String, dynamic> map){
+  Event.eventWithId(String id, String eventName, DateTime day, TimeOfDay startTimeEvent, TimeOfDay endTimeEvent, String sportSchoolId){
+    this.id = id;
+    this.eventName = eventName;
+    this.day = day;
+    this.startTimeEvent = startTimeEvent;
+    this.endTimeEvent = endTimeEvent;
+    this.sportSchoolId = sportSchoolId;
+  }
 
-    return new Event(map['day'], stringToTimeOfDay(map['startTimeEvent']) , stringToTimeOfDay(map['endTimeEvent']));
+  static Event eventFromMap(Map<String, dynamic> map){
+
+    return new Event.eventWithId(map['id'], map['eventName'], formatedToDateTime(map['day']), stringToTimeOfDay(map['startTimeEvent']) , stringToTimeOfDay(map['endTimeEvent']), map['sportSchoolId']);
   }
 
   Map<String, dynamic> eventToJson() => {
-    "day": day.toIso8601String(),
+    "id" : id,
+    "eventName" : eventName,
+    "day": formatDateTime(day),
     "startTimeEvent": startTimeEvent.hour.toString() + ":" + startTimeEvent.minute.toString(),
     "endTimeEvent": endTimeEvent.hour.toString() + ":" + endTimeEvent.minute.toString(),
+    "sportSchoolId" : sportSchoolId
   };
 }
