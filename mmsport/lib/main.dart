@@ -74,37 +74,6 @@ class MyApp extends StatelessWidget {
                 return loadingHome();
               }
             }));
-      debugShowCheckedModeBanner: false,
-    home: FutureBuilder<Map<String, bool>>(
-        future: checkSharedPreferences(),
-        // ignore: missing_return
-        builder: (BuildContext context, AsyncSnapshot<Map<String, bool>> snapshot) {
-          if (snapshot.hasData) {
-            if (snapshot.data['chosenSocialProfile'] == true) {
-              return MaterialApp(
-                debugShowCheckedModeBanner: false,
-                home: Home(),
-              );
-            } else if (snapshot.data['chosenSportSchool'] == true) {
-              return MaterialApp(
-                debugShowCheckedModeBanner: false,
-                home: ChooseSocialProfile(),
-              );
-            } else if (snapshot.data['loggedInUserId'] == true) {
-              return MaterialApp(
-                debugShowCheckedModeBanner: false,
-                home: ChooseSportSchool(),
-              );
-            } else if (snapshot.data['loggedInUserId'] == false) {
-              return MaterialApp(
-                debugShowCheckedModeBanner: false,
-                home: Login(),
-              );
-            }
-          } else {
-            return loadingHome();
-          }
-        }));
   }
 
   Future<Map<String, bool>> checkSharedPreferences() async {
