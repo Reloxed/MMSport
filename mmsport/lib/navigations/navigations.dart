@@ -4,6 +4,7 @@ import 'package:mmsport/models/event.dart';
 import 'package:mmsport/screens/acceptreject/accept_reject_profiles.dart';
 import 'package:mmsport/screens/acceptreject/accept_reject_schools.dart';
 import 'package:mmsport/screens/add_calendar_event.dart';
+import 'package:mmsport/screens/calendar_event.dart';
 import 'package:mmsport/screens/chats/chat_main.dart';
 import 'package:mmsport/screens/chats/chat_room.dart';
 import 'package:mmsport/screens/choose_social_profile.dart';
@@ -14,56 +15,59 @@ import 'package:mmsport/screens/edit_calendar_event.dart';
 import 'package:mmsport/screens/edit_social_profile.dart';
 import 'package:mmsport/screens/enrollment_create_social_profile_sport_school.dart';
 import 'package:mmsport/screens/enrollment_list_sport_school.dart';
+import 'package:mmsport/screens/homes/home.dart';
 import 'package:mmsport/screens/login.dart';
 import 'package:mmsport/screens/register.dart';
-import 'package:mmsport/screens/homes/home.dart';
 import 'package:mmsport/screens/remove/remove_sport_schools.dart';
-import 'file:///F:/Universidad/MMSPORT/mmsport/lib/screens/remove/remove_social_profiles.dart';
+import 'package:mmsport/screens/remove/remove_social_profiles.dart';
 import 'package:mmsport/screens/sport_school_group_details.dart';
 import 'package:mmsport/screens/sport_school_groups_list.dart';
-import 'package:mmsport/screens/calendar_event.dart';
 
-void navigateToRegister(BuildContext context){
+void navigateToRegister(BuildContext context) {
   Navigator.push(context, MaterialPageRoute(builder: (context) => Register()));
 }
 
-void navigateToCreateSchool(BuildContext context){
-  Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => CreateSportSchool()), (Route<dynamic> route) => false);
+void navigateToCreateSchool(BuildContext context) {
+  Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => CreateSportSchool()), (Route<dynamic> route) => false);
 }
 
-void navigateToChooseSportSchool(BuildContext context){
-  Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => ChooseSportSchool()), (Route<dynamic> route) => false);
+void navigateToChooseSportSchool(BuildContext context) {
+  Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => ChooseSportSchool()), (Route<dynamic> route) => false);
 }
 
-void navigateToChooseSocialProfile(BuildContext context){
+void navigateToChooseSocialProfile(BuildContext context) {
   Navigator.of(context).push(MaterialPageRoute(builder: (context) => ChooseSocialProfile()));
 }
 
-void navigateToHome(BuildContext context){
-  Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => Home()), (Route<dynamic> route) => false);
+void navigateToHome(BuildContext context) {
+  Navigator.of(context)
+      .pushAndRemoveUntil(MaterialPageRoute(builder: (context) => Home()), (Route<dynamic> route) => false);
 }
 
-void logout(BuildContext context){
-  Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => Login()), (Route<dynamic> route) => false);
+void logout(BuildContext context) {
+  Navigator.of(context)
+      .pushAndRemoveUntil(MaterialPageRoute(builder: (context) => Login()), (Route<dynamic> route) => false);
 }
 
-void navigateToChatMain(BuildContext context){
+void navigateToChatMain(BuildContext context) {
   Navigator.of(context).push(MaterialPageRoute(builder: (context) => ChatMain()));
 }
 
-void navigateToEnrollmentListSportSchool(BuildContext context){
+void navigateToEnrollmentListSportSchool(BuildContext context) {
   Navigator.of(context).push(MaterialPageRoute(builder: (context) => EnrollmentListSportSchool()));
 }
 
-void navigateToChatRoom(BuildContext context){
+void navigateToChatRoom(BuildContext context) {
   Navigator.of(context).push(MaterialPageRoute(builder: (context) => ChatRoom()));
 }
 
-void navigateToEnrollmentCreateSocialProfileSportSchool(BuildContext context){
+void navigateToEnrollmentCreateSocialProfileSportSchool(BuildContext context) {
   Navigator.of(context).push(MaterialPageRoute(builder: (context) => EnrollmentCreateSocialProfileSportSchool()));
 }
 
-void navigateToAcceptRejectProfiles(BuildContext context){
+void navigateToAcceptRejectProfiles(BuildContext context) {
   Navigator.of(context).push(MaterialPageRoute(builder: (context) => AcceptRejectProfiles()));
 }
 
@@ -71,34 +75,36 @@ void navigateToAcceptRejectSchools(BuildContext context){
   Navigator.of(context).push(MaterialPageRoute(builder: (context) => AcceptRejectSchools()));
 }
 
-void navigateToCreateSportSchoolGroup(BuildContext context){
+void navigateToCreateSportSchoolGroup(BuildContext context) {
   Navigator.of(context).push(MaterialPageRoute(builder: (context) => CreateSportSchoolGroup()));
 }
 
-void navigateToListSportSchoolGroups(BuildContext context){
+void navigateToListSportSchoolGroups(BuildContext context) {
   Navigator.of(context).push(MaterialPageRoute(builder: (context) => ListSportSchoolGroups()));
 }
 
-void navigateToSportSchoolGroupDetails(BuildContext context){
+void navigateToSportSchoolGroupDetails(BuildContext context) {
   Navigator.of(context).push(MaterialPageRoute(builder: (context) => SportSchoolGroupDetails())).then((value) => null);
 }
 
-void navigateToCalendarEvent(BuildContext context){
+void navigateToCalendarEvent(BuildContext context) {
   Navigator.of(context).push(MaterialPageRoute(builder: (context) => CalendarEvent()));
 }
 
-Future<dynamic> navigateToAddCalendarEvent(BuildContext context){
+Future<dynamic> navigateToAddCalendarEvent(BuildContext context) {
   return Navigator.of(context).push(MaterialPageRoute(builder: (context) => AddCalendarEvent()));
 }
 
-Future<dynamic> navigateToEditCalendarEvent(BuildContext context, Event event){
+Future<dynamic> navigateToEditCalendarEvent(BuildContext context, Event event) {
   setEventToEdit(event);
   return Navigator.of(context).push(MaterialPageRoute(builder: (context) => EditCalendarEvent()));
-void navigateToRemoveSocialProfiles(BuildContext context){
+}
+
+void navigateToRemoveSocialProfiles(BuildContext context) {
   Navigator.of(context).push(MaterialPageRoute(builder: (context) => RemoveSocialProfiles())).then((value) => null);
 }
 
-void navigateToEditSocialProfile(BuildContext context){
+void navigateToEditSocialProfile(BuildContext context) {
   Navigator.of(context).push(MaterialPageRoute(builder: (context) => EditSocialProfile())).then((value) => null);
 }
 
