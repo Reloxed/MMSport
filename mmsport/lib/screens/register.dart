@@ -98,6 +98,7 @@ class _RegisterState extends State<Register> {
       child: Column(
         children: <Widget>[
           TextFormField(
+            keyboardType: TextInputType.emailAddress,
             validator: (v) {
               if (FormValidators.validateEmptyEmail(v) == false)
                 return "Este campo no puede estar vacío";
