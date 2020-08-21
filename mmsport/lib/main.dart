@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:mmsport/components/dialogs.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
@@ -28,6 +29,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+		localizationsDelegates: [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: [
+          const Locale('es', 'ES')
+        ],
         debugShowCheckedModeBanner: false,
         home: FutureBuilder<Map<String, bool>>(
             future: checkSharedPreferences(),
@@ -66,6 +74,37 @@ class MyApp extends StatelessWidget {
                 return loadingHome();
               }
             }));
+      debugShowCheckedModeBanner: false,
+    home: FutureBuilder<Map<String, bool>>(
+        future: checkSharedPreferences(),
+        // ignore: missing_return
+        builder: (BuildContext context, AsyncSnapshot<Map<String, bool>> snapshot) {
+          if (snapshot.hasData) {
+            if (snapshot.data['chosenSocialProfile'] == true) {
+              return MaterialApp(
+                debugShowCheckedModeBanner: false,
+                home: Home(),
+              );
+            } else if (snapshot.data['chosenSportSchool'] == true) {
+              return MaterialApp(
+                debugShowCheckedModeBanner: false,
+                home: ChooseSocialProfile(),
+              );
+            } else if (snapshot.data['loggedInUserId'] == true) {
+              return MaterialApp(
+                debugShowCheckedModeBanner: false,
+                home: ChooseSportSchool(),
+              );
+            } else if (snapshot.data['loggedInUserId'] == false) {
+              return MaterialApp(
+                debugShowCheckedModeBanner: false,
+                home: Login(),
+              );
+            }
+          } else {
+            return loadingHome();
+          }
+        }));
   }
 
   Future<Map<String, bool>> checkSharedPreferences() async {

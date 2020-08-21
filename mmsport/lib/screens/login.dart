@@ -95,7 +95,7 @@ class _LoginState extends State<Login> {
         children: <Widget>[
           TextFormField(
             validator: (v) {
-              if (FormValidators.validateEmptyPassword(v) == false)
+              if (FormValidators.validateEmptyText(v) == false)
                 return "Este campo no puede estar vacío";
               else if (FormValidators.validateShortPassword(v) == false)
                 return "La contraseña tiene que tener más de 5 caracteres";

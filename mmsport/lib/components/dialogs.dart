@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:mmsport/models/event.dart';
 import 'package:mmsport/models/group.dart';
 import 'package:mmsport/models/socialProfile.dart';
 import 'package:mmsport/models/sportSchool.dart';
@@ -67,17 +69,20 @@ dynamic acceptDialogRegister(BuildContext context, String message) {
 
 // Muestra un dialog con el loading, usado en los momentos que se guardan datos en la BBDD
 dynamic loadingDialog(BuildContext context) {
-  return showDialog(context: context, barrierDismissible: false, builder: (BuildContext builder){
-    return AlertDialog(
-      title: Image.asset("assets/logo/loading_gif.gif"),
-      content: Text("Un momento, por favor...", style: TextStyle(fontSize: 20)),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0))),
-    );
-  });
+  return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext builder) {
+        return AlertDialog(
+          title: Image.asset("assets/logo/loading_gif.gif"),
+          content: Text("Un momento, por favor...", style: TextStyle(fontSize: 20)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0))),
+        );
+      });
 }
 
 // Muestra el loading directamente en la pantalla, por ejemplo dentro de un scaffold
-dynamic loading(){
+dynamic loading() {
   return Center(
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -91,7 +96,7 @@ dynamic loading(){
 }
 
 // Muestra una pantalla completa de loading, se usa en el home
-dynamic loadingHome(){
+dynamic loadingHome() {
   return Scaffold(
     body: Center(
       child: Column(
@@ -135,6 +140,47 @@ dynamic confirmDialogOnCreateSchool(BuildContext context, String message) {
       });
 }
 
+Future<Void> confirmDialogOnDeleteEvent(BuildContext context, String message, Event event) {
+  return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext builder) {
+        return AlertDialog(
+          title: new IconTheme(
+            data: new IconThemeData(
+              color: Colors.green,
+            ),
+            child: Icon(Icons.check),
+          ),
+          content: SingleChildScrollView(child: ListBody(children: <Widget>[Center(child: Text(message))])),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0))),
+          actions: <Widget>[
+            FlatButton(
+              color: Colors.white,
+              textColor: Colors.blueAccent,
+              onPressed: () {
+                Navigator.of(context, rootNavigator: true).pop();
+              },
+              child: Text("No"),
+            ),
+            FlatButton(
+              color: Colors.white,
+              textColor: Colors.blueAccent,
+              onPressed: () async {
+                final databaseReference = Firestore.instance;
+                await databaseReference
+                    .collection("events")
+                    .document(event.id)
+                    .delete()
+                    .then((value) => Navigator.of(context, rootNavigator: true).pop());
+              },
+              child: Text("Sí"),
+            )
+          ],
+        );
+      });
+}
+
 class AddStudentsToGroupDialog extends StatefulWidget {
   final List<SocialProfile> studentsEdited;
 
@@ -157,7 +203,7 @@ class AddStudentsToGroupDialogState extends State<AddStudentsToGroupDialog> {
   }
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
     firstLoad = true;
     studentsToEnroll = [];
@@ -165,7 +211,7 @@ class AddStudentsToGroupDialogState extends State<AddStudentsToGroupDialog> {
   }
 
   Future<List<SocialProfile>> loadStudentsToJoin() async {
-    if(firstLoad){
+    if (firstLoad) {
       SharedPreferences preferences = await SharedPreferences.getInstance();
       Map aux = jsonDecode(preferences.get("chosenSportSchool"));
       SportSchool sportSchool = SportSchool.sportSchoolFromMap(aux);
@@ -225,12 +271,13 @@ class AddStudentsToGroupDialogState extends State<AddStudentsToGroupDialog> {
                       title: const Text('Añada los alumnos'),
                       actions: [
                         new IconButton(
-                            onPressed: () {
-                              Navigator.of(context).pop(studentsEdited);
-                            },
-                            icon: Icon(Icons.check),
-                            color: Colors.white,
-                        )],
+                          onPressed: () {
+                            Navigator.of(context).pop(studentsEdited);
+                          },
+                          icon: Icon(Icons.check),
+                          color: Colors.white,
+                        )
+                      ],
                     ),
                     body: Center(
                       child: SafeArea(
@@ -247,10 +294,13 @@ class AddStudentsToGroupDialogState extends State<AddStudentsToGroupDialog> {
                                           decoration: new InputDecoration(hintText: 'Buscar', border: InputBorder.none),
                                           onChanged: onSearchTextChanged,
                                         ),
-                                        trailing: new IconButton(icon: new Icon(Icons.cancel), onPressed: () {
-                                          controller.clear();
-                                          onSearchTextChanged('');
-                                        },),
+                                        trailing: new IconButton(
+                                          icon: new Icon(Icons.cancel),
+                                          onPressed: () {
+                                            controller.clear();
+                                            onSearchTextChanged('');
+                                          },
+                                        ),
                                       ),
                                     ))),
                             Expanded(
@@ -318,14 +368,14 @@ class SelectTrainerGroupDialogState extends State<SelectTrainerGroupDialog> {
   }
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
     groupTrainers = [];
     firstLoad = true;
   }
 
   Future<List<SocialProfile>> loadTrainers() async {
-    if(firstLoad){
+    if (firstLoad) {
       SharedPreferences preferences = await SharedPreferences.getInstance();
       Group group = Group.groupFromMapWithId(jsonDecode(preferences.get("sportSchoolGroupToView")));
       await Firestore.instance
@@ -338,8 +388,8 @@ class SelectTrainerGroupDialogState extends State<SelectTrainerGroupDialog> {
         value.documents.forEach((element) {
           SocialProfile newTrainer = SocialProfile.socialProfileFromMap(element.data);
           newTrainer.id = element.data['id'];
-          if(trainerSelected != null){
-            if(trainerSelected.id == newTrainer.id){
+          if (trainerSelected != null) {
+            if (trainerSelected.id == newTrainer.id) {
               trainerSelected = newTrainer;
             }
           }
@@ -367,7 +417,8 @@ class SelectTrainerGroupDialogState extends State<SelectTrainerGroupDialog> {
                           },
                           icon: Icon(Icons.check),
                           color: Colors.white,
-                        )],
+                        )
+                      ],
                     ),
                     body: Center(
                       child: SafeArea(
@@ -412,4 +463,3 @@ class SelectTrainerGroupDialogState extends State<SelectTrainerGroupDialog> {
             }));
   }
 }
-

@@ -40,8 +40,9 @@ import 'package:shared_preferences/shared_preferences.dart';
         _menuItem("Mis grupos", Icons.group, "DIRECTOR", 2, context),
         _menuItem("Aceptar/rechazar perfiles", Icons.check, "DIRECTOR", 3, context),
         _menuItem("Crear grupo", Icons.group_add, "DIRECTOR", 4, context),
-        _menuItem("Editar perfil", Icons.person, "DIRECTOR", 5, context),
-        _menuItem("Eliminar perfiles", Icons.delete, "DIRECTOR", 6, context)
+        _menuItem("Calendario", Icons.calendar_today, "DIRECTOR", 5, context),
+        _menuItem("Eliminar perfiles", Icons.delete, "DIRECTOR", 6, context),
+        _menuItem("Editar perfil", Icons.person, "DIRECTOR", 7, context)
       ];
     } else if (role == "ADMIN"){
       return [
@@ -105,9 +106,13 @@ void _navigatorHelper(String role, int i, BuildContext context) async {
     navigateToAcceptRejectProfiles(context);
   } else if (i == 4 && role == "DIRECTOR") {
     navigateToCreateSportSchoolGroup(context);
+  } else if (i == 4) {
+    // TODO: Navigate to edit profile
+  } else if (i == 5 && role == "DIRECTOR") {
+    navigateToCalendarEvent(context);
   } else if (i == 4 && (role == "TRAINER" || role == "STUDENT")) {
     navigateToEditSocialProfile(context);
-  } else if (i == 5 && role == "DIRECTOR") {
+  } else if (i == 7 && role == "DIRECTOR") {
     navigateToEditSocialProfile(context);
   } else if(i == 6 && role == "DIRECTOR"){
     navigateToRemoveSocialProfiles(context);

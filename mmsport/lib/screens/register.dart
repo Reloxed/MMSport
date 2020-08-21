@@ -125,7 +125,7 @@ class _RegisterState extends State<Register> {
           TextFormField(
             controller: _password,
             validator: (v) {
-              if (FormValidators.validateEmptyPassword(v) == false)
+              if (FormValidators.validateEmptyText(v) == false)
                 return "Este campo no puede estar vacío";
               else if (FormValidators.validateShortPassword(v) == false)
                 return "La contraseña tiene que tener más de 5 caracteres";
@@ -151,7 +151,7 @@ class _RegisterState extends State<Register> {
           TextFormField(
             controller: _confirmPassword,
             validator: (v) {
-              if (FormValidators.validateEmptyPassword(v) == false)
+              if (FormValidators.validateEmptyText(v) == false)
                 return "Este campo no puede estar vacío";
               else if (v != _password.text)
                 return "Las contraseñas no coinciden";

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_pickers/flutter_material_pickers.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:mmsport/components/dialogs.dart';
+import 'package:mmsport/components/utils.dart';
 import 'package:mmsport/constants/constants.dart';
 import 'package:mmsport/models/group.dart';
 import 'package:mmsport/models/schedule.dart';
@@ -626,8 +627,6 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
           }
         }));
   }
-
-  double fromTimeOfDayToDouble(TimeOfDay myTime) => myTime.hour + myTime.minute / 60.0;
 
   void editGroup() async {
     if (selectedTrainerEdited == null) {

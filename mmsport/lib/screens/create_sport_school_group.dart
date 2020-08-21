@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_pickers/flutter_material_pickers.dart';
 import 'package:mmsport/components/dialogs.dart';
+import 'package:mmsport/components/utils.dart';
 import 'package:mmsport/models/group.dart';
 import 'package:mmsport/models/schedule.dart';
 import 'package:mmsport/models/socialProfile.dart';
@@ -285,8 +286,6 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
       }
     }));
   }
-
-  double fromTimeOfDayToDouble(TimeOfDay myTime) => myTime.hour + myTime.minute / 60.0;
 
   void createGroup() async {
     if (selectedTrainer == null) {
