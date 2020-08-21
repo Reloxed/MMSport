@@ -104,97 +104,128 @@ class _ListSportSchoolGroupsState extends State<ListSportSchoolGroups> {
   Widget build(BuildContext context) {
     return Material(
         child: FutureBuilder<List<dynamic>>(
-      future: Future.wait([_getAllGroups(), _getSocialProfileLogued(), _getSportSchool()]),
-      builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshots) {
-        if (snapshots.hasData) {
-          return Scaffold(
-              appBar: PreferredSize(
-                preferredSize: Size.fromHeight(MediaQuery.of(context).size.height * 0.15),
-                child: AppBar(
-                  flexibleSpace: FlexibleSpaceBar(
-                      titlePadding: EdgeInsets.all(10.0),
-                      centerTitle: true,
-                      title: Center(
-                          child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: <Widget>[
-                        Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
-                          CircleAvatar(radius: 40, backgroundImage: NetworkImage(snapshots.data[2].urlLogo)),
-                          SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.58,
-                              child: Container(
-                                  padding: EdgeInsets.all(10.0),
-                                  child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: <Widget>[
-                                        Text(
-                                          snapshots.data[2].name,
-                                          style: TextStyle(color: Colors.white, fontSize: 30),
-                                          overflow: TextOverflow.ellipsis,
-                                          softWrap: true,
-                                        ),
-                                        Text(
-                                            snapshots.data[1].name +
-                                                " " +
-                                                snapshots.data[1].firstSurname +
-                                                " " +
-                                                snapshots.data[1].secondSurname,
-                                            style: TextStyle(color: Colors.white, fontStyle: FontStyle.italic),
-                                            overflow: TextOverflow.ellipsis,
-                                            softWrap: true)
-                                      ]))),
-                        ]),
-                      ]))),
-                ),
-              ),
-              body: Container(
-                  child: ListView.builder(
-                itemBuilder: (context, index) {
-                  if (snapshots.data[0].values.elementAt(index).secondSurname == null) {
-                    return ListTile(
-                        onTap: () {
-                          setSportSchoolGroupToView(snapshots.data[0].keys.elementAt(index));
-                          Navigator.of(context)
-                              .push(MaterialPageRoute(builder: (context) => SportSchoolGroupDetails()))
-                              .then((value) => setState(() {}));
+          future: Future.wait([_getAllGroups(), _getSocialProfileLogued(), _getSportSchool()]),
+          builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshots) {
+            if (snapshots.hasData) {
+              return Scaffold(
+                  appBar: PreferredSize(
+                    preferredSize: Size.fromHeight(MediaQuery
+                        .of(context)
+                        .size
+                        .height * 0.15),
+                    child: AppBar(
+                      flexibleSpace: FlexibleSpaceBar(
+                          titlePadding: EdgeInsets.all(10.0),
+                          centerTitle: true,
+                          title: Center(
+                              child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: <Widget>[
+                                Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
+                                  Container(
+                                    padding: EdgeInsets.only(left: MediaQuery.of(context).size.width * 0.1),
+                                    child: CircleAvatar(radius: 40, backgroundImage: NetworkImage(snapshots.data[2].urlLogo)),
+                                  ),
+                                  SizedBox(
+                                      width: MediaQuery
+                                          .of(context)
+                                          .size
+                                          .width * 0.58,
+                                      child: Container(
+                                          padding: EdgeInsets.all(10.0),
+                                          child: Column(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: <Widget>[
+                                                Text(
+                                                  snapshots.data[2].name,
+                                                  style: TextStyle(color: Colors.white, fontSize: 30),
+                                                  overflow: TextOverflow.ellipsis,
+                                                  softWrap: true,
+                                                ),
+                                                Text(
+                                                    snapshots.data[1].name +
+                                                        " " +
+                                                        snapshots.data[1].firstSurname +
+                                                        " " +
+                                                        snapshots.data[1].secondSurname,
+                                                    style: TextStyle(color: Colors.white, fontStyle: FontStyle.italic),
+                                                    overflow: TextOverflow.ellipsis,
+                                                    softWrap: true)
+                                              ]))),
+                                ]),
+                              ]))),
+                      leading: IconButton(
+                        icon: Icon(Icons.arrow_back),
+                        onPressed: () async {
+                          Navigator.pop(context);
                         },
-                        title: Text(
-                          snapshots.data[0].keys.elementAt(index).name,
-                          style: TextStyle(fontSize: 20.0),
-                        ),
-                        subtitle: Text(
-                            'Entrenador: ' +
-                                snapshots.data[0].values.elementAt(index).name +
-                                ' ' +
-                                snapshots.data[0].values.elementAt(index).firstSurname,
-                            style: TextStyle(fontSize: 16.0)));
-                  } else {
-                    return ListTile(
-                        onTap: () {
-                          setSportSchoolGroupToView(snapshots.data[0].keys.elementAt(index));
-                          Navigator.of(context)
-                              .push(MaterialPageRoute(builder: (context) => SportSchoolGroupDetails()))
-                              .then((value) => setState(() {}));
+                      ),
+                    ),
+                  ),
+                  body: Container(
+                      child: ListView.builder(
+                        itemBuilder: (context, index) {
+                          if (snapshots.data[0].values
+                              .elementAt(index)
+                              .secondSurname == null) {
+                            return ListTile(
+                                onTap: () {
+                                  setSportSchoolGroupToView(snapshots.data[0].keys.elementAt(index));
+                                  Navigator.of(context)
+                                      .push(MaterialPageRoute(builder: (context) => SportSchoolGroupDetails()))
+                                      .then((value) => setState(() {}));
+                                },
+                                title: Text(
+                                  snapshots.data[0].keys
+                                      .elementAt(index)
+                                      .name,
+                                  style: TextStyle(fontSize: 20.0),
+                                ),
+                                subtitle: Text(
+                                    'Entrenador: ' +
+                                        snapshots.data[0].values
+                                            .elementAt(index)
+                                            .name +
+                                        ' ' +
+                                        snapshots.data[0].values
+                                            .elementAt(index)
+                                            .firstSurname,
+                                    style: TextStyle(fontSize: 16.0)));
+                          } else {
+                            return ListTile(
+                                onTap: () {
+                                  setSportSchoolGroupToView(snapshots.data[0].keys.elementAt(index));
+                                  Navigator.of(context)
+                                      .push(MaterialPageRoute(builder: (context) => SportSchoolGroupDetails()))
+                                      .then((value) => setState(() {}));
+                                },
+                                title: Text(
+                                  snapshots.data[0].keys
+                                      .elementAt(index)
+                                      .name,
+                                  style: TextStyle(fontSize: 20.0),
+                                ),
+                                subtitle: Text(
+                                    'Entrenador: ' +
+                                        snapshots.data[0].values
+                                            .elementAt(index)
+                                            .name +
+                                        ' ' +
+                                        snapshots.data[0].values
+                                            .elementAt(index)
+                                            .firstSurname +
+                                        ' ' +
+                                        snapshots.data[0].values
+                                            .elementAt(index)
+                                            .secondSurname,
+                                    style: TextStyle(fontSize: 16.0)));
+                          }
                         },
-                        title: Text(
-                          snapshots.data[0].keys.elementAt(index).name,
-                          style: TextStyle(fontSize: 20.0),
-                        ),
-                        subtitle: Text(
-                            'Entrenador: ' +
-                                snapshots.data[0].values.elementAt(index).name +
-                                ' ' +
-                                snapshots.data[0].values.elementAt(index).firstSurname +
-                                ' ' +
-                                snapshots.data[0].values.elementAt(index).secondSurname,
-                            style: TextStyle(fontSize: 16.0)));
-                  }
-                },
-                itemCount: snapshots.data[0].length,
-              )));
-        } else {
-          return Container();
-        }
-      },
-    ));
+                        itemCount: snapshots.data[0].length,
+                      )));
+            } else {
+              return Container();
+            }
+          },
+        ));
   }
 }

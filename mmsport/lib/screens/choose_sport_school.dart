@@ -25,26 +25,29 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
   Map<SportSchool, int> sportSchools = new Map();
   List<String> sportSchoolIds = new List();
   double currentPage = 0.0;
+  bool firstLoad = true;
   PageController _pageController = PageController();
 
   // ignore: missing_return
   Future<Map<SportSchool, int>> _loadFirebaseData() async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    String firebaseUser = preferences.get("loggedInUserId");
-    Map<SportSchool, int> auxMap = new Map<SportSchool, int>();
-    await Firestore.instance
-        .collection("socialProfiles")
-        .where('userAccountId', isEqualTo: firebaseUser)
-        .getDocuments()
-        .then((value) {
-      value.documents.forEach((element) async {
-        SocialProfile newProfile = SocialProfile.socialProfileFromMap(element.data);
-        newProfile.id = element.documentID;
-        profiles.add(newProfile);
+    if(firstLoad) {
+      SharedPreferences preferences = await SharedPreferences.getInstance();
+      String firebaseUser = preferences.get("loggedInUserId");
+      Map<SportSchool, int> auxMap = new Map<SportSchool, int>();
+      await Firestore.instance
+          .collection("socialProfiles")
+          .where('userAccountId', isEqualTo: firebaseUser)
+          .getDocuments()
+          .then((value) {
+        value.documents.forEach((element) async {
+          SocialProfile newProfile = SocialProfile.socialProfileFromMap(element.data);
+          newProfile.id = element.documentID;
+          profiles.add(newProfile);
+        });
       });
-    });
       for (SocialProfile actualProfile in profiles) {
-        await Firestore.instance.collection('sportSchools').document(actualProfile.sportSchoolId).get().then((document) {
+        await Firestore.instance.collection('sportSchools').document(actualProfile.sportSchoolId).get().then((
+            document) {
           SportSchool newSportSchool = SportSchool.sportSchoolFromMap(document.data);
           newSportSchool.id = actualProfile.sportSchoolId;
           if (sportSchoolIds.contains(newSportSchool.id)) {
@@ -62,7 +65,9 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
           }
         });
       }
-    sportSchools = auxMap;
+      sportSchools.addAll(auxMap);
+      firstLoad = false;
+    }
     return sportSchools;
   }
 
@@ -91,7 +96,7 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
                 _logoutButton(),
               ],
             ),
-            body: Center(
+            body: profilesSnapshot.data.length != 0 ? Center(
                 child: SingleChildScrollView(
               padding: EdgeInsets.all(20.0),
               child: Center(
@@ -113,14 +118,12 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
                           )
                         ],
                       ))),
-            )),
+            )):Center(child: Text("No tienes escuelas", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),),),
             floatingActionButton: FloatingActionButton(
               onPressed: null,
               tooltip: 'Inscribirme en una escuela',
               child: IconButton(
-                onPressed: () =>
-                  navigateToEnrollmentListSportSchool(context)
-                ,
+                onPressed: () => navigateToEnrollmentListSportSchool(context),
                 icon: new IconTheme(
                     data: new IconThemeData(
                       color: Colors.white,
@@ -173,8 +176,7 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
     );
   }
 
-  _saveSharedPreferenceAndGoToForm(SportSchool sportSchoolSelected){
-
+  _saveSharedPreferenceAndGoToForm(SportSchool sportSchoolSelected) {
     setSportSchoolToEnrollIn(sportSchoolSelected);
     navigateToEnrollmentCreateSocialProfileSportSchool(context);
   }
@@ -225,9 +227,7 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
                       child: Container(
                           margin: EdgeInsets.all(4.0),
                           child: OutlineButton.icon(
-                            onPressed: () =>
-                              _saveSharedPreferenceAndGoToForm(sportSchool)
-                            ,
+                            onPressed: () => _saveSharedPreferenceAndGoToForm(sportSchool),
                             icon: new IconTheme(
                                 data: new IconThemeData(
                                   color: Colors.blueAccent,

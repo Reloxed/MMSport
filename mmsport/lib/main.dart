@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:mmsport/models/socialProfile.dart';
+import 'package:mmsport/models/sportSchool.dart';
 import 'package:mmsport/screens/choose_social_profile.dart';
 import 'package:mmsport/screens/choose_sport_school.dart';
 import 'package:mmsport/screens/homes/home.dart';
@@ -7,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
 import 'package:mmsport/components/dialogs.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 void main() {
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
@@ -15,6 +20,7 @@ void main() {
   runApp(MyApp());
 }
 
+// ignore: must_be_immutable
 class MyApp extends StatelessWidget {
   bool isAdmin;
 
@@ -69,18 +75,39 @@ class MyApp extends StatelessWidget {
       map['loggedInUserId'] = false;
     }
     if (sharedPreferences.getString("loggedInUserId") != null) {
-      map['loggedInUserId'] = true;
-      await Firestore.instance
-          .collection("admins")
-          .where("userId", isEqualTo: sharedPreferences.getString("loggedInUserId"))
-          .getDocuments()
-          .then((value) => value.documents.length != 0 ? isAdmin = true : isAdmin = false);
+      FirebaseUser user = await FirebaseAuth.instance.currentUser();
+      bool userExists = false;
+      if (user != null) {
+        await FirebaseAuth.instance.fetchSignInMethodsForEmail(email: user.email).then((value) {
+          value.length == 0 ? userExists = false : userExists = true;
+        });
+      }
+      if (userExists) {
+        map['loggedInUserId'] = true;
+        await Firestore.instance
+            .collection("admins")
+            .where("userId", isEqualTo: sharedPreferences.getString("loggedInUserId"))
+            .getDocuments()
+            .then((value) => value.documents.length != 0 ? isAdmin = true : isAdmin = false);
+      } else {
+        map['loggedInUserId'] = false;
+      }
     }
     if (sharedPreferences.getString("chosenSportSchool") != null) {
-      map['chosenSportSchool'] = true;
+      SportSchool sportSchool = SportSchool.sportSchoolFromMap(jsonDecode(sharedPreferences.get("chosenSportSchool")));
+      var ref = await Firestore.instance.collection("sportSchools").document(sportSchool.id).get();
+      if (ref.exists) {
+        map['chosenSportSchool'] = true;
+      }
     }
     if (sharedPreferences.getString("chosenSocialProfile") != null) {
-      map['chosenSocialProfile'] = true;
+      Map aux = jsonDecode(sharedPreferences.get("chosenSocialProfile"));
+      SocialProfile profile = SocialProfile.socialProfileFromMap(aux);
+      profile.id = aux['id'];
+      var ref = await Firestore.instance.collection("socialProfiles").document(profile.id).get();
+      if (ref.exists) {
+        map['chosenSocialProfile'] = true;
+      }
     }
 
     return map;

@@ -113,7 +113,12 @@ class _AcceptRejectProfilesState extends State<AcceptRejectProfiles> {
                     "Rol: ",
                     style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                   ),
-                  Text(profile.role, style: TextStyle(fontSize: 15))
+                  profile.role == "STUDENT"
+                      ? Text("Alumno", style: TextStyle(fontSize: 15))
+                      : Text(
+                          "Entrenador",
+                          style: TextStyle(fontSize: 15),
+                        )
                 ],
               )
             ],

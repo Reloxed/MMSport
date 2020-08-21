@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import "package:flutter/material.dart";
+import 'package:mmsport/constants/constants.dart';
 import 'package:mmsport/models/socialProfile.dart';
 import 'package:mmsport/models/sportSchool.dart';
 import 'package:mmsport/navigations/navigations.dart';
@@ -55,6 +57,9 @@ class _ChooseSocialProfileState extends State<ChooseSocialProfile> {
                   }),
               title: const Text("Perfiles sociales"),
               centerTitle: true,
+              actions: <Widget>[
+                _logoutButton()
+              ],
             ),
             body: Center(
               child: SingleChildScrollView(
@@ -142,5 +147,24 @@ class _ChooseSocialProfileState extends State<ChooseSocialProfile> {
         itemBuilder: (context, int index) {
           return _cardView(snapshot.elementAt(index));
         });
+  }
+
+  Widget _logoutButton() {
+    return IconButton(
+      onPressed: () {
+        _logout();
+      },
+      icon: new IconTheme(
+          data: new IconThemeData(
+            color: Colors.white,
+          ),
+          child: Icon(Icons.power_settings_new)),
+    );
+  }
+
+  void _logout() async {
+    deleteLoggedInUserId();
+    await FirebaseAuth.instance.signOut();
+    logout(context);
   }
 }

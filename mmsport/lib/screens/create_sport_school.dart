@@ -216,7 +216,11 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
             if (_formKey.currentState.validate() && imageSchool != null) {
               _controller.animateToPage(1, duration: const Duration(milliseconds: 400), curve: Curves.easeInOut);
             } else {
-              errorDialog(context, "Hay errores, corríjalos.");
+              if(imageSchool == null){
+                errorDialog(context, "El logotipo es obligatorio.");
+              } else {
+                errorDialog(context, "Hay errores, corríjalos.");
+              }
             }
           },
           elevation: 3.0,
@@ -368,14 +372,16 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
         alignment: Alignment.bottomCenter,
         child: RaisedButton(
           onPressed: () async {
-            if (_formKey2.currentState.validate() && imageProfile != null) {
+            if (_formKey2.currentState.validate()) {
+              if(imageProfile != null){
               loadingDialog(context);
               _uploadAndCreate();
               Navigator.of(context, rootNavigator: true).pop();
               confirmDialogOnCreateSchool(
                   context, "Escuela y perfil creados, espere a la confirmación de la administración.");
-            } else {
-              errorDialog(context, "Hay errores, corríjalos.");
+              } else {
+                errorDialog(context, "La fotografía es obligatoria para los directores.");
+              }
             }
           },
           elevation: 3.0,

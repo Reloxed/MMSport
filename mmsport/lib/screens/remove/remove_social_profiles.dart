@@ -217,8 +217,15 @@ class _RemoveSocialProfilesState extends State<RemoveSocialProfiles> {
 
   Widget _listItem(SocialProfile profile) {
     return ListTile(
-      onTap: () {
-        confirmDelete(context, profile);
+      onTap: () async {
+        if (profile.role == "TRAINER") {
+          await Firestore.instance.collection("groups").where("trainerId", isEqualTo: profile.id).getDocuments().then(
+              (value) => value.documents.length == 0
+                  ? confirmDelete(context, profile)
+                  : errorDialog(context, "Este entrenador está asignado a un grupo, no se puede eliminar."));
+        } else {
+          confirmDelete(context, profile);
+        }
       },
       title: Text(
         profile.name,

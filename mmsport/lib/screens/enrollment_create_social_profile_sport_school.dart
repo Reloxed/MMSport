@@ -9,8 +9,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mmsport/components/dialogs.dart';
 import 'package:mmsport/models/socialProfile.dart';
 import 'package:mmsport/models/sportSchool.dart';
+import 'package:mmsport/navigations/navigations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class EnrollmentCreateSocialProfileSportSchool extends StatefulWidget {
@@ -34,10 +36,7 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
   @override
   Widget build(BuildContext context) {
     return Material(
-        child: Scaffold(
-            body: Container(
-                padding: EdgeInsets.symmetric(horizontal: 30),
-                child: _studentProfileForm())));
+        child: Scaffold(body: Container(padding: EdgeInsets.symmetric(horizontal: 30), child: _studentProfileForm())));
   }
 
   // Parent widget for the second page (director profile creation)
@@ -51,15 +50,15 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
             _profileImage(),
             Center(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    _nameProfileField(),
-                    _firstSurnameProfileField(),
-                    _secondSurnameProfileField(),
-                    chooseTypeOfSocialProfile()
-                  ],
-                )),
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                _nameProfileField(),
+                _firstSurnameProfileField(),
+                _secondSurnameProfileField(),
+                chooseTypeOfSocialProfile()
+              ],
+            )),
             Column(
               mainAxisAlignment: MainAxisAlignment.end,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -91,11 +90,11 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
                   child: ClipOval(
                       child: (imageProfile != null)
                           ? Image.file(
-                        imageProfile,
-                        fit: BoxFit.cover,
-                        width: 150,
-                        height: 150,
-                      )
+                              imageProfile,
+                              fit: BoxFit.cover,
+                              width: 150,
+                              height: 150,
+                            )
                           : Icon(Icons.camera_alt, size: 100.0))),
             )));
   }
@@ -177,7 +176,19 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
         child: RaisedButton(
           onPressed: () async {
             if (_formKey.currentState.validate()) {
-              _uploadAndCreate();
+              if (socialProfileRole == "STUDENT" || (socialProfileRole == "TRAINER" && imageProfile != null)) {
+                loadingDialog(context);
+                _uploadAndCreate();
+                Navigator.of(context, rootNavigator: true).pop();
+                acceptDialogCreateProfile(
+                    context, "Perfil social creado con éxito, espere a ser aceptado por el director.");
+              } else {
+                if(socialProfileRole == "TRAINER" && imageProfile == null){
+                  errorDialog(context, "La imagen de perfil es obligatoria para los entrenadores.");
+                } else {
+                  errorDialog(context, "Hay errores, corríjalos.");
+                }
+              }
             }
           },
           elevation: 3.0,
@@ -203,17 +214,8 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
       await uploadPicProfile(context);
     }
     FirebaseUser firebaseUser = await FirebaseAuth.instance.currentUser();
-    SocialProfile socialProfile = new SocialProfile(
-        "",
-        firebaseUser.uid,
-        nameProfile,
-        firstSurnameProfile,
-        secondSurnameProfile,
-        socialProfileRole,
-        "PENDING",
-        urlProfile,
-        sportSchoolId,
-        "");
+    SocialProfile socialProfile = new SocialProfile("", firebaseUser.uid, nameProfile, firstSurnameProfile,
+        secondSurnameProfile, socialProfileRole, "PENDING", urlProfile, sportSchoolId, "");
     DocumentReference ref = await databaseReference.collection("socialProfiles").add({
       "userAccountId": socialProfile.userAccountId,
       "name": socialProfile.name,
@@ -225,8 +227,10 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
       "sportSchoolId": socialProfile.sportSchoolId,
       "groupId": socialProfile.groupId
     });
-    await databaseReference.collection("socialProfiles").document(ref.documentID).setData(
-        {"id": ref.documentID}, merge: true);
+    await databaseReference
+        .collection("socialProfiles")
+        .document(ref.documentID)
+        .setData({"id": ref.documentID}, merge: true);
   }
 
   String getRandomString(int length) {
@@ -240,7 +244,7 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
 
   Future uploadPicProfile(BuildContext context) async {
     String fileName;
-    if(secondSurnameProfile != null) {
+    if (secondSurnameProfile != null) {
       fileName = nameProfile + firstSurnameProfile + secondSurnameProfile;
     } else {
       fileName = nameProfile + firstSurnameProfile;
@@ -253,12 +257,11 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
   }
 
   void _handleRadioValueChange(dynamic value) {
-    if(value == "Alumno"){
+    if (value == "Alumno") {
       setState(() {
         socialProfileRole = "STUDENT";
       });
-    }
-    else{
+    } else {
       setState(() {
         socialProfileRole = "TRAINER";
       });
@@ -283,16 +286,44 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
         onChanged: _handleRadioValueChange,
         validators: [_checkSelectedRadioButton],
         options: ["Entrenador", "Alumno"]
-            .map((lang) =>
-            FormBuilderFieldOption(
-              value: lang,
-              child: Text(
-                '$lang',
-                style: TextStyle(fontSize: 16.0),
-              ),
-            ))
+            .map((lang) => FormBuilderFieldOption(
+                  value: lang,
+                  child: Text(
+                    '$lang',
+                    style: TextStyle(fontSize: 16.0),
+                  ),
+                ))
             .toList(growable: false),
       ),
     );
+  }
+
+  dynamic acceptDialogCreateProfile(BuildContext context, String message) {
+    return showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext builder) {
+          return AlertDialog(
+            title: new IconTheme(
+              data: new IconThemeData(
+                color: Colors.green,
+              ),
+              child: Icon(Icons.thumb_up),
+            ),
+            content: SingleChildScrollView(child: ListBody(children: <Widget>[Center(child: Text(message))])),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0))),
+            actions: <Widget>[
+              FlatButton(
+                color: Colors.white,
+                textColor: Colors.blueAccent,
+                onPressed: () {
+                  navigateToChooseSportSchool(context);
+                  Navigator.of(context, rootNavigator: true).pop();
+                },
+                child: Text("Entendido"),
+              )
+            ],
+          );
+        });
   }
 }
