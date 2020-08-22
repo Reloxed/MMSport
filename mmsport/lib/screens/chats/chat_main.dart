@@ -16,7 +16,7 @@ class ChatMain extends StatefulWidget {
 
 class _ChatMain extends State<ChatMain> {
   SocialProfile chosenSocialProfile;
-  Map<SocialProfile, String> openChats = new Map();
+  Map<SocialProfile, String> openChats = new Map(); // El otro socialProfile, y la ID del chatRoom
 
   Future<SocialProfile> _loadData() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
@@ -32,6 +32,7 @@ class _ChatMain extends State<ChatMain> {
     chosenSocialProfile = SocialProfile.socialProfileFromMap(aux);
     chosenSocialProfile.id = aux['id'];
     Set<String> ids = new Set();
+    Set<String> chatRoomIds = new Set();
     await Firestore.instance
         .collection("chatRooms")
         .where("users", arrayContains: chosenSocialProfile.id)
@@ -42,6 +43,7 @@ class _ChatMain extends State<ChatMain> {
               } else {
                 ids.add(document.data['users'][0]);
               }
+              chatRoomIds.add(document.documentID);
             }));
     openChats.clear();
     for (String id in ids) {
@@ -50,28 +52,6 @@ class _ChatMain extends State<ChatMain> {
         auxProfile = SocialProfile.socialProfileFromMap(value.data);
         auxProfile.id = id;
       });
-      String lastMessage;
-      var existsDoc =
-          await Firestore.instance.collection("chatRooms").document(chosenSocialProfile.id + "_" + id).get();
-      if (existsDoc.exists) {
-        await Firestore.instance
-            .collection("chatRooms")
-            .document(chosenSocialProfile.id + "_" + id)
-            .collection("messages")
-            .orderBy("sentDate", descending: true)
-            .snapshots()
-            .first
-            .then((value) => value.documents.length != 0 ? lastMessage = value.documents[0].data['message'] : null);
-      } else {
-        await Firestore.instance
-            .collection("chatRooms")
-            .document(id + "_" + chosenSocialProfile.id)
-            .collection("messages")
-            .orderBy("sentDate", descending: true)
-            .snapshots()
-            .first
-            .then((value) => value.documents.length != 0 ? lastMessage = value.documents[0].data['message'] : null);
-      }
       bool contains = false;
       for (SocialProfile p in openChats.keys) {
         if (auxProfile.id == p.id) {
@@ -80,7 +60,17 @@ class _ChatMain extends State<ChatMain> {
         }
       }
       if (contains == false) {
-        openChats.putIfAbsent(auxProfile, () => lastMessage);
+        String chatRoomId;
+        for (String i in chatRoomIds) {
+          List<String> aux = i.split("_");
+          for (String s in aux) {
+            if (s == auxProfile.id) {
+              chatRoomId = i;
+              break;
+            }
+          }
+        }
+        openChats.putIfAbsent(auxProfile, () => chatRoomId);
       }
     }
     return openChats;
@@ -176,7 +166,7 @@ class _ChatMain extends State<ChatMain> {
         });
   }
 
-  Widget _listItemOpenChat(SocialProfile socialProfile, String lastMessage) {
+  Widget _listItemOpenChat(SocialProfile socialProfile, String chatRoomId) {
     return InkWell(
       child: Container(
           padding: EdgeInsets.all(10.0),
@@ -214,10 +204,24 @@ class _ChatMain extends State<ChatMain> {
                                     style: TextStyle(fontSize: 16))
                                 : Text(socialProfile.name + " " + socialProfile.firstSurname,
                                     overflow: TextOverflow.ellipsis, softWrap: true, style: TextStyle(fontSize: 16)),
-                            lastMessage != null
-                                ? Text(lastMessage,
-                                    overflow: TextOverflow.ellipsis, softWrap: true, style: TextStyle(fontSize: 13))
-                                : SizedBox.shrink()
+                            StreamBuilder(
+                              stream: Firestore.instance
+                                  .collection("chatRooms")
+                                  .document(chatRoomId)
+                                  .collection("messages")
+                                  .orderBy("sentDate", descending: true)
+                                  .snapshots(),
+                              builder: (context, listSnapshot) {
+                                if (listSnapshot.hasData) {
+                                  if (listSnapshot.data.documents.length > 0)
+                                    return Text(listSnapshot.data.documents.elementAt(0)['message']);
+                                  else
+                                    return SizedBox.shrink();
+                                } else {
+                                  return SizedBox.shrink();
+                                }
+                              },
+                            )
                           ]))),
               Container(child: Icon(Icons.chevron_right))
             ]),
