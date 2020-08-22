@@ -18,6 +18,7 @@ class _ChatRoom extends State<ChatRoom> {
   ChatRoomModel chosenChatRoom;
   SocialProfile socialProfileToChat;
   SocialProfile loggedSocialProfile;
+  bool isButtonEnabled = true;
   TextEditingController _textController = TextEditingController();
 
   Future<ChatRoomModel> _loadDataChatRoom() async {
@@ -80,15 +81,15 @@ class _ChatRoom extends State<ChatRoom> {
                             children: <Widget>[
                               snapshot.data[1].urlImage != null
                                   ? CircleAvatar(
-                                      radius: 30,
+                                      radius: 24,
                                       backgroundImage: NetworkImage(snapshot.data[1].urlImage),
                                     )
                                   : CircleAvatar(
-                                      radius: 30,
+                                      radius: 24,
                                       child: ClipOval(
                                           child: Icon(
                                         Icons.person,
-                                        size: 50,
+                                        size: 44,
                                       ))),
                               SizedBox(
                                   width: MediaQuery.of(context).size.width * 0.55,
@@ -138,22 +139,26 @@ class _ChatRoom extends State<ChatRoom> {
                               child: TextField(
                                 controller: _textController,
                                 textCapitalization: TextCapitalization.sentences,
-                                decoration: InputDecoration.collapsed(hintText: "Send a message"),
+                                decoration: InputDecoration.collapsed(hintText: "Enviar mensaje..."),
                               ),
                             ),
                             IconButton(
                               icon: Icon(Icons.send),
                               iconSize: 25.0,
                               color: Colors.blueAccent,
-                              onPressed: () {
-                                ChatMessage chatMessage =
-                                    new ChatMessage(_textController.text, loggedSocialProfile.id, Timestamp.now());
-                                Firestore.instance
-                                    .collection("chatRooms")
-                                    .document(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
-                                    .collection("messages")
-                                    .add(chatMessage.chatMessageToJson())
-                                    .then((value) => _textController.clear());
+                              onPressed: () async {
+                                if (_textController.text.isNotEmpty && isButtonEnabled == true) {
+                                  isButtonEnabled = false;
+                                  ChatMessage chatMessage =
+                                      new ChatMessage(_textController.text, loggedSocialProfile.id, Timestamp.now());
+                                  await Firestore.instance
+                                      .collection("chatRooms")
+                                      .document(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
+                                      .collection("messages")
+                                      .add(chatMessage.chatMessageToJson())
+                                      .then((value) => _textController.clear());
+                                  isButtonEnabled = true;
+                                }
                               },
                             )
                           ],
