@@ -61,7 +61,7 @@ class _ChatMain extends State<ChatMain> {
             .orderBy("sentDate", descending: true)
             .snapshots()
             .first
-            .then((value) => lastMessage = value.documents[0].data['message']);
+            .then((value) => value.documents.length != 0 ? lastMessage = value.documents[0].data['message'] : null);
       } else {
         await Firestore.instance
             .collection("chatRooms")
@@ -70,7 +70,7 @@ class _ChatMain extends State<ChatMain> {
             .orderBy("sentDate", descending: true)
             .snapshots()
             .first
-            .then((value) => lastMessage = value.documents[0].data['message']);
+            .then((value) => value.documents.length != 0 ? lastMessage = value.documents[0].data['message'] : null);
       }
       bool contains = false;
       for (SocialProfile p in openChats.keys) {
@@ -184,16 +184,16 @@ class _ChatMain extends State<ChatMain> {
             Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
               socialProfile.urlImage != null
                   ? CircleAvatar(
-                      radius: 30,
+                      radius: 24,
                       backgroundImage: NetworkImage(socialProfile.urlImage),
                     )
                   : CircleAvatar(
-                radius: 30,
+                      radius: 24,
                       child: ClipOval(
                           child: Icon(
-                      Icons.person,
-                      size: 50,
-                    ))),
+                        Icons.person,
+                        size: 44,
+                      ))),
               SizedBox(
                   width: MediaQuery.of(context).size.width * 0.7,
                   child: Container(
@@ -211,11 +211,13 @@ class _ChatMain extends State<ChatMain> {
                                         socialProfile.secondSurname,
                                     overflow: TextOverflow.ellipsis,
                                     softWrap: true,
-                                    style: TextStyle(fontSize: 21))
+                                    style: TextStyle(fontSize: 16))
                                 : Text(socialProfile.name + " " + socialProfile.firstSurname,
-                                    overflow: TextOverflow.ellipsis, softWrap: true, style: TextStyle(fontSize: 21)),
-                            Text(lastMessage,
-                                overflow: TextOverflow.ellipsis, softWrap: true, style: TextStyle(fontSize: 13))
+                                    overflow: TextOverflow.ellipsis, softWrap: true, style: TextStyle(fontSize: 16)),
+                            lastMessage != null
+                                ? Text(lastMessage,
+                                    overflow: TextOverflow.ellipsis, softWrap: true, style: TextStyle(fontSize: 13))
+                                : SizedBox.shrink()
                           ]))),
               Container(child: Icon(Icons.chevron_right))
             ]),
@@ -271,16 +273,16 @@ class _ChatMain extends State<ChatMain> {
             Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
               socialProfile["urlImage"] != null
                   ? CircleAvatar(
-                      radius: 30,
+                      radius: 24,
                       backgroundImage: NetworkImage(socialProfile["urlImage"]),
                     )
                   : CircleAvatar(
-                radius: 30,
+                      radius: 24,
                       child: ClipOval(
                           child: Icon(
-                      Icons.person,
-                      size: 50,
-                    ))),
+                        Icons.person,
+                        size: 44,
+                      ))),
               SizedBox(
                   width: MediaQuery.of(context).size.width * 0.7,
                   child: Container(
@@ -298,9 +300,9 @@ class _ChatMain extends State<ChatMain> {
                                         socialProfile["secondSurname"],
                                     overflow: TextOverflow.ellipsis,
                                     softWrap: true,
-                                    style: TextStyle(fontSize: 21))
+                                    style: TextStyle(fontSize: 16))
                                 : Text(socialProfile["name"] + " " + socialProfile["firstSurname"],
-                                    overflow: TextOverflow.ellipsis, softWrap: true, style: TextStyle(fontSize: 21)),
+                                    overflow: TextOverflow.ellipsis, softWrap: true, style: TextStyle(fontSize: 16)),
                           ]))),
               Container(child: Icon(Icons.chevron_right))
             ]),
