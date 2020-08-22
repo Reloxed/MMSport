@@ -58,6 +58,10 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
   Widget build(BuildContext context) {
     return Material(
         child: Scaffold(
+          appBar: AppBar(
+            centerTitle: true,
+            title: Text("Crear grupo"),
+          ),
             body: Center(
       child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 30),
@@ -129,9 +133,11 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
     IconData icon;
     icon = Icons.group;
     return Container(
+      margin: EdgeInsets.only(top: 8.0, bottom: 4.0),
       child: Column(
         children: <Widget>[
           TextFormField(
+            textCapitalization: TextCapitalization.words,
             validator: (v) {
               if (v.isEmpty)
                 return "Este campo no puede estar vacío";
@@ -177,7 +183,11 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
           radius: 56,
           backgroundImage: NetworkImage(selectedTrainer.urlImage),
         ),
+        selectedTrainer.secondSurname == null ?
         Text(
+          selectedTrainer.name + " " + selectedTrainer.firstSurname,
+          style: TextStyle(fontSize: 16, color: Colors.blueAccent),
+        ) : Text(
           selectedTrainer.name + " " + selectedTrainer.firstSurname + " " + selectedTrainer.secondSurname,
           style: TextStyle(fontSize: 16, color: Colors.blueAccent),
         ),
@@ -239,22 +249,55 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
         onConfirmed: () => {showStartTimeSchedulePicker()});
   }
 
-  void showStartTimeSchedulePicker() {
-    showMaterialTimePicker(
-        title: "Hora inicio",
-        context: context,
-        selectedTime: selectedStartTimeSchedule,
-        onChanged: (value) => setState(() => selectedStartTimeSchedule = value),
-        onConfirmed: () => {showEndTimeSchedulePicker()});
+  void showStartTimeSchedulePicker() async{
+
+    TimeOfDay selectedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+      cancelText: 'CANCELAR',
+      confirmText: 'CONFIRMAR',
+      helpText: 'Seleccione la hora de inicio',
+      initialEntryMode: TimePickerEntryMode.dial,
+      builder: (BuildContext context, Widget child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+          child: child,
+        );
+      },
+    );
+    setState(() {
+      selectedStartTimeSchedule = selectedTime;
+    });
+    showEndTimeSchedulePicker();
   }
 
-  void showEndTimeSchedulePicker() {
-    showMaterialTimePicker(
-        title: "Hora fin",
-        context: context,
-        selectedTime: selectedEndTimeSchedule,
-        onChanged: (value) => setState(() => selectedEndTimeSchedule = value),
-        onConfirmed: () => {addNewSchedule()});
+  void showEndTimeSchedulePicker() async {
+
+    TimeOfDay selectedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+      cancelText: 'CANCELAR',
+      confirmText: 'CONFIRMAR',
+      helpText: 'Seleccione la hora de fin',
+      initialEntryMode: TimePickerEntryMode.dial,
+      builder: (BuildContext context, Widget child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+          child: child,
+        );
+      },
+    );
+    if (selectedTime != null) {
+        if(fromTimeOfDayToDouble(selectedStartTimeSchedule) > fromTimeOfDayToDouble(selectedTime)){
+          errorDialog(context, "La hora de fin debe de ser superior a la hora de inicio");
+        }
+        else{
+          setState(() {
+            selectedEndTimeSchedule = selectedTime;
+          });
+          addNewSchedule();
+        }
+    }
   }
 
   void addNewSchedule() {
@@ -314,10 +357,8 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
           .collection("groups")
           .document(ref.documentID)
           .setData({"id": ref.documentID}, merge: true);
-      await databaseReference
-          .collection("socialProfiles")
-          .document(newGroup.trainerId)
-          .setData({"groupId": ref.documentID}, merge: true);
+
+      Navigator.pop(context);
 
     }
   }

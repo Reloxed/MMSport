@@ -8,6 +8,7 @@ import 'package:mmsport/models/group.dart';
 import 'package:mmsport/models/schedule.dart';
 import 'package:mmsport/models/socialProfile.dart';
 import 'package:mmsport/models/sportSchool.dart';
+import 'package:mmsport/navigations/navigations.dart';
 import 'package:mmsport/screens/sport_school_group_details.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -104,128 +105,86 @@ class _ListSportSchoolGroupsState extends State<ListSportSchoolGroups> {
   Widget build(BuildContext context) {
     return Material(
         child: FutureBuilder<List<dynamic>>(
-          future: Future.wait([_getAllGroups(), _getSocialProfileLogued(), _getSportSchool()]),
-          builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshots) {
-            if (snapshots.hasData) {
-              return Scaffold(
-                  appBar: PreferredSize(
-                    preferredSize: Size.fromHeight(MediaQuery
-                        .of(context)
-                        .size
-                        .height * 0.15),
-                    child: AppBar(
-                      flexibleSpace: FlexibleSpaceBar(
-                          titlePadding: EdgeInsets.all(10.0),
-                          centerTitle: true,
-                          title: Center(
-                              child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: <Widget>[
-                                Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
-                                  Container(
-                                    padding: EdgeInsets.only(left: MediaQuery.of(context).size.width * 0.1),
-                                    child: CircleAvatar(radius: 40, backgroundImage: NetworkImage(snapshots.data[2].urlLogo)),
-                                  ),
-                                  SizedBox(
-                                      width: MediaQuery
-                                          .of(context)
-                                          .size
-                                          .width * 0.58,
-                                      child: Container(
-                                          padding: EdgeInsets.all(10.0),
-                                          child: Column(
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: <Widget>[
-                                                Text(
-                                                  snapshots.data[2].name,
-                                                  style: TextStyle(color: Colors.white, fontSize: 30),
-                                                  overflow: TextOverflow.ellipsis,
-                                                  softWrap: true,
-                                                ),
-                                                Text(
-                                                    snapshots.data[1].name +
-                                                        " " +
-                                                        snapshots.data[1].firstSurname +
-                                                        " " +
-                                                        snapshots.data[1].secondSurname,
-                                                    style: TextStyle(color: Colors.white, fontStyle: FontStyle.italic),
-                                                    overflow: TextOverflow.ellipsis,
-                                                    softWrap: true)
-                                              ]))),
-                                ]),
-                              ]))),
-                      leading: IconButton(
-                        icon: Icon(Icons.arrow_back),
-                        onPressed: () async {
-                          Navigator.pop(context);
-                        },
-                      ),
+      future: Future.wait([_getAllGroups(), _getSocialProfileLogued(), _getSportSchool()]),
+      builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshots) {
+        if (snapshots.hasData) {
+          return Scaffold(
+            appBar: AppBar(
+              title: Text("Mis grupos"),
+              centerTitle: true,
+            ),
+            body: snapshots.data[0].length > 0
+                ? Container(
+                    child: ListView.builder(
+                    itemBuilder: (context, index) {
+                      if (snapshots.data[0].values.elementAt(index).secondSurname == null) {
+                        return ListTile(
+                            onTap: () {
+                              setSportSchoolGroupToView(snapshots.data[0].keys.elementAt(index));
+                              Navigator.of(context)
+                                  .push(MaterialPageRoute(builder: (context) => SportSchoolGroupDetails()))
+                                  .then((value) => setState(() {}));
+                            },
+                            title: Text(
+                              snapshots.data[0].keys.elementAt(index).name,
+                              style: TextStyle(fontSize: 20.0),
+                            ),
+                            subtitle: Text(
+                                'Entrenador: ' +
+                                    snapshots.data[0].values.elementAt(index).name +
+                                    ' ' +
+                                    snapshots.data[0].values.elementAt(index).firstSurname,
+                                style: TextStyle(fontSize: 16.0)));
+                      } else {
+                        return ListTile(
+                            onTap: () {
+                              setSportSchoolGroupToView(snapshots.data[0].keys.elementAt(index));
+                              Navigator.of(context)
+                                  .push(MaterialPageRoute(builder: (context) => SportSchoolGroupDetails()))
+                                  .then((value) => setState(() {}));
+                            },
+                            title: Text(
+                              snapshots.data[0].keys.elementAt(index).name,
+                              style: TextStyle(fontSize: 20.0),
+                            ),
+                            subtitle: Text(
+                                'Entrenador: ' +
+                                    snapshots.data[0].values.elementAt(index).name +
+                                    ' ' +
+                                    snapshots.data[0].values.elementAt(index).firstSurname +
+                                    ' ' +
+                                    snapshots.data[0].values.elementAt(index).secondSurname,
+                                style: TextStyle(fontSize: 16.0)));
+                      }
+                    },
+                    itemCount: snapshots.data[0].length,
+                  ))
+                : Container(
+                    child: Center(
+                      child: Text("No se encontraron grupos", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
                     ),
                   ),
-                  body: Container(
-                      child: ListView.builder(
-                        itemBuilder: (context, index) {
-                          if (snapshots.data[0].values
-                              .elementAt(index)
-                              .secondSurname == null) {
-                            return ListTile(
-                                onTap: () {
-                                  setSportSchoolGroupToView(snapshots.data[0].keys.elementAt(index));
-                                  Navigator.of(context)
-                                      .push(MaterialPageRoute(builder: (context) => SportSchoolGroupDetails()))
-                                      .then((value) => setState(() {}));
-                                },
-                                title: Text(
-                                  snapshots.data[0].keys
-                                      .elementAt(index)
-                                      .name,
-                                  style: TextStyle(fontSize: 20.0),
-                                ),
-                                subtitle: Text(
-                                    'Entrenador: ' +
-                                        snapshots.data[0].values
-                                            .elementAt(index)
-                                            .name +
-                                        ' ' +
-                                        snapshots.data[0].values
-                                            .elementAt(index)
-                                            .firstSurname,
-                                    style: TextStyle(fontSize: 16.0)));
-                          } else {
-                            return ListTile(
-                                onTap: () {
-                                  setSportSchoolGroupToView(snapshots.data[0].keys.elementAt(index));
-                                  Navigator.of(context)
-                                      .push(MaterialPageRoute(builder: (context) => SportSchoolGroupDetails()))
-                                      .then((value) => setState(() {}));
-                                },
-                                title: Text(
-                                  snapshots.data[0].keys
-                                      .elementAt(index)
-                                      .name,
-                                  style: TextStyle(fontSize: 20.0),
-                                ),
-                                subtitle: Text(
-                                    'Entrenador: ' +
-                                        snapshots.data[0].values
-                                            .elementAt(index)
-                                            .name +
-                                        ' ' +
-                                        snapshots.data[0].values
-                                            .elementAt(index)
-                                            .firstSurname +
-                                        ' ' +
-                                        snapshots.data[0].values
-                                            .elementAt(index)
-                                            .secondSurname,
-                                    style: TextStyle(fontSize: 16.0)));
-                          }
-                        },
-                        itemCount: snapshots.data[0].length,
-                      )));
-            } else {
-              return Container();
-            }
-          },
-        ));
+            floatingActionButton: FloatingActionButton(
+              onPressed: null,
+              tooltip: 'Inscribirme en una escuela',
+              child: IconButton(
+                onPressed: () => navigateToCreateSportSchoolGroup(context).then((value) {
+                  setState(() {
+
+                  });
+                }),
+                icon: new IconTheme(
+                    data: new IconThemeData(
+                      color: Colors.white,
+                    ),
+                    child: Icon(Icons.add)),
+              ),
+            ),
+          );
+        } else {
+          return Container();
+        }
+      },
+    ));
   }
 }

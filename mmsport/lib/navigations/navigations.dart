@@ -75,8 +75,8 @@ void navigateToAcceptRejectSchools(BuildContext context){
   Navigator.of(context).push(MaterialPageRoute(builder: (context) => AcceptRejectSchools()));
 }
 
-void navigateToCreateSportSchoolGroup(BuildContext context) {
-  Navigator.of(context).push(MaterialPageRoute(builder: (context) => CreateSportSchoolGroup()));
+Future<dynamic> navigateToCreateSportSchoolGroup(BuildContext context) {
+  return Navigator.of(context).push(MaterialPageRoute(builder: (context) => CreateSportSchoolGroup()));
 }
 
 void navigateToListSportSchoolGroups(BuildContext context) {

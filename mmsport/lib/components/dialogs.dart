@@ -4,7 +4,6 @@ import 'dart:ffi';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:mmsport/models/event.dart';
-import 'package:mmsport/models/group.dart';
 import 'package:mmsport/models/socialProfile.dart';
 import 'package:mmsport/models/sportSchool.dart';
 import 'package:mmsport/navigations/navigations.dart';
@@ -308,34 +307,52 @@ class AddStudentsToGroupDialogState extends State<AddStudentsToGroupDialog> {
                                   itemCount: snapshot.data.length,
                                   itemBuilder: (context, index) {
                                     return CheckboxListTile(
-                                      selected: studentsEdited.contains(snapshot.data[index]),
-                                      value: studentsEdited.contains(snapshot.data[index]),
-                                      onChanged: (bool value) {
-                                        if (value) {
-                                          setState(() {
-                                            firstLoad = false;
-                                            studentsEdited.add(snapshot.data[index]);
-                                          });
-                                        } else {
-                                          setState(() {
-                                            firstLoad = false;
-                                            studentsEdited.remove(snapshot.data[index]);
-                                          });
-                                        }
-                                      },
-                                      title: Text(
-                                        snapshot.data[index].name +
-                                            " " +
-                                            snapshot.data[index].firstSurname +
-                                            " " +
-                                            snapshot.data[index].secondSurname,
-                                        style: TextStyle(fontSize: 16.0),
-                                      ),
-                                      secondary: CircleAvatar(
-                                        backgroundImage: NetworkImage(snapshot.data[index].urlImage),
-                                        radius: 16.0,
-                                      ),
-                                    );
+                                        selected: studentsEdited.contains(snapshot.data[index]),
+                                        value: studentsEdited.contains(snapshot.data[index]),
+                                        onChanged: (bool value) {
+                                          if (value) {
+                                            setState(() {
+                                              firstLoad = false;
+                                              studentsEdited.add(snapshot.data[index]);
+                                            });
+                                          } else {
+                                            setState(() {
+                                              firstLoad = false;
+                                              studentsEdited.remove(snapshot.data[index]);
+                                            });
+                                          }
+                                        },
+                                        title: snapshot.data[index].secondSurname == null
+                                            ? Text(
+                                                snapshot.data[index].name + " " + snapshot.data[index].firstSurname,
+                                                style: TextStyle(fontSize: 16.0),
+                                              )
+                                            : Text(
+                                                snapshot.data[index].name +
+                                                    " " +
+                                                    snapshot.data[index].firstSurname +
+                                                    " " +
+                                                    snapshot.data[index].secondSurname,
+                                                style: TextStyle(fontSize: 16.0),
+                                              ),
+                                        secondary: snapshot.data[index].urlImage != null
+                                            ? CircleAvatar(
+                                                radius: 20,
+                                                child: ClipOval(
+                                                  child: Image.network(
+                                                    snapshot.data[index].urlImage,
+                                                    fit: BoxFit.cover,
+                                                    width: 92,
+                                                    height: 92,
+                                                  ),
+                                                ))
+                                            : CircleAvatar(
+                                                radius: 20,
+                                                child: ClipOval(
+                                                    child: Icon(
+                                                  Icons.person,
+                                                  size: 24,
+                                                ))));
                                   }),
                             )
                           ],
@@ -359,9 +376,9 @@ class SelectTrainerGroupDialog extends StatefulWidget {
 }
 
 class SelectTrainerGroupDialogState extends State<SelectTrainerGroupDialog> {
-  List<SocialProfile> groupTrainers;
+  List<SocialProfile> groupTrainers = [];
   SocialProfile trainerSelected;
-  bool firstLoad;
+  bool firstLoad = true;
 
   SelectTrainerGroupDialogState(SocialProfile trainerSelected) {
     this.trainerSelected = trainerSelected;
@@ -370,19 +387,21 @@ class SelectTrainerGroupDialogState extends State<SelectTrainerGroupDialog> {
   @override
   void initState() {
     super.initState();
-    groupTrainers = [];
-    firstLoad = true;
   }
 
   Future<List<SocialProfile>> loadTrainers() async {
     if (firstLoad) {
       SharedPreferences preferences = await SharedPreferences.getInstance();
-      Group group = Group.groupFromMapWithId(jsonDecode(preferences.get("sportSchoolGroupToView")));
+      Map aux = jsonDecode(preferences.get("chosenSportSchool"));
+      SportSchool sportSchool = SportSchool.sportSchoolFromMap(aux);
+      Map auxDirector = jsonDecode(preferences.get("chosenSocialProfile"));
+      SocialProfile director = SocialProfile.socialProfileFromMap(auxDirector);
+      director.id = auxDirector["id"];
       await Firestore.instance
           .collection("socialProfiles")
           .where('role', isEqualTo: 'TRAINER')
-          .where('role', isEqualTo: 'DIRECTOR')
-          .where('sportSchoolId', isEqualTo: group.sportSchoolId)
+          .where('status', isEqualTo: 'ACCEPTED')
+          .where('sportSchoolId', isEqualTo: sportSchool.id)
           .getDocuments()
           .then((value) {
         value.documents.forEach((element) {
@@ -395,6 +414,7 @@ class SelectTrainerGroupDialogState extends State<SelectTrainerGroupDialog> {
           }
           groupTrainers.add(newTrainer);
         });
+        groupTrainers.add(director);
       });
     }
     return groupTrainers;
@@ -438,18 +458,37 @@ class SelectTrainerGroupDialogState extends State<SelectTrainerGroupDialog> {
                                           trainerSelected = value;
                                         });
                                       },
-                                      title: Text(
-                                        snapshot.data[index].name +
-                                            " " +
-                                            snapshot.data[index].firstSurname +
-                                            " " +
-                                            snapshot.data[index].secondSurname,
-                                        style: TextStyle(fontSize: 16.0),
-                                      ),
-                                      secondary: CircleAvatar(
-                                        backgroundImage: NetworkImage(snapshot.data[index].urlImage),
-                                        radius: 16.0,
-                                      ),
+                                      title: snapshot.data[index].secondSurname == null
+                                          ? Text(
+                                              snapshot.data[index].name + " " + snapshot.data[index].firstSurname,
+                                              style: TextStyle(fontSize: 16.0),
+                                            )
+                                          : Text(
+                                              snapshot.data[index].name +
+                                                  " " +
+                                                  snapshot.data[index].firstSurname +
+                                                  " " +
+                                                  snapshot.data[index].secondSurname,
+                                              style: TextStyle(fontSize: 16.0),
+                                            ),
+                                      secondary: snapshot.data[index].urlImage != null
+                                          ? CircleAvatar(
+                                              radius: 20,
+                                              child: ClipOval(
+                                                child: Image.network(
+                                                  snapshot.data[index].urlImage,
+                                                  fit: BoxFit.cover,
+                                                  width: 92,
+                                                  height: 92,
+                                                ),
+                                              ))
+                                          : CircleAvatar(
+                                              radius: 20,
+                                              child: ClipOval(
+                                                  child: Icon(
+                                                Icons.person,
+                                                size: 24,
+                                              ))),
                                     );
                                   }),
                             )

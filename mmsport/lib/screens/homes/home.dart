@@ -95,7 +95,7 @@ class _Home extends State<Home> {
                                 Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
                                   CircleAvatar(radius: 28, backgroundImage: NetworkImage(snapshots.data[0].urlLogo)),
                                   SizedBox(
-                                      width: MediaQuery.of(context).size.width * 0.58,
+                                      width: MediaQuery.of(context).size.width * 0.64,
                                       child: Container(
                                           padding: EdgeInsets.all(10.0),
                                           child: Column(
