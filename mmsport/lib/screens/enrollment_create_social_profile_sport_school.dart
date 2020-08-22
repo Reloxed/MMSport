@@ -323,7 +323,7 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
                   navigateToChooseSportSchool(context);
                   Navigator.of(context, rootNavigator: true).pop();
                 },
-                child: Text("Entendido"),
+                child: Text("ENTENDIDO"),
               )
             ],
           );

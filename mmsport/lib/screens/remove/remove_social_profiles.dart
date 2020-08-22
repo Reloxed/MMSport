@@ -276,6 +276,14 @@ class _RemoveSocialProfilesState extends State<RemoveSocialProfiles> {
               FlatButton(
                 color: Colors.white,
                 textColor: Colors.blueAccent,
+                child: Text("Cancelar"),
+                onPressed: () {
+                  Navigator.of(context, rootNavigator: true).pop();
+                },
+              ),
+              FlatButton(
+                color: Colors.white,
+                textColor: Colors.blueAccent,
                 onPressed: () async {
                   setState(() {
                     firstLoad = false;
@@ -338,15 +346,7 @@ class _RemoveSocialProfilesState extends State<RemoveSocialProfiles> {
                   });
                   Navigator.of(context, rootNavigator: true).pop();
                 },
-                child: Text("Entendido"),
-              ),
-              FlatButton(
-                color: Colors.white,
-                textColor: Colors.blueAccent,
-                child: Text("Cancelar"),
-                onPressed: () {
-                  Navigator.of(context, rootNavigator: true).pop();
-                },
+                child: Text("ENTENDIDO", style: TextStyle(color: Colors.red),),
               )
             ],
           );

@@ -190,7 +190,7 @@ class _AcceptRejectProfilesState extends State<AcceptRejectProfiles> {
               FlatButton(
                 color: Colors.white,
                 textColor: Colors.blueAccent,
-                child: Text("Cancelar"),
+                child: Text("CANCELAR"),
                 onPressed: () async {
                   Navigator.pop(context, true);
                 },
@@ -198,7 +198,7 @@ class _AcceptRejectProfilesState extends State<AcceptRejectProfiles> {
               FlatButton(
                 color: Colors.white,
                 textColor: Colors.blueAccent,
-                child: Text("Aceptar"),
+                child: Text("ACEPTAR"),
                 onPressed: () async {
                   Map<String, dynamic> aux = new Map();
                   aux.putIfAbsent("status", () => "ACCEPTED");
@@ -233,7 +233,7 @@ class _AcceptRejectProfilesState extends State<AcceptRejectProfiles> {
               FlatButton(
                 color: Colors.white,
                 textColor: Colors.blueAccent,
-                child: Text("Cancelar"),
+                child: Text("CANCELAR"),
                 onPressed: () async {
                   Navigator.pop(context, true);
                 },
@@ -241,7 +241,7 @@ class _AcceptRejectProfilesState extends State<AcceptRejectProfiles> {
               FlatButton(
                 color: Colors.white,
                 textColor: Colors.blueAccent,
-                child: Text("Rechazar"),
+                child: Text("RECHAZAR", style: TextStyle(color: Colors.red),),
                 onPressed: () async {
                   await Firestore.instance.collection("socialProfiles").document(profile.id).delete();
                   Navigator.pop(context, true);

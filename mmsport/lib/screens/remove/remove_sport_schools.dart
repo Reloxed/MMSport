@@ -167,6 +167,14 @@ class _RemoveSportSchoolsState extends State<StatefulWidget> {
               FlatButton(
                 color: Colors.white,
                 textColor: Colors.blueAccent,
+                child: Text("Cancelar"),
+                onPressed: () {
+                  Navigator.of(context, rootNavigator: true).pop();
+                },
+              ),
+              FlatButton(
+                color: Colors.white,
+                textColor: Colors.blueAccent,
                 onPressed: () async {
                   setState(() {
                     firstLoad = false;
@@ -230,15 +238,7 @@ class _RemoveSportSchoolsState extends State<StatefulWidget> {
                   });
                   Navigator.of(context, rootNavigator: true).pop();
                 },
-                child: Text("Entendido"),
-              ),
-              FlatButton(
-                color: Colors.white,
-                textColor: Colors.blueAccent,
-                child: Text("Cancelar"),
-                onPressed: () {
-                  Navigator.of(context, rootNavigator: true).pop();
-                },
+                child: Text("ENTENDIDO", style: TextStyle(color: Colors.red),),
               )
             ],
           );

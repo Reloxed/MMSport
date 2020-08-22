@@ -196,7 +196,15 @@ class _AcceptRejectSchoolsState extends State<AcceptRejectSchools> {
               FlatButton(
                 color: Colors.white,
                 textColor: Colors.blueAccent,
-                child: Text("Aceptar"),
+                child: Text("CANCELAR"),
+                onPressed: () async {
+                  Navigator.pop(context, true);
+                },
+              ),
+              FlatButton(
+                color: Colors.white,
+                textColor: Colors.blueAccent,
+                child: Text("ACEPTAR"),
                 onPressed: () async {
                   Map<String, dynamic> aux = new Map();
                   aux.putIfAbsent("status", () => "ACCEPTED");
@@ -212,14 +220,6 @@ class _AcceptRejectSchoolsState extends State<AcceptRejectSchools> {
                   setState(() {
                     schoolsPending.clear();
                   });
-                },
-              ),
-              FlatButton(
-                color: Colors.white,
-                textColor: Colors.blueAccent,
-                child: Text("Cancelar"),
-                onPressed: () async {
-                  Navigator.pop(context, true);
                 },
               )
             ],
@@ -248,7 +248,15 @@ class _AcceptRejectSchoolsState extends State<AcceptRejectSchools> {
               FlatButton(
                 color: Colors.white,
                 textColor: Colors.blueAccent,
-                child: Text("Rechazar"),
+                child: Text("Cancelar"),
+                onPressed: () async {
+                  Navigator.pop(context, true);
+                },
+              ),
+              FlatButton(
+                color: Colors.white,
+                textColor: Colors.blueAccent,
+                child: Text("RECHAZAR", style: TextStyle(color: Colors.red),),
                 onPressed: () async {
                   await Firestore.instance.collection("sportSchools").document(sportSchool.id).delete();
                   await Firestore.instance.collection("socialProfiles").document(socialProfile.id).delete();
@@ -256,14 +264,6 @@ class _AcceptRejectSchoolsState extends State<AcceptRejectSchools> {
                   setState(() {
                     schoolsPending.clear();
                   });
-                },
-              ),
-              FlatButton(
-                color: Colors.white,
-                textColor: Colors.blueAccent,
-                child: Text("Cancelar"),
-                onPressed: () async {
-                  Navigator.pop(context, true);
                 },
               )
             ],

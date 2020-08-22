@@ -30,7 +30,7 @@ dynamic errorDialog(BuildContext context, String message) {
               onPressed: () {
                 Navigator.of(context, rootNavigator: true).pop();
               },
-              child: Text("Entendido"),
+              child: Text("ENTENDIDO"),
             )
           ],
         );
@@ -59,7 +59,7 @@ dynamic acceptDialogRegister(BuildContext context, String message) {
                 logout(context);
                 Navigator.of(context, rootNavigator: true).pop();
               },
-              child: Text("Entendido"),
+              child: Text("ENTENDIDO"),
             )
           ],
         );
@@ -132,7 +132,7 @@ dynamic confirmDialogOnCreateSchool(BuildContext context, String message) {
                 logout(context);
                 Navigator.of(context, rootNavigator: true).pop();
               },
-              child: Text("Entendido"),
+              child: Text("ENTENDIDO"),
             )
           ],
         );
@@ -160,7 +160,7 @@ Future<Void> confirmDialogOnDeleteEvent(BuildContext context, String message, Ev
               onPressed: () {
                 Navigator.of(context, rootNavigator: true).pop();
               },
-              child: Text("No"),
+              child: Text("NO"),
             ),
             FlatButton(
               color: Colors.white,
@@ -173,7 +173,7 @@ Future<Void> confirmDialogOnDeleteEvent(BuildContext context, String message, Ev
                     .delete()
                     .then((value) => Navigator.of(context, rootNavigator: true).pop());
               },
-              child: Text("Sí"),
+              child: Text("SI", style: TextStyle(color: Colors.red),),
             )
           ],
         );
