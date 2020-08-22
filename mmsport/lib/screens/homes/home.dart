@@ -8,6 +8,8 @@ import 'package:mmsport/constants/constants.dart';
 import 'package:mmsport/models/socialProfile.dart';
 import 'package:mmsport/models/sportSchool.dart';
 import 'package:mmsport/navigations/navigations.dart';
+import 'package:mmsport/screens/choose_social_profile.dart';
+import 'package:mmsport/screens/choose_sport_school.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'menu_helper.dart';
 import 'package:mmsport/screens/homes/menu_helper.dart';
@@ -151,9 +153,9 @@ class _Home extends State<Home> {
                                     ),
                                     onSelected: (value) {
                                       if (value == 1) {
-                                        // TODO: Cambiar escuela
+                                        changeSocialProfile();
                                       } else if (value == 2) {
-                                        // TODO: Cambiar perfil
+                                        changeSportSchool();
                                       } else if (value == 3) {
                                         _logout();
                                       }
@@ -179,6 +181,19 @@ class _Home extends State<Home> {
     deleteLoggedInUserId();
     await FirebaseAuth.instance.signOut();
     logout(context);
+  }
+
+  void changeSocialProfile() async {
+    deleteChosenSocialProfile();
+    Navigator.of(context)
+        .pushAndRemoveUntil(MaterialPageRoute(builder: (context) => ChooseSocialProfile()), (Route<dynamic> route) => false);
+  }
+
+  void changeSportSchool() async {
+    deleteChosenSocialProfile();
+    deleteChosenSportSchool();
+    Navigator.of(context)
+        .pushAndRemoveUntil(MaterialPageRoute(builder: (context) => ChooseSportSchool()), (Route<dynamic> route) => false);
   }
 
   Widget _logoutButton() {

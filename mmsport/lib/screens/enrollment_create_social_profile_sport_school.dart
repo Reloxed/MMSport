@@ -107,6 +107,7 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
       child: Column(
         children: <Widget>[
           TextFormField(
+            textCapitalization: TextCapitalization.words,
             validator: (v) {
               if (v.isEmpty)
                 return "Este campo no puede estar vacío";
@@ -130,6 +131,7 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
       child: Column(
         children: <Widget>[
           TextFormField(
+            textCapitalization: TextCapitalization.words,
             validator: (v) {
               if (v.isEmpty)
                 return "Este campo no puede estar vacío";
@@ -153,6 +155,7 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
       child: Column(
         children: <Widget>[
           TextFormField(
+            textCapitalization: TextCapitalization.words,
             validator: (v) {
               return null;
             },

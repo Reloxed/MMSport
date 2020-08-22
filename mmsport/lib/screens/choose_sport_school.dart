@@ -4,13 +4,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mmsport/components/dialogs.dart';
 import 'package:mmsport/constants/constants.dart';
 import 'package:mmsport/models/socialProfile.dart';
 import 'package:mmsport/models/sportSchool.dart';
 import 'package:mmsport/navigations/navigations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import 'package:mmsport/components/dialogs.dart';
 
 class ChooseSportSchool extends StatefulWidget {
   @override
@@ -30,13 +30,14 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
 
   // ignore: missing_return
   Future<Map<SportSchool, int>> _loadFirebaseData() async {
-    if(firstLoad) {
+    if (firstLoad) {
       SharedPreferences preferences = await SharedPreferences.getInstance();
       String firebaseUser = preferences.get("loggedInUserId");
       Map<SportSchool, int> auxMap = new Map<SportSchool, int>();
       await Firestore.instance
           .collection("socialProfiles")
           .where('userAccountId', isEqualTo: firebaseUser)
+          .where('status', isEqualTo: "ACCEPTED")
           .getDocuments()
           .then((value) {
         value.documents.forEach((element) async {
@@ -46,15 +47,16 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
         });
       });
       for (SocialProfile actualProfile in profiles) {
-        await Firestore.instance.collection('sportSchools').document(actualProfile.sportSchoolId).get().then((
-            document) {
+        await Firestore.instance
+            .collection('sportSchools')
+            .document(actualProfile.sportSchoolId)
+            .get()
+            .then((document) {
           SportSchool newSportSchool = SportSchool.sportSchoolFromMap(document.data);
           newSportSchool.id = actualProfile.sportSchoolId;
           if (sportSchoolIds.contains(newSportSchool.id)) {
             for (int i = 0; i <= auxMap.keys.length - 1; i++) {
-              if (auxMap.keys
-                  .elementAt(i)
-                  .id == newSportSchool.id) {
+              if (auxMap.keys.elementAt(i).id == newSportSchool.id) {
                 SportSchool aux = auxMap.keys.elementAt(i);
                 auxMap[aux] += 1;
               }
@@ -96,29 +98,36 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
                 _logoutButton(),
               ],
             ),
-            body: profilesSnapshot.data.length != 0 ? Center(
-                child: SingleChildScrollView(
-              padding: EdgeInsets.all(20.0),
-              child: Center(
-                  child: SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.75,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          Container(
-                              height: MediaQuery.of(context).size.height * 0.5,
-                              child: _pageView(context, profilesSnapshot.data)),
-                          Align(
-                            alignment: Alignment.center,
-                            child: Container(
-                              margin: EdgeInsets.all(16.0),
-                              child: _smoothPageIndicator(),
-                            ),
-                          )
-                        ],
-                      ))),
-            )):Center(child: Text("No tienes escuelas", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),),),
+            body: profilesSnapshot.data.length != 0
+                ? Center(
+                    child: SingleChildScrollView(
+                    padding: EdgeInsets.all(20.0),
+                    child: Center(
+                        child: SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.75,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: <Widget>[
+                                Container(
+                                    height: MediaQuery.of(context).size.height * 0.5,
+                                    child: _pageView(context, profilesSnapshot.data)),
+                                Align(
+                                  alignment: Alignment.center,
+                                  child: Container(
+                                    margin: EdgeInsets.all(16.0),
+                                    child: _smoothPageIndicator(),
+                                  ),
+                                )
+                              ],
+                            ))),
+                  ))
+                : Center(
+                    child: Text(
+                      "No tienes escuelas",
+                      style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                    ),
+                  ),
             floatingActionButton: FloatingActionButton(
               onPressed: null,
               tooltip: 'Inscribirme en una escuela',

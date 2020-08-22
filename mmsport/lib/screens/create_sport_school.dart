@@ -44,6 +44,7 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
             body: Container(
                 padding: EdgeInsets.symmetric(horizontal: 30),
                 child: PageView(
+                  physics: NeverScrollableScrollPhysics(),
                   controller: _controller,
                   children: <Widget>[_sportSchoolForm(), _directorProfileForm()],
                 ))));
@@ -113,6 +114,7 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
       child: Column(
         children: <Widget>[
           TextFormField(
+            textCapitalization: TextCapitalization.words,
             validator: (v) {
               if (FormValidators.validateNotEmpty(v) == false)
                 return "Este campo no puede estar vacío";
@@ -138,6 +140,8 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
       child: Column(
         children: <Widget>[
           TextFormField(
+            keyboardType: TextInputType.streetAddress,
+            textCapitalization: TextCapitalization.words,
             validator: (v) {
               if (FormValidators.validateNotEmpty(v) == false)
                 return "Este campo no puede estar vacío";
@@ -163,6 +167,7 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
       child: Column(
         children: <Widget>[
           TextFormField(
+            textCapitalization: TextCapitalization.words,
             validator: (v) {
               if (FormValidators.validateNotEmpty(v) == false)
                 return "Este campo no puede estar vacío";
@@ -187,6 +192,7 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
       child: Column(
         children: <Widget>[
           TextFormField(
+            textCapitalization: TextCapitalization.words,
             validator: (v) {
               if (FormValidators.validateNotEmpty(v) == false)
                 return "Este campo no puede estar vacío";
@@ -301,6 +307,7 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
       child: Column(
         children: <Widget>[
           TextFormField(
+            textCapitalization: TextCapitalization.words,
             validator: (v) {
               if (FormValidators.validateNotEmpty(v) == false)
                 return "Este campo no puede estar vacío";
@@ -324,6 +331,7 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
       child: Column(
         children: <Widget>[
           TextFormField(
+            textCapitalization: TextCapitalization.words,
             validator: (v) {
               if (FormValidators.validateNotEmpty(v) == false)
                 return "Este campo no puede estar vacío";
@@ -347,11 +355,9 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
       child: Column(
         children: <Widget>[
           TextFormField(
+            textCapitalization: TextCapitalization.words,
             validator: (v) {
-              if (FormValidators.validateNotEmpty(v) == false)
-                return "Este campo no puede estar vacío";
-              else
-                return null;
+              return null;
             },
             obscureText: false,
             decoration: InputDecoration(border: OutlineInputBorder(), labelText: "Segundo apellido"),
