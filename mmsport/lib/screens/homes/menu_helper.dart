@@ -77,7 +77,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 }
 
 void _navigatorHelper(String role, int i, BuildContext context) async {
-  //TODO: Añadir roles a los navigator necesarios
   if (i == 1 && role != "ADMIN") {
     navigateToChatMain(context);
   } else if (i == 1 && role == "ADMIN") {
@@ -101,13 +100,11 @@ void _navigatorHelper(String role, int i, BuildContext context) async {
       navigateToSportSchoolGroupDetails(context);
     });
   } else if (i == 3 && (role == "TRAINER" || role == "STUDENT")) {
-    // TODO: Navigate to calendar
+
   } else if (i == 3 && role == "DIRECTOR") {
     navigateToAcceptRejectProfiles(context);
   } else if (i == 4 && role == "DIRECTOR") {
     navigateToCreateSportSchoolGroup(context);
-  } else if (i == 4) {
-    // TODO: Navigate to edit profile
   } else if (i == 5 && role == "DIRECTOR") {
     navigateToCalendarEvent(context);
   } else if (i == 4 && (role == "TRAINER" || role == "STUDENT")) {

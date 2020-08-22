@@ -373,7 +373,6 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
             } else {
               return ListTile(
                   leading: CircleAvatar(
-                    //TODO
                     child: Icon(Icons.account_circle),
                     radius: 16.0,
                   ),
@@ -428,7 +427,6 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
             } else {
               return ListTile(
                 leading: CircleAvatar(
-                  //TODO
                   child: Icon(Icons.account_circle),
                   radius: 16.0,
                 ),
