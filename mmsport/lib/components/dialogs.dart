@@ -4,6 +4,7 @@ import 'dart:ffi';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:mmsport/models/event.dart';
+import 'package:mmsport/models/group.dart';
 import 'package:mmsport/models/socialProfile.dart';
 import 'package:mmsport/models/sportSchool.dart';
 import 'package:mmsport/navigations/navigations.dart';
@@ -174,6 +175,42 @@ Future<Void> confirmDialogOnDeleteEvent(BuildContext context, String message, Ev
                     .then((value) => Navigator.of(context, rootNavigator: true).pop());
               },
               child: Text("SI", style: TextStyle(color: Colors.red),),
+            )
+          ],
+        );
+      });
+}
+
+Future<bool> confirmDialogOnDeleteGroup(BuildContext context, String message, Group groupEdited) {
+  return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext builder) {
+        return AlertDialog(
+          title: new IconTheme(
+            data: new IconThemeData(
+              color: Colors.green,
+            ),
+            child: Icon(Icons.check),
+          ),
+          content: SingleChildScrollView(child: ListBody(children: <Widget>[Center(child: Text(message))])),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0))),
+          actions: <Widget>[
+            FlatButton(
+              color: Colors.white,
+              textColor: Colors.blueAccent,
+              onPressed: () {
+                Navigator.of(context, rootNavigator: true).pop();
+              },
+              child: Text("NO"),
+            ),
+            FlatButton(
+              color: Colors.white,
+              textColor: Colors.blueAccent,
+              onPressed: () {
+                Navigator.of(context, rootNavigator: true).pop(true);
+              },
+              child: Text("SÍ"),
             )
           ],
         );

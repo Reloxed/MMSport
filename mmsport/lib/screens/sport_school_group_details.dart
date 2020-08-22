@@ -241,6 +241,16 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
                           color: Colors.white,
                         ),
                         label: 'Cancelar',
+                        backgroundColor: Colors.deepOrange),
+                    SpeedDialChild(
+                        onTap: () async {
+                          deleteGroup();
+                        },
+                        child: Icon(
+                          Icons.delete,
+                          color: Colors.white,
+                        ),
+                        label: 'Eliminar',
                         backgroundColor: Colors.red),
                   ],
                 ));
@@ -271,17 +281,17 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
                                 margin: EdgeInsets.only(top: 4.0),
                                 child: groupTrainer.secondSurname == null
                                     ? Text(
-                                  groupTrainer.name + " " + groupTrainer.firstSurname,
-                                  style: TextStyle(fontSize: 16, color: Colors.blueAccent),
-                                )
+                                        groupTrainer.name + " " + groupTrainer.firstSurname,
+                                        style: TextStyle(fontSize: 16, color: Colors.blueAccent),
+                                      )
                                     : Text(
-                                  groupTrainer.name +
-                                      " " +
-                                      groupTrainer.firstSurname +
-                                      " " +
-                                      groupTrainer.secondSurname,
-                                  style: TextStyle(fontSize: 16, color: Colors.blueAccent),
-                                ),
+                                        groupTrainer.name +
+                                            " " +
+                                            groupTrainer.firstSurname +
+                                            " " +
+                                            groupTrainer.secondSurname,
+                                        style: TextStyle(fontSize: 16, color: Colors.blueAccent),
+                                      ),
                               )
                             ]),
                           ),
@@ -642,10 +652,9 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
       },
     );
     if (selectedTime != null) {
-      if(fromTimeOfDayToDouble(selectedStartTimeSchedule) > fromTimeOfDayToDouble(selectedTime)){
+      if (fromTimeOfDayToDouble(selectedStartTimeSchedule) > fromTimeOfDayToDouble(selectedTime)) {
         errorDialog(context, "La hora de fin debe de ser superior a la hora de inicio");
-      }
-      else{
+      } else {
         setState(() {
           selectedEndTimeSchedule = selectedTime;
         });
@@ -682,6 +691,29 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
                 selectedTrainerEdited = value;
               }
             }));
+  }
+
+  void deleteGroup() async {
+    bool confirm =
+        await confirmDialogOnDeleteGroup(context, "¿Está seguro de que quiere eliminar el grupo?", groupEdited);
+    if (confirm) {
+      final databaseReference = Firestore.instance;
+      List<String> studentsIds = new List();
+      await databaseReference
+          .collection("socialProfiles")
+          .where("groupId", isEqualTo: groupEdited.id)
+          .getDocuments()
+          .then((value) {
+        value.documents.forEach((element) {
+          studentsIds.add(element.data["id"]);
+        });
+      });
+      studentsIds.forEach((element) async {
+        await databaseReference.collection("socialProfiles").document(element).setData({"groupId": ""}, merge: true);
+      });
+      await databaseReference.collection("groups").document(groupEdited.id).delete();
+      Navigator.pop(context);
+    }
   }
 
   void editGroup() async {

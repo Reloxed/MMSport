@@ -41,6 +41,10 @@ class _EditSocialProfileState extends State<EditSocialProfile> {
   Widget build(BuildContext context) {
     return Material(
         child: Scaffold(
+            appBar: AppBar(
+              title: Text("Editar mi perfil"),
+              centerTitle: true,
+            ),
             body: FutureBuilder(
               future: getChosenProfile(),
               builder: (context, snapshot) {

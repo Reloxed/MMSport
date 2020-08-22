@@ -95,6 +95,10 @@ class _CalendarEventState extends State<CalendarEvent> {
         builder: (BuildContext context, AsyncSnapshot<Map<DateTime, List<Event>>> snapshots) {
           if (snapshots.hasData) {
             return Scaffold(
+              appBar: AppBar(
+                title: Text("Eventos"),
+                centerTitle: true,
+              ),
               body: SafeArea(
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
@@ -189,6 +193,9 @@ class _CalendarEventState extends State<CalendarEvent> {
             onPressed: () {
               confirmDialogOnDeleteEvent(context, "¿Estás seguro de que quieres eliminar el grupo?", event)
                   .then((value) {
+                if (_events[_selectedDay].contains(event)) {
+                  _events[_selectedDay].remove(event);
+                }
                 setState(() {
                   onBack = true;
                 });
