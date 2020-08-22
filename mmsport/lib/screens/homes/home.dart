@@ -93,7 +93,7 @@ class _Home extends State<Home> {
                               title: Center(
                                   child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: <Widget>[
                                 Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
-                                  CircleAvatar(radius: 40, backgroundImage: NetworkImage(snapshots.data[0].urlLogo)),
+                                  CircleAvatar(radius: 28, backgroundImage: NetworkImage(snapshots.data[0].urlLogo)),
                                   SizedBox(
                                       width: MediaQuery.of(context).size.width * 0.58,
                                       child: Container(
@@ -104,7 +104,7 @@ class _Home extends State<Home> {
                                               children: <Widget>[
                                                 Text(
                                                   snapshots.data[0].name,
-                                                  style: TextStyle(color: Colors.white, fontSize: 30),
+                                                  style: TextStyle(color: Colors.white, fontSize: 22),
                                                   overflow: TextOverflow.ellipsis,
                                                   softWrap: true,
                                                 ),
@@ -116,13 +116,13 @@ class _Home extends State<Home> {
                                                             " " +
                                                             snapshots.data[1].secondSurname,
                                                         style:
-                                                            TextStyle(color: Colors.white, fontStyle: FontStyle.italic),
+                                                            TextStyle(color: Colors.white, fontStyle: FontStyle.italic, fontSize: 18),
                                                         overflow: TextOverflow.ellipsis,
                                                         softWrap: true)
                                                     : Text(
                                                         snapshots.data[1].name + " " + snapshots.data[1].firstSurname,
                                                         style:
-                                                            TextStyle(color: Colors.white, fontStyle: FontStyle.italic),
+                                                            TextStyle(color: Colors.white, fontStyle: FontStyle.italic, fontSize: 18),
                                                         overflow: TextOverflow.ellipsis,
                                                         softWrap: true)
                                               ]))),

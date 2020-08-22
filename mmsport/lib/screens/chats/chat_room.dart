@@ -166,7 +166,7 @@ class _ChatRoom extends State<ChatRoom> {
                       )
                     ])));
           } else {
-            return loading();
+            return loadingHome();
           }
         });
   }
