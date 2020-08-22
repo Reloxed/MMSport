@@ -55,19 +55,33 @@ class _AcceptRejectProfilesState extends State<AcceptRejectProfiles> {
           future: getProfiles(),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              return ListView.builder(
-                  itemCount: snapshot.data.length,
-                  itemBuilder: (context, index) {
-                    if (snapshot.hasData) {
-                      return _listProfile(snapshot.data[index]);
-                    } else {
-                      return Container(
-                        child: Center(
-                          child: Text("No hay perfiles para aceptar/rechazar"),
-                        ),
-                      );
-                    }
-                  });
+              if (snapshot.data.length == 0) {
+                return Container(
+                  child: Center(
+                    child: Text(
+                      "No hay perfiles para aceptar/rechazar",
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                );
+              } else {
+                return ListView.builder(
+                    itemCount: snapshot.data.length,
+                    itemBuilder: (context, index) {
+                      if (snapshot.hasData) {
+                        return _listProfile(snapshot.data[index]);
+                      } else {
+                        return Container(
+                          child: Center(
+                            child: Text(
+                              "No hay perfiles para aceptar/rechazar",
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        );
+                      }
+                    });
+              }
             } else {
               return loading();
             }
@@ -86,10 +100,20 @@ class _AcceptRejectProfilesState extends State<AcceptRejectProfiles> {
         children: <Widget>[
           Align(
             alignment: Alignment.center,
-            child: CircleAvatar(
-              backgroundImage: NetworkImage(profile.urlImage),
-              radius: 30,
-            ),
+            child: profile.urlImage != null
+                ? CircleAvatar(
+                    backgroundImage: NetworkImage(profile.urlImage),
+                    radius: 30,
+                  )
+                : CircleAvatar(
+                    radius: 30,
+                    child: ClipOval(
+                      child: Icon(
+                        Icons.person,
+                        size: 50,
+                      ),
+                    ),
+                  ),
           ),
           Column(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -127,15 +151,15 @@ class _AcceptRejectProfilesState extends State<AcceptRejectProfiles> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
               IconButton(
-                icon: Icon(Icons.thumb_up),
-                onPressed: () {
-                  acceptProfileDialog(context, profile);
-                },
-              ),
-              IconButton(
                 icon: Icon(Icons.thumb_down),
                 onPressed: () {
                   rejectProfileDialog(context, profile);
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.thumb_up),
+                onPressed: () {
+                  acceptProfileDialog(context, profile);
                 },
               )
             ],
@@ -166,6 +190,14 @@ class _AcceptRejectProfilesState extends State<AcceptRejectProfiles> {
               FlatButton(
                 color: Colors.white,
                 textColor: Colors.blueAccent,
+                child: Text("Cancelar"),
+                onPressed: () async {
+                  Navigator.pop(context, true);
+                },
+              ),
+              FlatButton(
+                color: Colors.white,
+                textColor: Colors.blueAccent,
                 child: Text("Aceptar"),
                 onPressed: () async {
                   Map<String, dynamic> aux = new Map();
@@ -175,14 +207,6 @@ class _AcceptRejectProfilesState extends State<AcceptRejectProfiles> {
                   setState(() {});
                 },
               ),
-              FlatButton(
-                color: Colors.white,
-                textColor: Colors.blueAccent,
-                child: Text("Cancelar"),
-                onPressed: () async {
-                  Navigator.pop(context, true);
-                },
-              )
             ],
           );
         });
@@ -209,6 +233,14 @@ class _AcceptRejectProfilesState extends State<AcceptRejectProfiles> {
               FlatButton(
                 color: Colors.white,
                 textColor: Colors.blueAccent,
+                child: Text("Cancelar"),
+                onPressed: () async {
+                  Navigator.pop(context, true);
+                },
+              ),
+              FlatButton(
+                color: Colors.white,
+                textColor: Colors.blueAccent,
                 child: Text("Rechazar"),
                 onPressed: () async {
                   await Firestore.instance.collection("socialProfiles").document(profile.id).delete();
@@ -216,14 +248,6 @@ class _AcceptRejectProfilesState extends State<AcceptRejectProfiles> {
                   setState(() {});
                 },
               ),
-              FlatButton(
-                color: Colors.white,
-                textColor: Colors.blueAccent,
-                child: Text("Cancelar"),
-                onPressed: () async {
-                  Navigator.pop(context, true);
-                },
-              )
             ],
           );
         });

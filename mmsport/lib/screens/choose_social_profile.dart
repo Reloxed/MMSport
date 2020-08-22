@@ -9,6 +9,7 @@ import 'package:mmsport/models/sportSchool.dart';
 import 'package:mmsport/navigations/navigations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mmsport/components/dialogs.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class ChooseSocialProfile extends StatefulWidget {
   @override
@@ -20,6 +21,7 @@ class ChooseSocialProfile extends StatefulWidget {
 
 class _ChooseSocialProfileState extends State<ChooseSocialProfile> {
   List<SocialProfile> socialProfiles = new List();
+  PageController _pageController = PageController();
 
   // ignore: missing_return
   Future<List<SocialProfile>> _loadFirebaseData() async {
@@ -29,6 +31,7 @@ class _ChooseSocialProfileState extends State<ChooseSocialProfile> {
     await Firestore.instance
         .collection("socialProfiles")
         .where("userAccountId", isEqualTo: preferences.get("loggedInUserId"))
+        .where("status", isEqualTo: "ACCEPTED")
         .where("sportSchoolId", isEqualTo: chosenSportSchool.id)
         .getDocuments()
         .then((value) => value.documents.forEach((element) {
@@ -66,7 +69,23 @@ class _ChooseSocialProfileState extends State<ChooseSocialProfile> {
                 padding: EdgeInsets.all(20.0),
                 child: Center(
                     child: SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.55, child: _pageView(context, snapshot.data))),
+                        height: MediaQuery.of(context).size.height * 0.75,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            Container(
+                                height: MediaQuery.of(context).size.height * 0.5,
+                                child: _pageView(context, snapshot.data)),
+                            Align(
+                              alignment: Alignment.center,
+                              child: Container(
+                                margin: EdgeInsets.all(16.0),
+                                child: _smoothPageIndicator(snapshot.data),
+                              ),
+                            )
+                          ],
+                        ))),
               ),
             ),
           ));
@@ -81,7 +100,6 @@ class _ChooseSocialProfileState extends State<ChooseSocialProfile> {
     return Card(
         elevation: 2.0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0))),
-        margin: EdgeInsets.all(16.0),
         child: InkWell(
             onTap: () async {
               SharedPreferences preferences = await SharedPreferences.getInstance();
@@ -99,21 +117,21 @@ class _ChooseSocialProfileState extends State<ChooseSocialProfile> {
                       margin: EdgeInsets.all(10.0),
                       child: socialProfile.urlImage != null
                           ? CircleAvatar(
-                              radius: 85,
+                              radius: 65,
                               child: ClipOval(
                                 child: Image.network(
                                   socialProfile.urlImage,
                                   fit: BoxFit.cover,
-                                  width: 150,
-                                  height: 150,
+                                  width: 120,
+                                  height: 120,
                                 ),
                               ))
                           : CircleAvatar(
-                              radius: 85,
+                              radius: 65,
                               child: ClipOval(
                                 child: Icon(
                                   Icons.person,
-                                  size: 150,
+                                  size: 120,
                                 )
                               )),
                     )),
@@ -144,9 +162,18 @@ class _ChooseSocialProfileState extends State<ChooseSocialProfile> {
   Widget _pageView(BuildContext context, List<SocialProfile> snapshot) {
     return PageView.builder(
         itemCount: snapshot.length,
+        controller: _pageController,
         itemBuilder: (context, int index) {
           return _cardView(snapshot.elementAt(index));
         });
+  }
+
+  Widget _smoothPageIndicator(List<SocialProfile> snapshot) {
+    return SmoothPageIndicator(
+      controller: _pageController, // PageController
+      count: snapshot.length,
+      effect: WormEffect(dotColor: Colors.grey, activeDotColor: Colors.blueAccent), // your preferred effect
+    );
   }
 
   Widget _logoutButton() {
