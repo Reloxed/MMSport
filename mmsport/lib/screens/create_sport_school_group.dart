@@ -162,7 +162,10 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
         child: RaisedButton(
           onPressed: () async {
             if (_formKey.currentState.validate()) {
+              loadingDialog(context);
               createGroup();
+              Navigator.of(context, rootNavigator: true).pop();
+              Navigator.of(context).pop();
             }
           },
           elevation: 3.0,
@@ -357,9 +360,6 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
           .collection("groups")
           .document(ref.documentID)
           .setData({"id": ref.documentID}, merge: true);
-
-      Navigator.pop(context);
-
     }
   }
 }

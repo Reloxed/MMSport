@@ -5,7 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mmsport/components/dialogs.dart';
 import 'package:mmsport/components/form_validators.dart';
 import 'package:mmsport/navigations/navigations.dart';
-import 'package:mmsport/components/dialogs.dart';
 
 class Register extends StatefulWidget {
   @override
@@ -92,8 +91,6 @@ class _RegisterState extends State<Register> {
   Widget _emailField(String hintText) {
     IconData icon;
     icon = Icons.email;
-    final RegExp emailRegex = new RegExp(
-        r"^[a-zA-Z0-9.!#$%&'+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)$");
     return Container(
       child: Column(
         children: <Widget>[

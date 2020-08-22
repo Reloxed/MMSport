@@ -1,8 +1,4 @@
-import 'dart:convert';
-
-import 'package:flutter/material.dart';
 import 'package:mmsport/models/schedule.dart';
-import 'package:mmsport/models/socialProfile.dart';
 
 class Group{
   String name;

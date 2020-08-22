@@ -1,11 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_search_bar/flutter_search_bar.dart';
+import 'package:mmsport/components/dialogs.dart';
 import 'package:mmsport/constants/constants.dart';
 import 'package:mmsport/models/sportSchool.dart';
 import 'package:mmsport/navigations/navigations.dart';
-import 'package:search_app_bar/filter.dart';
 
 class EnrollmentListSportSchool extends StatefulWidget {
   @override
@@ -121,7 +120,7 @@ class _EnrollmentListSportSchoolState extends State<EnrollmentListSportSchool> {
                     ))
                   ]));
                 } else {
-                  return CircularProgressIndicator();
+                  return loading();
                 }
               },
             )));
