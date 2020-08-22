@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mmsport/components/dialogs.dart';
 import 'package:mmsport/constants/constants.dart';
 import 'package:mmsport/models/group.dart';
 import 'package:mmsport/models/schedule.dart';
@@ -182,7 +183,7 @@ class _ListSportSchoolGroupsState extends State<ListSportSchoolGroups> {
             ),
           );
         } else {
-          return Container();
+          return loadingHome();
         }
       },
     ));

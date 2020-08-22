@@ -310,7 +310,10 @@ class _EditCalendarEventState extends State<EditCalendarEvent> {
           alignment: Alignment.bottomCenter,
           child: RaisedButton(
             onPressed: () {
+              loadingDialog(context);
               editEvent();
+              Navigator.of(context,rootNavigator: true).pop();
+              Navigator.of(context).pop();
             },
             elevation: 3.0,
             color: Colors.blueAccent,

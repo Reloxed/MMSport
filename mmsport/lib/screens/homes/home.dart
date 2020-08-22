@@ -166,7 +166,7 @@ class _Home extends State<Home> {
                       body: menuGrid(context, snapshots.data[1].role),
                     );
                   } else {
-                    return Container();
+                    return loadingHome();
                   }
                 });
           }

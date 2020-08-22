@@ -275,7 +275,10 @@ class _AddCalendarEventState extends State<AddCalendarEvent> {
           alignment: Alignment.bottomCenter,
           child: RaisedButton(
             onPressed: () {
+              loadingDialog(context);
               createEvent();
+              Navigator.of(context, rootNavigator: true).pop();
+              Navigator.of(context).pop();
             },
             elevation: 3.0,
             color: Colors.blueAccent,
@@ -293,7 +296,7 @@ class _AddCalendarEventState extends State<AddCalendarEvent> {
       SportSchool _sportSchool = SportSchool.sportSchoolFromMap(await jsonDecode(preferences.get("chosenSportSchool")));
       Event newEvent = Event(eventName, selectedDay, selectedStartTimeEvent, selectedEndTimeEvent, _sportSchool.id);
       final databaseReference = Firestore.instance;
-      DocumentReference ref = await databaseReference.collection("events").add({
+      await databaseReference.collection("events").add({
         "eventName": newEvent.eventName,
         "day": formatDateTime(newEvent.day),
         "startTimeEvent": timeOfDayToString(newEvent.startTimeEvent, context),

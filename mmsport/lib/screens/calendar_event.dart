@@ -136,7 +136,7 @@ class _CalendarEventState extends State<CalendarEvent> {
               ),
             );
           } else {
-            return Container();
+            return loadingHome();
           }
         });
   }

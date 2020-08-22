@@ -328,7 +328,7 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
                 floatingActionButton: editButton(schedules, groupStudents, groupTrainer, group));
           }
         } else {
-          return Container();
+          return loadingHome();
         }
       },
     ));
