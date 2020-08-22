@@ -34,7 +34,7 @@ class _EditCalendarEventState extends State<EditCalendarEvent> {
   Future<Event> loadEvent() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     Event _event = Event.eventFromMap(await jsonDecode(preferences.get("eventToEdit")));
-    if(firstLoad){
+    if (firstLoad) {
       selectedDay = _event.day;
       _dayController.text = formatDateTime(selectedDay);
       selectedStartTimeEvent = _event.startTimeEvent;
@@ -57,10 +57,14 @@ class _EditCalendarEventState extends State<EditCalendarEvent> {
   Widget build(BuildContext context) {
     return Material(
         child: FutureBuilder<Event>(
-          future: loadEvent(),
+            future: loadEvent(),
             builder: (BuildContext context, AsyncSnapshot<Event> snapshot) {
-              if(snapshot.hasData){
+              if (snapshot.hasData) {
                 return Scaffold(
+                    appBar: AppBar(
+                      title: Text("Editar evento"),
+                      centerTitle: true,
+                    ),
                     body: SingleChildScrollView(
                         padding: EdgeInsets.symmetric(horizontal: 30),
                         child: Form(
@@ -87,33 +91,27 @@ class _EditCalendarEventState extends State<EditCalendarEvent> {
                                 ),
                               ],
                             ))));
-              }
-              else{
+              } else {
                 return Container();
               }
-            }
-        )
-    );
+            }));
   }
 
   Widget _eventName() {
     IconData icon;
     icon = Icons.event_note;
     return Container(
-      child: Column(
-        children: <Widget>[
-          TextFormField(
-            initialValue: eventName,
-            validator: (v) {
-              if (FormValidators.validateEmptyText(v) == false)
-                return "Este campo no puede estar vacío";
-              else
-                return null;
-            },
-            decoration: InputDecoration(border: OutlineInputBorder(), labelText: "Evento", prefixIcon: Icon(icon)),
-            onChanged: (value) => eventName = value,
-          )
-        ],
+      margin: EdgeInsets.only(top: 16.0, bottom: 8.0),
+      child: TextFormField(
+        initialValue: eventName,
+        validator: (v) {
+          if (FormValidators.validateEmptyText(v) == false)
+            return "Este campo no puede estar vacío";
+          else
+            return null;
+        },
+        decoration: InputDecoration(border: OutlineInputBorder(), labelText: "Evento", prefixIcon: Icon(icon)),
+        onChanged: (value) => eventName = value,
       ),
     );
   }
@@ -156,9 +154,7 @@ class _EditCalendarEventState extends State<EditCalendarEvent> {
       context: context,
       initialDate: selectedDay,
       firstDate: DateTime.now(),
-      lastDate: new DateTime(DateTime
-          .now()
-          .year + 2),
+      lastDate: new DateTime(DateTime.now().year + 2),
       helpText: "Seleccione el día del evento",
       cancelText: "Cancelar",
       confirmText: "Confirmar",
@@ -222,10 +218,9 @@ class _EditCalendarEventState extends State<EditCalendarEvent> {
     );
     if (selectedTime != null) {
       if (selectedEndTimeEvent != null) {
-        if(fromTimeOfDayToDouble(selectedEndTimeEvent) < fromTimeOfDayToDouble(selectedTime)){
+        if (fromTimeOfDayToDouble(selectedEndTimeEvent) < fromTimeOfDayToDouble(selectedTime)) {
           errorDialog(context, "La hora de fin debe de ser superior a la hora de inicio");
-        }
-        else{
+        } else {
           setState(() {
             selectedStartTimeEvent = selectedTime;
             _startTimeController.text = selectedStartTimeEvent.format(context);
@@ -290,10 +285,9 @@ class _EditCalendarEventState extends State<EditCalendarEvent> {
     );
     if (selectedTime != null) {
       if (selectedStartTimeEvent != null) {
-        if(fromTimeOfDayToDouble(selectedTime) < fromTimeOfDayToDouble(selectedStartTimeEvent)){
+        if (fromTimeOfDayToDouble(selectedTime) < fromTimeOfDayToDouble(selectedStartTimeEvent)) {
           errorDialog(context, "La hora de fin debe de ser superior a la hora de inicio");
-        }
-        else{
+        } else {
           setState(() {
             selectedEndTimeEvent = selectedTime;
             _endTimeController.text = selectedEndTimeEvent.format(context);

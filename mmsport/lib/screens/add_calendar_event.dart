@@ -38,6 +38,10 @@ class _AddCalendarEventState extends State<AddCalendarEvent> {
   Widget build(BuildContext context) {
     return Material(
         child: Scaffold(
+            appBar: AppBar(
+              title: Text("Crear evento"),
+              centerTitle: true,
+            ),
             body: SingleChildScrollView(
                 padding: EdgeInsets.symmetric(horizontal: 30),
                 child: Form(
@@ -45,12 +49,10 @@ class _AddCalendarEventState extends State<AddCalendarEvent> {
                     autovalidate: false,
                     child: Column(
                       children: <Widget>[
-                        Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: <Widget>[_eventName(), _selectDateField(), _selectStartTime(), _selectEndTime()],
-                          ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[_eventName(), _selectDateField(), _selectStartTime(), _selectEndTime()],
                         ),
                         Column(
                           mainAxisAlignment: MainAxisAlignment.end,
@@ -65,19 +67,16 @@ class _AddCalendarEventState extends State<AddCalendarEvent> {
     IconData icon;
     icon = Icons.event_note;
     return Container(
-      child: Column(
-        children: <Widget>[
-          TextFormField(
-            validator: (v) {
-              if (FormValidators.validateEmptyText(v) == false)
-                return "Este campo no puede estar vacío";
-              else
-                return null;
-            },
-            decoration: InputDecoration(border: OutlineInputBorder(), labelText: "Evento", prefixIcon: Icon(icon)),
-            onChanged: (value) => eventName = value,
-          )
-        ],
+      margin: EdgeInsets.only(top: 16.0, bottom: 8.0),
+      child: TextFormField(
+        validator: (v) {
+          if (FormValidators.validateEmptyText(v) == false)
+            return "Este campo no puede estar vacío";
+          else
+            return null;
+        },
+        decoration: InputDecoration(border: OutlineInputBorder(), labelText: "Evento", prefixIcon: Icon(icon)),
+        onChanged: (value) => eventName = value,
       ),
     );
   }
@@ -85,7 +84,7 @@ class _AddCalendarEventState extends State<AddCalendarEvent> {
   Widget _selectDateField() {
     IconData icon = Icons.today;
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 10),
+      margin: EdgeInsets.symmetric(vertical: 8),
       child: Column(
         children: <Widget>[
           TextFormField(
@@ -137,7 +136,7 @@ class _AddCalendarEventState extends State<AddCalendarEvent> {
   Widget _selectStartTime() {
     IconData icon = Icons.timer;
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 10),
+      margin: EdgeInsets.symmetric(vertical: 8),
       child: Column(
         children: <Widget>[
           TextFormField(
@@ -184,10 +183,9 @@ class _AddCalendarEventState extends State<AddCalendarEvent> {
     );
     if (selectedTime != null) {
       if (selectedEndTimeEvent != null) {
-        if(fromTimeOfDayToDouble(selectedEndTimeEvent) < fromTimeOfDayToDouble(selectedTime)){
+        if (fromTimeOfDayToDouble(selectedEndTimeEvent) < fromTimeOfDayToDouble(selectedTime)) {
           errorDialog(context, "La hora de fin debe de ser superior a la hora de inicio");
-        }
-        else{
+        } else {
           setState(() {
             selectedStartTimeEvent = selectedTime;
             _startTimeController.text = selectedStartTimeEvent.format(context);
@@ -205,7 +203,7 @@ class _AddCalendarEventState extends State<AddCalendarEvent> {
   Widget _selectEndTime() {
     IconData icon = Icons.timer_off;
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 10),
+      margin: EdgeInsets.symmetric(vertical: 8),
       child: Column(
         children: <Widget>[
           TextFormField(
@@ -252,10 +250,9 @@ class _AddCalendarEventState extends State<AddCalendarEvent> {
     );
     if (selectedTime != null) {
       if (selectedStartTimeEvent != null) {
-        if(fromTimeOfDayToDouble(selectedTime) < fromTimeOfDayToDouble(selectedStartTimeEvent)){
+        if (fromTimeOfDayToDouble(selectedTime) < fromTimeOfDayToDouble(selectedStartTimeEvent)) {
           errorDialog(context, "La hora de fin debe de ser superior a la hora de inicio");
-        }
-        else{
+        } else {
           setState(() {
             selectedEndTimeEvent = selectedTime;
             _endTimeController.text = selectedEndTimeEvent.format(context);
