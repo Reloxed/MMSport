@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mmsport/constants/constants.dart';
 import 'package:mmsport/models/event.dart';
+import 'package:mmsport/screens/reset_password.dart';
 import 'package:mmsport/screens/acceptreject/accept_reject_profiles.dart';
 import 'package:mmsport/screens/acceptreject/accept_reject_schools.dart';
 import 'package:mmsport/screens/add_calendar_event.dart';
@@ -98,6 +99,10 @@ Future<dynamic> navigateToAddCalendarEvent(BuildContext context) {
 Future<dynamic> navigateToEditCalendarEvent(BuildContext context, Event event) {
   setEventToEdit(event);
   return Navigator.of(context).push(MaterialPageRoute(builder: (context) => EditCalendarEvent()));
+}
+
+Future<dynamic> navigateToResetPassword(BuildContext context) {
+  return Navigator.of(context).push(MaterialPageRoute(builder: (context) => ResetPassword()));
 }
 
 void navigateToRemoveSocialProfiles(BuildContext context) {

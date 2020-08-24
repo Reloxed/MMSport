@@ -28,6 +28,14 @@ class _RegisterState extends State<Register> {
   Widget build(BuildContext context) {
     return Material(
         child: Scaffold(
+            backgroundColor: Colors.white,
+            appBar: AppBar(
+              backgroundColor: Colors.white,
+              elevation: 0.0,
+              leading: IconButton(icon: Icon(Icons.arrow_back, color: Colors.blue,), onPressed: () {
+                Navigator.of(context).pop();
+              },),
+            ),
             body: SingleChildScrollView(
                 padding: EdgeInsets.symmetric(horizontal: 30),
                 child: Form(
@@ -61,13 +69,14 @@ class _RegisterState extends State<Register> {
                                   onChanged: _handleRadioValueChange,
                                   validators: [_checkSelectedRadioButton],
                                   options: ["Sí", "No"]
-                                      .map((lang) => FormBuilderFieldOption(
-                                            value: lang,
-                                            child: Text(
-                                              '$lang',
-                                              style: TextStyle(fontSize: 16.0),
-                                            ),
-                                          ))
+                                      .map((lang) =>
+                                      FormBuilderFieldOption(
+                                        value: lang,
+                                        child: Text(
+                                          '$lang',
+                                          style: TextStyle(fontSize: 16.0),
+                                        ),
+                                      ))
                                       .toList(growable: false),
                                 ),
                               ),
@@ -85,7 +94,7 @@ class _RegisterState extends State<Register> {
 
   Widget _logoImage() {
     return Container(
-        padding: EdgeInsets.symmetric(vertical: 50), child: Image.asset("assets/logo/Logo_MMSport_sin_fondo.png"));
+        margin: EdgeInsets.only(bottom: 50), child: Image.asset("assets/logo/Logo_MMSport_sin_fondo.png"));
   }
 
   Widget _emailField(String hintText) {
@@ -171,6 +180,7 @@ class _RegisterState extends State<Register> {
       child: Align(
         alignment: Alignment.bottomCenter,
         child: RaisedButton(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
           onPressed: () async {
             try {
               if (_formKey.currentState.validate()) {
