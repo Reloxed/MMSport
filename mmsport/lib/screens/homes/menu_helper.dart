@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:mmsport/components/dialogs.dart';
 import 'package:mmsport/constants/constants.dart';
 import 'package:mmsport/models/group.dart';
 import 'package:mmsport/models/schedule.dart';
@@ -92,14 +93,21 @@ void _navigatorHelper(String role, int i, BuildContext context) async {
   } else if (i == 2 && role == "STUDENT") {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     Map aux = await jsonDecode(preferences.get("chosenSocialProfile"));
-    await Firestore.instance.collection("groups").document(aux['groupId']).get().then((value) {
-      List<Schedule> groupSchedule = [];
-      value.data['schedule'].forEach((codedSchedule) {
-        groupSchedule.add(Schedule.scheduleFromMap(codedSchedule));
-      });
-      Group group = Group.groupFromMapWithIdFromFirebase(value.data, groupSchedule);
-      setSportSchoolGroupToView(group);
-      navigateToSportSchoolGroupDetails(context);
+    await Firestore.instance.collection("socialProfiles").document(aux['id']).get().then((value) {
+      if (value.data['groupId'] != null && value.data['groupId'] != "") {
+        Firestore.instance.collection("groups").document(value.data['groupId'].toString()).get().then((element) {
+          List<Schedule> groupSchedule = [];
+          element.data['schedule'].forEach((codedSchedule) {
+            groupSchedule.add(Schedule.scheduleFromMap(codedSchedule));
+          });
+          Group group = Group.groupFromMapWithIdFromFirebase(element.data, groupSchedule);
+          setSportSchoolGroupToView(group);
+          navigateToSportSchoolGroupDetails(context);
+        });
+      }
+      else {
+        errorDialog(context, "El alumno no está en ningún grupo actualmente");
+      }
     });
   } else if (i == 3 && (role == "TRAINER" || role == "STUDENT")) {
   } else if (i == 3 && role == "DIRECTOR") {
