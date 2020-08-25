@@ -1,18 +1,20 @@
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:mmsport/components/dialogs.dart';
 import 'package:mmsport/models/socialProfile.dart';
 import 'package:mmsport/models/sportSchool.dart';
 import 'package:mmsport/screens/choose_social_profile.dart';
 import 'package:mmsport/screens/choose_sport_school.dart';
+import 'package:mmsport/screens/create_sport_school.dart';
+import 'package:mmsport/screens/create_sport_school_group.dart';
 import 'package:mmsport/screens/homes/home.dart';
 import 'package:mmsport/screens/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter/services.dart';
-import 'package:mmsport/components/dialogs.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
@@ -24,12 +26,13 @@ void main() {
 // ignore: must_be_immutable
 class MyApp extends StatelessWidget {
   bool isAdmin;
+  bool hasToCreateTheSportSchool = false;
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-		localizationsDelegates: [
+        localizationsDelegates: [
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
         ],
@@ -54,10 +57,17 @@ class MyApp extends StatelessWidget {
                   );
                 } else if (snapshot.data['loggedInUserId'] == true) {
                   if (isAdmin == false) {
-                    return MaterialApp(
-                      debugShowCheckedModeBanner: false,
-                      home: ChooseSportSchool(),
-                    );
+                    if (hasToCreateTheSportSchool) {
+                      return MaterialApp(
+                        debugShowCheckedModeBanner: false,
+                        home: CreateSportSchool(),
+                      );
+                    } else {
+                      return MaterialApp(
+                        debugShowCheckedModeBanner: false,
+                        home: ChooseSportSchool(),
+                      );
+                    }
                   } else {
                     return MaterialApp(
                       debugShowCheckedModeBanner: false,
@@ -97,6 +107,16 @@ class MyApp extends StatelessWidget {
             .where("userId", isEqualTo: sharedPreferences.getString("loggedInUserId"))
             .getDocuments()
             .then((value) => value.documents.length != 0 ? isAdmin = true : isAdmin = false);
+        FirebaseUser user = await FirebaseAuth.instance.currentUser();
+        await Firestore.instance
+            .collection("directorsWithoutSportSchool")
+            .where("id", isEqualTo: user.uid)
+            .getDocuments()
+            .then((value) {
+          if (value.documents.length > 0) {
+            hasToCreateTheSportSchool = true;
+          }
+        });
       } else {
         map['loggedInUserId'] = false;
       }

@@ -118,10 +118,13 @@ class _ResetPasswordState extends State<ResetPassword> {
             },
             elevation: 3.0,
             color: Colors.blueAccent,
-            child: Text(
-              "ENVIAR NUEVA CONTRASEÑA",
-              style: TextStyle(fontSize: 20, color: Colors.white),
-            ),
+            child: Center(
+              child: Text(
+                "RESTABLECER CONTRASEÑA",
+                style: TextStyle(fontSize: 20, color: Colors.white),
+                textAlign: TextAlign.center,
+              ),
+            )
           ),
         ));
   }

@@ -31,10 +31,6 @@ class _LoginState extends State<Login> {
     return Material(
         child: Scaffold(
             backgroundColor: Colors.white,
-            appBar: AppBar(
-              backgroundColor: Colors.white,
-              elevation: 0.0,
-            ),
             body: SingleChildScrollView(
                 padding: EdgeInsets.symmetric(horizontal: 30),
                 child: Form(
@@ -64,7 +60,7 @@ class _LoginState extends State<Login> {
 
   Widget _logoImage() {
     return Container(
-        margin: EdgeInsets.only(bottom: 50), child: Image.asset("assets/logo/Logo_MMSport_sin_fondo.png"));
+        margin: EdgeInsets.symmetric(vertical: 50.0), child: Image.asset("assets/logo/Logo_MMSport_sin_fondo.png"));
   }
 
   Widget _emailTextField() {
@@ -131,15 +127,33 @@ class _LoginState extends State<Login> {
                       (await _auth.signInWithEmailAndPassword(email: email, password: password)).user;
 
                   if (user != null) {
-                    SharedPreferences preferences = await SharedPreferences.getInstance();
-                    preferences.setString("loggedInUserId", user.uid);
-                    await Firestore.instance
-                        .collection("admins")
-                        .where("userId", isEqualTo: user.uid)
-                        .getDocuments()
-                        .then((value) => value.documents.length != 0
-                            ? navigateToHome(context)
-                            : navigateToChooseSportSchool(context));
+                    if (user.isEmailVerified) {
+                      bool withoutSportSchoolCreated = false;
+                      SharedPreferences preferences = await SharedPreferences.getInstance();
+                      preferences.setString("loggedInUserId", user.uid);
+                      await Firestore.instance
+                          .collection("directorsWithoutSportSchool")
+                          .where("id", isEqualTo: user.uid)
+                          .getDocuments()
+                          .then((value) {
+                        if (value.documents.length > 0) {
+                          navigateToCreateSchool(context);
+                          withoutSportSchoolCreated = true;
+                        }
+                      });
+                      if (!withoutSportSchoolCreated) {
+                        await Firestore.instance
+                            .collection("admins")
+                            .where("userId", isEqualTo: user.uid)
+                            .getDocuments()
+                            .then((value) => value.documents.length != 0
+                                ? navigateToHome(context)
+                                : navigateToChooseSportSchool(context));
+                      }
+                    } else {
+                      errorDialog(
+                          context, "Necesita verificar su cuenta mediante el correo que le enviamos al registrarse");
+                    }
                   }
                 }
               } catch (e) {
@@ -167,17 +181,22 @@ class _LoginState extends State<Login> {
   }
 
   Widget _forgotPassword() {
-    return Container(margin: EdgeInsets.only(bottom: 12), child: FlatButton(
-      child: Text("Olvidé mi contraseña", style: TextStyle(color: Colors.blueAccent, fontSize: 14.0),),
-      onPressed: () {
-        navigateToResetPassword(context);
-      },
-    ));
+    return Container(
+        margin: EdgeInsets.only(bottom: 12),
+        child: FlatButton(
+          child: Text(
+            "Olvidé mi contraseña",
+            style: TextStyle(color: Colors.blueAccent, fontSize: 14.0),
+          ),
+          onPressed: () {
+            navigateToResetPassword(context);
+          },
+        ));
   }
 
   Widget _registerYet() {
     return Container(
-        padding: EdgeInsets.symmetric(vertical: 20),
+        margin: EdgeInsets.only(top: 16.0),
         child: Align(
             alignment: Alignment.bottomCenter,
             child: Column(children: <Widget>[
@@ -185,13 +204,13 @@ class _LoginState extends State<Login> {
                 "¿Aún no te has registrado?",
                 style: TextStyle(fontSize: 16, color: Colors.black),
               ),
-              new GestureDetector(
-                onTap: () {
+              FlatButton(
+                onPressed: () {
                   navigateToRegister(context);
                 },
                 child: new Text(
                   "¡Regístrate!",
-                  style: TextStyle(fontSize: 16, color: Colors.black, decoration: TextDecoration.underline),
+                  style: TextStyle(fontSize: 16, color: Colors.blueAccent),
                 ),
               )
             ])));
