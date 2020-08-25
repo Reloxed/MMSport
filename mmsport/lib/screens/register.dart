@@ -190,6 +190,7 @@ class _RegisterState extends State<Register> {
                 }
               }
             } catch (e) {
+              Navigator.of(context, rootNavigator: true).pop();
               String message;
               if (e.code == "ERROR_INVALID_EMAIL") {
                 message = "El email no es válido";
