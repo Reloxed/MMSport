@@ -2,9 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mmsport/components/dialogs.dart';
 import 'package:mmsport/components/form_validators.dart';
 import 'package:mmsport/navigations/navigations.dart';
-import 'package:mmsport/components/dialogs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Login extends StatefulWidget {
@@ -30,6 +30,7 @@ class _LoginState extends State<Login> {
   Widget build(BuildContext context) {
     return Material(
         child: Scaffold(
+            backgroundColor: Colors.white,
             body: SingleChildScrollView(
                 padding: EdgeInsets.symmetric(horizontal: 30),
                 child: Form(
@@ -51,7 +52,7 @@ class _LoginState extends State<Login> {
                         Column(
                           mainAxisAlignment: MainAxisAlignment.end,
                           crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[_button(), _registerYet()],
+                          children: <Widget>[_button(), _forgotPassword(), _registerYet()],
                         ),
                       ],
                     )))));
@@ -59,8 +60,7 @@ class _LoginState extends State<Login> {
 
   Widget _logoImage() {
     return Container(
-        padding: EdgeInsets.symmetric(vertical: 50), child: Image.asset("assets/logo/Logo_MMSport_sin_fondo.png"));
-    //return Image.asset("assets/logo/Logo_MMSport_sin_fondo.png");
+        margin: EdgeInsets.symmetric(vertical: 50.0), child: Image.asset("assets/logo/Logo_MMSport_sin_fondo.png"));
   }
 
   Widget _emailTextField() {
@@ -119,6 +119,7 @@ class _LoginState extends State<Login> {
         child: Align(
           alignment: Alignment.bottomCenter,
           child: RaisedButton(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
             onPressed: () async {
               try {
                 if (_formKey.currentState.validate()) {
@@ -126,15 +127,33 @@ class _LoginState extends State<Login> {
                       (await _auth.signInWithEmailAndPassword(email: email, password: password)).user;
 
                   if (user != null) {
-                    SharedPreferences preferences = await SharedPreferences.getInstance();
-                    preferences.setString("loggedInUserId", user.uid);
-                    await Firestore.instance
-                        .collection("admins")
-                        .where("userId", isEqualTo: user.uid)
-                        .getDocuments()
-                        .then((value) => value.documents.length != 0
-                            ? navigateToHome(context)
-                            : navigateToChooseSportSchool(context));
+                    if (user.isEmailVerified) {
+                      bool withoutSportSchoolCreated = false;
+                      SharedPreferences preferences = await SharedPreferences.getInstance();
+                      preferences.setString("loggedInUserId", user.uid);
+                      await Firestore.instance
+                          .collection("directorsWithoutSportSchool")
+                          .where("id", isEqualTo: user.uid)
+                          .getDocuments()
+                          .then((value) {
+                        if (value.documents.length > 0) {
+                          navigateToCreateSchool(context);
+                          withoutSportSchoolCreated = true;
+                        }
+                      });
+                      if (!withoutSportSchoolCreated) {
+                        await Firestore.instance
+                            .collection("admins")
+                            .where("userId", isEqualTo: user.uid)
+                            .getDocuments()
+                            .then((value) => value.documents.length != 0
+                                ? navigateToHome(context)
+                                : navigateToChooseSportSchool(context));
+                      }
+                    } else {
+                      errorDialog(
+                          context, "Necesita verificar su cuenta mediante el correo que le enviamos al registrarse");
+                    }
                   }
                 }
               } catch (e) {
@@ -161,23 +180,37 @@ class _LoginState extends State<Login> {
         ));
   }
 
+  Widget _forgotPassword() {
+    return Container(
+        margin: EdgeInsets.only(bottom: 12),
+        child: FlatButton(
+          child: Text(
+            "Olvidé mi contraseña",
+            style: TextStyle(color: Colors.blueAccent, fontSize: 14.0),
+          ),
+          onPressed: () {
+            navigateToResetPassword(context);
+          },
+        ));
+  }
+
   Widget _registerYet() {
     return Container(
-        padding: EdgeInsets.symmetric(vertical: 20),
+        margin: EdgeInsets.only(top: 16.0),
         child: Align(
             alignment: Alignment.bottomCenter,
             child: Column(children: <Widget>[
               new Text(
                 "¿Aún no te has registrado?",
-                style: TextStyle(fontSize: 15, color: Colors.black),
+                style: TextStyle(fontSize: 16, color: Colors.black),
               ),
-              new GestureDetector(
-                onTap: () {
+              FlatButton(
+                onPressed: () {
                   navigateToRegister(context);
                 },
                 child: new Text(
                   "¡Regístrate!",
-                  style: TextStyle(fontSize: 15, color: Colors.black, decoration: TextDecoration.underline),
+                  style: TextStyle(fontSize: 16, color: Colors.blueAccent),
                 ),
               )
             ])));

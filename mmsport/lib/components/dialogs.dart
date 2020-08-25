@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:ffi';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:mmsport/models/event.dart';
 import 'package:mmsport/models/group.dart';
@@ -129,8 +130,14 @@ dynamic confirmDialogOnCreateSchool(BuildContext context, String message) {
             FlatButton(
               color: Colors.white,
               textColor: Colors.blueAccent,
-              onPressed: () {
-                logout(context);
+              onPressed: () async{
+                FirebaseUser user = await FirebaseAuth.instance.currentUser();
+                if(user != null && user.isEmailVerified){
+                  navigateToChooseSportSchool(context);
+                }
+                else{
+                  logout(context);
+                }
                 Navigator.of(context, rootNavigator: true).pop();
               },
               child: Text("ENTENDIDO"),

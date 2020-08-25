@@ -1,7 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mmsport/components/dialogs.dart';
 import 'package:mmsport/components/form_validators.dart';
 import 'package:mmsport/navigations/navigations.dart';
@@ -28,6 +29,20 @@ class _RegisterState extends State<Register> {
   Widget build(BuildContext context) {
     return Material(
         child: Scaffold(
+            backgroundColor: Colors.white,
+            appBar: AppBar(
+              backgroundColor: Colors.white,
+              elevation: 0.0,
+              leading: IconButton(
+                icon: Icon(
+                  Icons.arrow_back,
+                  color: Colors.blue,
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ),
             body: SingleChildScrollView(
                 padding: EdgeInsets.symmetric(horizontal: 30),
                 child: Form(
@@ -45,10 +60,11 @@ class _RegisterState extends State<Register> {
                               _passwordField("Contraseña"),
                               _confirmPasswordField("Confirmar contraseña"),
                               Container(
-                                margin: const EdgeInsets.only(top: 16.0),
+                                margin: const EdgeInsets.only(top: 24.0),
                                 child: Text(
-                                  "¿Tienes una escuela?",
+                                  "¿Eres director de una escuela deportiva?",
                                   style: TextStyle(fontSize: 20.0),
+                                  textAlign: TextAlign.center,
                                 ),
                               ),
                               Container(
@@ -84,8 +100,7 @@ class _RegisterState extends State<Register> {
   }
 
   Widget _logoImage() {
-    return Container(
-        padding: EdgeInsets.symmetric(vertical: 50), child: Image.asset("assets/logo/Logo_MMSport_sin_fondo.png"));
+    return Container(margin: EdgeInsets.only(bottom: 50), child: Image.asset("assets/logo/Logo_MMSport_sin_fondo.png"));
   }
 
   Widget _emailField(String hintText) {
@@ -171,6 +186,7 @@ class _RegisterState extends State<Register> {
       child: Align(
         alignment: Alignment.bottomCenter,
         child: RaisedButton(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
           onPressed: () async {
             try {
               if (_formKey.currentState.validate()) {
@@ -180,12 +196,29 @@ class _RegisterState extends State<Register> {
                   password: password,
                 ))
                     .user;
-                Navigator.of(context, rootNavigator: true).pop();
+
                 if (newUser != null) {
-                  if (hasSchoolSport == "Sí") {
-                    navigateToCreateSchool(context);
-                  } else {
-                    acceptDialogRegister(context, "¡Bienvenido! Ya puedes iniciar sesión");
+                  if(hasSchoolSport == "Sí"){
+                    await Firestore.instance.collection("directorsWithoutSportSchool").add({
+                      "id" : newUser.uid
+                    });
+                    Navigator.of(context, rootNavigator: true).pop();
+                  }
+                  else{
+                    Navigator.of(context, rootNavigator: true).pop();
+                  }
+                  try {
+                    await newUser.sendEmailVerification();
+                    if (hasSchoolSport == "Sí") {
+                      await acceptDialogRegister(context,
+                          "Le hemos enviado un email para verificar la cuenta. Recuerde que antes de iniciar sesión debe de verificar la cuenta");
+                      navigateToCreateSchool(context);
+                    } else {
+                      acceptDialogRegister(context,
+                          "Le hemos enviado un email para verificar la cuenta. Recuerde que antes de iniciar sesión debe de verificar la cuenta");
+                    }
+                  } catch (e) {
+                    errorDialog(context, "No se le ha podido enviar el email para verificar la cuenta");
                   }
                 }
               }

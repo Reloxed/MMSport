@@ -222,7 +222,7 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
             if (_formKey.currentState.validate() && imageSchool != null) {
               _controller.animateToPage(1, duration: const Duration(milliseconds: 400), curve: Curves.easeInOut);
             } else {
-              if(imageSchool == null){
+              if (imageSchool == null) {
                 errorDialog(context, "El logotipo es obligatorio.");
               } else {
                 errorDialog(context, "Hay errores, corríjalos.");
@@ -379,12 +379,12 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
         child: RaisedButton(
           onPressed: () async {
             if (_formKey2.currentState.validate()) {
-              if(imageProfile != null){
-              loadingDialog(context);
-              _uploadAndCreate();
-              Navigator.of(context, rootNavigator: true).pop();
-              confirmDialogOnCreateSchool(
-                  context, "Escuela y perfil creados, espere a la confirmación de la administración.");
+              if (imageProfile != null) {
+                loadingDialog(context);
+                _uploadAndCreate();
+                Navigator.of(context, rootNavigator: true).pop();
+                confirmDialogOnCreateSchool(
+                    context, "Escuela y perfil creados, espere a la confirmación de la administración.");
               } else {
                 errorDialog(context, "La fotografía es obligatoria para los directores.");
               }
@@ -444,6 +444,14 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
         .collection("socialProfiles")
         .document(ref2.documentID)
         .setData({"id": ref2.documentID}, merge: true);
+    FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    await databaseReference
+        .collection("directorsWithoutSportSchool")
+        .where("id", isEqualTo: user.uid)
+        .getDocuments()
+        .then((value) => value.documents.forEach((element) {
+              databaseReference.collection("directorsWithoutSportSchool").document(element.documentID).delete();
+            }));
   }
 
   String getRandomString(int length) {
@@ -467,7 +475,7 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
 
   Future uploadPicProfile(BuildContext context) async {
     String fileName;
-    if(secondSurnameProfile != null) {
+    if (secondSurnameProfile != null) {
       fileName = nameProfile + firstSurnameProfile + secondSurnameProfile;
     } else {
       fileName = nameProfile + firstSurnameProfile;
