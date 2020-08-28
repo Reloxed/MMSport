@@ -70,7 +70,10 @@ class _Home extends State<Home> {
                 flexibleSpace: FlexibleSpaceBar(
                   titlePadding: EdgeInsets.all(10.0),
                   centerTitle: true,
-                  title: Text("Menú de admin", style: TextStyle(fontSize: 30),),
+                  title: Text(
+                    "Menú de admin",
+                    style: TextStyle(fontSize: 30),
+                  ),
                 ),
                 actions: <Widget>[
                   _logoutButton(),
@@ -115,14 +118,18 @@ class _Home extends State<Home> {
                                                             snapshots.data[1].firstSurname +
                                                             " " +
                                                             snapshots.data[1].secondSurname,
-                                                        style:
-                                                            TextStyle(color: Colors.white, fontStyle: FontStyle.italic, fontSize: 18),
+                                                        style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontStyle: FontStyle.italic,
+                                                            fontSize: 18),
                                                         overflow: TextOverflow.ellipsis,
                                                         softWrap: true)
                                                     : Text(
                                                         snapshots.data[1].name + " " + snapshots.data[1].firstSurname,
-                                                        style:
-                                                            TextStyle(color: Colors.white, fontStyle: FontStyle.italic, fontSize: 18),
+                                                        style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontStyle: FontStyle.italic,
+                                                            fontSize: 18),
                                                         overflow: TextOverflow.ellipsis,
                                                         softWrap: true)
                                               ]))),
@@ -144,7 +151,11 @@ class _Home extends State<Home> {
                                               child: Row(children: <Widget>[
                                                 Icon(Icons.power_settings_new),
                                                 Text(" Cerrar sesión")
-                                              ]))
+                                              ])),
+                                          PopupMenuItem(
+                                              value: 4,
+                                              child: Row(
+                                                  children: <Widget>[Icon(Icons.security), Text(" Exportar usuario")]))
                                         ],
                                     icon: Icon(
                                       Icons.more_vert,
@@ -158,6 +169,8 @@ class _Home extends State<Home> {
                                         changeSportSchool();
                                       } else if (value == 3) {
                                         _logout();
+                                      } else if (value == 4) {
+                                        _exportUser(snapshots.data[1]);
                                       }
                                     })
                               ]))),
@@ -185,15 +198,15 @@ class _Home extends State<Home> {
 
   void changeSocialProfile() async {
     deleteChosenSocialProfile();
-    Navigator.of(context)
-        .pushAndRemoveUntil(MaterialPageRoute(builder: (context) => ChooseSocialProfile()), (Route<dynamic> route) => false);
+    Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => ChooseSocialProfile()), (Route<dynamic> route) => false);
   }
 
   void changeSportSchool() async {
     deleteChosenSocialProfile();
     deleteChosenSportSchool();
-    Navigator.of(context)
-        .pushAndRemoveUntil(MaterialPageRoute(builder: (context) => ChooseSportSchool()), (Route<dynamic> route) => false);
+    Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => ChooseSportSchool()), (Route<dynamic> route) => false);
   }
 
   Widget _logoutButton() {
@@ -207,5 +220,85 @@ class _Home extends State<Home> {
           ),
           child: Icon(Icons.power_settings_new)),
     );
+  }
+
+  dynamic _exportUser(SocialProfile socialProfile) {
+    return showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return AlertDialog(
+            title: new IconTheme(data: new IconThemeData(color: Colors.green), child: Icon(Icons.thumb_up)),
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: <Widget>[
+                  Center(
+                    child: Text("Se va a exportar la información de tu usuario, ¿estás seguro?"),
+                  )
+                ],
+              ),
+            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0))),
+            actions: <Widget>[
+              FlatButton(
+                color: Colors.white,
+                textColor: Colors.blueAccent,
+                child: Text("CANCELAR"),
+                onPressed: () async {
+                  Navigator.pop(context, true);
+                },
+              ),
+              FlatButton(
+                color: Colors.white,
+                textColor: Colors.blueAccent,
+                child: Text("ACEPTAR"),
+                onPressed: () async {
+                  String json = "";
+                  await Firestore.instance
+                      .collection("socialProfiles")
+                      .where("userAccountId", isEqualTo: socialProfile.userAccountId)
+                      .getDocuments()
+                      .then((value) => value.documents.forEach((element) {
+                            json += element.data.toString();
+                          }));
+                  await FirebaseAuth.instance.currentUser().then((value) => json += "email: " + value.email);
+                  Navigator.pop(context, true);
+                  _dataExported(json);
+                },
+              ),
+            ],
+          );
+        });
+  }
+
+  dynamic _dataExported(String json) {
+    return showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return AlertDialog(
+            title: new IconTheme(data: new IconThemeData(color: Colors.green), child: Icon(Icons.thumb_up)),
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: <Widget>[
+                  Center(
+                    child: Text(json),
+                  )
+                ],
+              ),
+            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0))),
+            actions: <Widget>[
+              FlatButton(
+                color: Colors.white,
+                textColor: Colors.blueAccent,
+                child: Text("CERRAR"),
+                onPressed: () async {
+                  Navigator.pop(context, true);
+                },
+              ),
+            ],
+          );
+        });
   }
 }
