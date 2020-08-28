@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:mmsport/components/dialogs.dart';
 import 'package:mmsport/components/form_validators.dart';
+import 'package:mmsport/components/privacy_policy.dart';
 import 'package:mmsport/components/terms_and_conditions.dart';
 import 'package:mmsport/navigations/navigations.dart';
 
@@ -286,7 +287,12 @@ class _RegisterState extends State<Register> {
                 TextSpan(
                     text: 'Política de Privacidad',
                     style: TextStyle(fontSize: 8.0, color: Colors.blueAccent, decoration: TextDecoration.underline),
-                    recognizer: TapGestureRecognizer())
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (context) => PrivacyPolicyDialog(), fullscreenDialog: true),
+                        ); // code to open / launch privacy policy link here
+                      })
               ])
             ]),
       )),
