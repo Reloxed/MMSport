@@ -103,6 +103,7 @@ class _EditCalendarEventState extends State<EditCalendarEvent> {
     return Container(
       margin: EdgeInsets.only(top: 16.0, bottom: 8.0),
       child: TextFormField(
+        textCapitalization: TextCapitalization.sentences,
         initialValue: eventName,
         validator: (v) {
           if (FormValidators.validateEmptyText(v) == false)
@@ -123,6 +124,7 @@ class _EditCalendarEventState extends State<EditCalendarEvent> {
       child: Column(
         children: <Widget>[
           TextFormField(
+            textCapitalization: TextCapitalization.words,
             controller: _dayController,
             readOnly: true,
             onTap: () {

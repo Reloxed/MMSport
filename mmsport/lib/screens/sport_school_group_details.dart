@@ -485,6 +485,7 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
       child: Column(
         children: <Widget>[
           TextFormField(
+            textCapitalization: TextCapitalization.words,
             initialValue: groupEdited.name,
             validator: (v) {
               if (v.isEmpty)

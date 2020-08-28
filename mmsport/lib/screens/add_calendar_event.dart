@@ -69,6 +69,7 @@ class _AddCalendarEventState extends State<AddCalendarEvent> {
     return Container(
       margin: EdgeInsets.only(top: 16.0, bottom: 8.0),
       child: TextFormField(
+        textCapitalization: TextCapitalization.sentences,
         validator: (v) {
           if (FormValidators.validateEmptyText(v) == false)
             return "Este campo no puede estar vacío";
