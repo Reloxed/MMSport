@@ -34,6 +34,7 @@ class _RemoveSocialProfilesState extends State<RemoveSocialProfiles> {
           .collection("socialProfiles")
           .where("role", isEqualTo: "STUDENT")
           .where("sportSchoolId", isEqualTo: loggedProfile.sportSchoolId)
+          .where("status", isEqualTo: "ACCEPTED")
           .getDocuments()
           .then((value) => value.documents.forEach((element) {
                 SocialProfile newProfile = SocialProfile.socialProfileFromMap(element.data);
@@ -55,6 +56,7 @@ class _RemoveSocialProfilesState extends State<RemoveSocialProfiles> {
           .collection("socialProfiles")
           .where("role", isEqualTo: "TRAINER")
           .where("sportSchoolId", isEqualTo: loggedProfile.sportSchoolId)
+          .where("status", isEqualTo: "ACCEPTED")
           .getDocuments()
           .then((value) => value.documents.forEach((element) {
                 SocialProfile newProfile = SocialProfile.socialProfileFromMap(element.data);
@@ -276,7 +278,7 @@ class _RemoveSocialProfilesState extends State<RemoveSocialProfiles> {
               FlatButton(
                 color: Colors.white,
                 textColor: Colors.blueAccent,
-                child: Text("Cancelar"),
+                child: Text("CANCELAR"),
                 onPressed: () {
                   Navigator.of(context, rootNavigator: true).pop();
                 },

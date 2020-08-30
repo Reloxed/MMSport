@@ -167,7 +167,7 @@ class _RemoveSportSchoolsState extends State<StatefulWidget> {
               FlatButton(
                 color: Colors.white,
                 textColor: Colors.blueAccent,
-                child: Text("Cancelar"),
+                child: Text("CANCELAR"),
                 onPressed: () {
                   Navigator.of(context, rootNavigator: true).pop();
                 },

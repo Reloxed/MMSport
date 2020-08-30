@@ -135,6 +135,7 @@ class _ChatMain extends State<ChatMain> {
                           stream: Firestore.instance
                               .collection("socialProfiles")
                               .where("sportSchoolId", isEqualTo: snapshotSocialProfile.data.sportSchoolId)
+                              .where("status", isEqualTo: "ACCEPTED")
                               .snapshots(),
                           builder: (context, listSnapshot) {
                             if (listSnapshot.hasData) {

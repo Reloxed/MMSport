@@ -36,7 +36,7 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
   @override
   Widget build(BuildContext context) {
     return Material(
-        child: Scaffold(body: Container(padding: EdgeInsets.symmetric(horizontal: 30), child: _studentProfileForm())));
+        child: Scaffold(appBar: AppBar(title: Text("Inscripción"), centerTitle: true,),body: Container(padding: EdgeInsets.symmetric(horizontal: 30), child: _studentProfileForm())));
   }
 
   // Parent widget for the second page (director profile creation)
