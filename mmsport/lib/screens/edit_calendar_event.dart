@@ -312,10 +312,12 @@ class _EditCalendarEventState extends State<EditCalendarEvent> {
           alignment: Alignment.bottomCenter,
           child: RaisedButton(
             onPressed: () {
-              loadingDialog(context);
-              editEvent();
-              Navigator.of(context,rootNavigator: true).pop();
-              Navigator.of(context).pop();
+              if (_formKey.currentState.validate()) {
+                loadingDialog(context);
+                editEvent();
+                Navigator.of(context, rootNavigator: true).pop();
+                Navigator.of(context).pop();
+              }
             },
             elevation: 3.0,
             color: Colors.blueAccent,
@@ -328,18 +330,16 @@ class _EditCalendarEventState extends State<EditCalendarEvent> {
   }
 
   void editEvent() async {
-    if (_formKey.currentState.validate()) {
-      SharedPreferences preferences = await SharedPreferences.getInstance();
-      SportSchool _sportSchool = SportSchool.sportSchoolFromMap(await jsonDecode(preferences.get("chosenSportSchool")));
-      Event newEvent = Event(eventName, selectedDay, selectedStartTimeEvent, selectedEndTimeEvent, _sportSchool.id);
-      final databaseReference = Firestore.instance;
-      await databaseReference.collection("events").document(_id).setData({
-        "eventName": newEvent.eventName,
-        "day": formatDateTime(newEvent.day),
-        "startTimeEvent": timeOfDayToString(newEvent.startTimeEvent, context),
-        "endTimeEvent": timeOfDayToString(newEvent.endTimeEvent, context),
-        "sportSchoolId": newEvent.sportSchoolId
-      }, merge: true);
-    }
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    SportSchool _sportSchool = SportSchool.sportSchoolFromMap(await jsonDecode(preferences.get("chosenSportSchool")));
+    Event newEvent = Event(eventName, selectedDay, selectedStartTimeEvent, selectedEndTimeEvent, _sportSchool.id);
+    final databaseReference = Firestore.instance;
+    await databaseReference.collection("events").document(_id).setData({
+      "eventName": newEvent.eventName,
+      "day": formatDateTime(newEvent.day),
+      "startTimeEvent": timeOfDayToString(newEvent.startTimeEvent, context),
+      "endTimeEvent": timeOfDayToString(newEvent.endTimeEvent, context),
+      "sportSchoolId": newEvent.sportSchoolId
+    }, merge: true);
   }
 }
