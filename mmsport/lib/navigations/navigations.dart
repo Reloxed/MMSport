@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mmsport/components/terms_and_conditions.dart';
 import 'package:mmsport/constants/constants.dart';
 import 'package:mmsport/models/event.dart';
 import 'package:mmsport/screens/reset_password.dart';
@@ -94,6 +95,10 @@ void navigateToCalendarEvent(BuildContext context) {
 
 Future<dynamic> navigateToAddCalendarEvent(BuildContext context) {
   return Navigator.of(context).push(MaterialPageRoute(builder: (context) => AddCalendarEvent()));
+}
+
+Future<dynamic> navigateToTermsAndConditions(BuildContext context) {
+  return Navigator.of(context).push(MaterialPageRoute(builder: (context) => TermsAndConditionsDialog()));
 }
 
 Future<dynamic> navigateToEditCalendarEvent(BuildContext context, Event event) {

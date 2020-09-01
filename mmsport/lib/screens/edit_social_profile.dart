@@ -134,6 +134,7 @@ class _EditSocialProfileState extends State<EditSocialProfile> {
       child: Column(
         children: <Widget>[
           TextFormField(
+            textCapitalization: TextCapitalization.words,
             validator: (v) {
               if (FormValidators.validateNotEmpty(v) == false)
                 return "Este campo no puede estar vacío";
@@ -158,6 +159,7 @@ class _EditSocialProfileState extends State<EditSocialProfile> {
       child: Column(
         children: <Widget>[
           TextFormField(
+            textCapitalization: TextCapitalization.words,
             validator: (v) {
               if (FormValidators.validateNotEmpty(v) == false)
                 return "Este campo no puede estar vacío";
@@ -182,6 +184,7 @@ class _EditSocialProfileState extends State<EditSocialProfile> {
       child: Column(
         children: <Widget>[
           TextFormField(
+            textCapitalization: TextCapitalization.words,
             validator: (v) {
               return null;
             },

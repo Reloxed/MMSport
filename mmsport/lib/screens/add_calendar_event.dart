@@ -69,6 +69,7 @@ class _AddCalendarEventState extends State<AddCalendarEvent> {
     return Container(
       margin: EdgeInsets.only(top: 16.0, bottom: 8.0),
       child: TextFormField(
+        textCapitalization: TextCapitalization.sentences,
         validator: (v) {
           if (FormValidators.validateEmptyText(v) == false)
             return "Este campo no puede estar vacío";
@@ -275,10 +276,13 @@ class _AddCalendarEventState extends State<AddCalendarEvent> {
           alignment: Alignment.bottomCenter,
           child: RaisedButton(
             onPressed: () {
-              loadingDialog(context);
-              createEvent();
-              Navigator.of(context, rootNavigator: true).pop();
-              Navigator.of(context).pop();
+
+              if (_formKey.currentState.validate()) {
+                loadingDialog(context);
+                createEvent();
+                Navigator.of(context, rootNavigator: true).pop();
+                Navigator.of(context).pop();
+              }
             },
             elevation: 3.0,
             color: Colors.blueAccent,
@@ -291,18 +295,16 @@ class _AddCalendarEventState extends State<AddCalendarEvent> {
   }
 
   void createEvent() async {
-    if (_formKey.currentState.validate()) {
-      SharedPreferences preferences = await SharedPreferences.getInstance();
-      SportSchool _sportSchool = SportSchool.sportSchoolFromMap(await jsonDecode(preferences.get("chosenSportSchool")));
-      Event newEvent = Event(eventName, selectedDay, selectedStartTimeEvent, selectedEndTimeEvent, _sportSchool.id);
-      final databaseReference = Firestore.instance;
-      await databaseReference.collection("events").add({
-        "eventName": newEvent.eventName,
-        "day": formatDateTime(newEvent.day),
-        "startTimeEvent": timeOfDayToString(newEvent.startTimeEvent, context),
-        "endTimeEvent": timeOfDayToString(newEvent.endTimeEvent, context),
-        "sportSchoolId": newEvent.sportSchoolId
-      });
-    }
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    SportSchool _sportSchool = SportSchool.sportSchoolFromMap(await jsonDecode(preferences.get("chosenSportSchool")));
+    Event newEvent = Event(eventName, selectedDay, selectedStartTimeEvent, selectedEndTimeEvent, _sportSchool.id);
+    final databaseReference = Firestore.instance;
+    await databaseReference.collection("events").add({
+      "eventName": newEvent.eventName,
+      "day": formatDateTime(newEvent.day),
+      "startTimeEvent": timeOfDayToString(newEvent.startTimeEvent, context),
+      "endTimeEvent": timeOfDayToString(newEvent.endTimeEvent, context),
+      "sportSchoolId": newEvent.sportSchoolId
+    });
   }
 }

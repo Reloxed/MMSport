@@ -162,10 +162,7 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
         child: RaisedButton(
           onPressed: () async {
             if (_formKey.currentState.validate()) {
-              loadingDialog(context);
               createGroup();
-              Navigator.of(context, rootNavigator: true).pop();
-              Navigator.of(context).pop();
             }
           },
           elevation: 3.0,
@@ -341,6 +338,7 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
       String message = "Debe de añadir los horarios del grupo";
       errorDialog(context, message);
     } else if (selectedTrainer != null && schedules.isNotEmpty) {
+      loadingDialog(context);
       final databaseReference = Firestore.instance;
       SharedPreferences preferences = await SharedPreferences.getInstance();
       Map aux = jsonDecode(preferences.get("chosenSportSchool"));
@@ -360,6 +358,8 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
           .collection("groups")
           .document(ref.documentID)
           .setData({"id": ref.documentID}, merge: true);
+      Navigator.of(context, rootNavigator: true).pop();
+      Navigator.of(context).pop();
     }
   }
 }

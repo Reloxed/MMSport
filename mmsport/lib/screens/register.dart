@@ -1,10 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:mmsport/components/dialogs.dart';
 import 'package:mmsport/components/form_validators.dart';
+import 'package:mmsport/components/privacy_policy.dart';
+import 'package:mmsport/components/terms_and_conditions.dart';
 import 'package:mmsport/navigations/navigations.dart';
 
 class Register extends StatefulWidget {
@@ -93,7 +96,7 @@ class _RegisterState extends State<Register> {
                         Column(
                           mainAxisAlignment: MainAxisAlignment.end,
                           crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[_button()],
+                          children: <Widget>[termsAndConditions(), _button()],
                         ),
                       ],
                     )))));
@@ -198,13 +201,10 @@ class _RegisterState extends State<Register> {
                     .user;
 
                 if (newUser != null) {
-                  if(hasSchoolSport == "Sí"){
-                    await Firestore.instance.collection("directorsWithoutSportSchool").add({
-                      "id" : newUser.uid
-                    });
+                  if (hasSchoolSport == "Sí") {
+                    await Firestore.instance.collection("directorsWithoutSportSchool").add({"id": newUser.uid});
                     Navigator.of(context, rootNavigator: true).pop();
-                  }
-                  else{
+                  } else {
                     Navigator.of(context, rootNavigator: true).pop();
                   }
                   try {
@@ -259,5 +259,43 @@ class _RegisterState extends State<Register> {
     if (v == "") {
       return "Debe de seleccionar una opción";
     }
+  }
+
+  Widget termsAndConditions() {
+    return Container(
+      margin: EdgeInsets.only(top: 16.0),
+      child: Center(
+          child: RichText(
+        text: TextSpan(
+            text: 'Al registrarte, estás aceptando nuestros ',
+            style: TextStyle(fontSize: 8.0, color: Colors.black),
+            children: <TextSpan>[
+              TextSpan(
+                  text: 'Términos y Condiciones',
+                  style: TextStyle(
+                    fontSize: 8.0,
+                    color: Colors.blueAccent,
+                    decoration: TextDecoration.underline,
+                  ),
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => TermsAndConditionsDialog(), fullscreenDialog: true),
+                      ); // code to open / launch privacy policy link here
+                    }),
+              TextSpan(text: ' y nuestra ', style: TextStyle(fontSize: 8.0, color: Colors.black), children: <TextSpan>[
+                TextSpan(
+                    text: 'Política de Privacidad',
+                    style: TextStyle(fontSize: 8.0, color: Colors.blueAccent, decoration: TextDecoration.underline),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (context) => PrivacyPolicyDialog(), fullscreenDialog: true),
+                        ); // code to open / launch privacy policy link here
+                      })
+              ])
+            ]),
+      )),
+    );
   }
 }
