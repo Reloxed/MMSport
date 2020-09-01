@@ -96,7 +96,7 @@ class _RegisterState extends State<Register> {
                         Column(
                           mainAxisAlignment: MainAxisAlignment.end,
                           crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[TermsAndConditions(), _button()],
+                          children: <Widget>[termsAndConditions(), _button()],
                         ),
                       ],
                     )))));
@@ -261,7 +261,7 @@ class _RegisterState extends State<Register> {
     }
   }
 
-  Widget TermsAndConditions() {
+  Widget termsAndConditions() {
     return Container(
       margin: EdgeInsets.only(top: 16.0),
       child: Center(

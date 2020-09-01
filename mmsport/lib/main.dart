@@ -11,7 +11,6 @@ import 'package:mmsport/models/sportSchool.dart';
 import 'package:mmsport/screens/choose_social_profile.dart';
 import 'package:mmsport/screens/choose_sport_school.dart';
 import 'package:mmsport/screens/create_sport_school.dart';
-import 'package:mmsport/screens/create_sport_school_group.dart';
 import 'package:mmsport/screens/homes/home.dart';
 import 'package:mmsport/screens/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
