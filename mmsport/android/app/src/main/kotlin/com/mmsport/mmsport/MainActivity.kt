@@ -1,4 +1,4 @@
-package com.example.mmsport
+package com.mmsport.mmsport
 
 import io.flutter.embedding.android.FlutterActivity
 
