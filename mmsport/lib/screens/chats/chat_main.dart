@@ -33,23 +33,23 @@ class _ChatMain extends State<ChatMain> {
     chosenSocialProfile.id = aux['id'];
     Set<String> ids = new Set();
     Set<String> chatRoomIds = new Set();
-    await Firestore.instance
+    await FirebaseFirestore.instance
         .collection("chatRooms")
         .where("users", arrayContains: chosenSocialProfile.id)
-        .getDocuments()
-        .then((value) => value.documents.forEach((document) {
-              if (document.data['users'][0] == chosenSocialProfile.id) {
-                ids.add(document.data['users'][1]);
+        .get()
+        .then((value) => value.docs.forEach((document) {
+              if (document.data()['users'][0] == chosenSocialProfile.id) {
+                ids.add(document.data()['users'][1]);
               } else {
-                ids.add(document.data['users'][0]);
+                ids.add(document.data()['users'][0]);
               }
-              chatRoomIds.add(document.documentID);
+              chatRoomIds.add(document.id);
             }));
     openChats.clear();
     for (String id in ids) {
       SocialProfile auxProfile;
-      await Firestore.instance.collection("socialProfiles").document(id).get().then((value) {
-        auxProfile = SocialProfile.socialProfileFromMap(value.data);
+      await FirebaseFirestore.instance.collection("socialProfiles").doc(id).get().then((value) {
+        auxProfile = SocialProfile.socialProfileFromMap(value.data());
         auxProfile.id = id;
       });
       bool contains = false;
@@ -132,7 +132,7 @@ class _ChatMain extends State<ChatMain> {
                         },
                       ),
                       StreamBuilder(
-                          stream: Firestore.instance
+                          stream: FirebaseFirestore.instance
                               .collection("socialProfiles")
                               .where("sportSchoolId", isEqualTo: snapshotSocialProfile.data.sportSchoolId)
                               .where("status", isEqualTo: "ACCEPTED")
@@ -144,13 +144,13 @@ class _ChatMain extends State<ChatMain> {
                                   // ignore: missing_return
                                   itemBuilder: (context, index) {
                                     DocumentSnapshot document = listSnapshot.data.documents[index];
-                                    if (document.documentID != snapshotSocialProfile.data.id) {
+                                    if (document.id != snapshotSocialProfile.data.id) {
                                       if (index + 1 < listSnapshot.data.documents.length) {
                                         return Column(
-                                          children: <Widget>[_listItem(document.data), Divider(color: Colors.black38)],
+                                          children: <Widget>[_listItem(document.data()), Divider(color: Colors.black38)],
                                         );
                                       } else {
-                                        return _listItem(document.data);
+                                        return _listItem(document.data());
                                       }
                                     } else {
                                       return Container();
@@ -206,9 +206,9 @@ class _ChatMain extends State<ChatMain> {
                                 : Text(socialProfile.name + " " + socialProfile.firstSurname,
                                     overflow: TextOverflow.ellipsis, softWrap: true, style: TextStyle(fontSize: 16)),
                             StreamBuilder(
-                              stream: Firestore.instance
+                              stream: FirebaseFirestore.instance
                                   .collection("chatRooms")
-                                  .document(chatRoomId)
+                                  .doc(chatRoomId)
                                   .collection("messages")
                                   .orderBy("sentDate", descending: true)
                                   .snapshots(),
@@ -231,37 +231,37 @@ class _ChatMain extends State<ChatMain> {
         SharedPreferences preferences = await SharedPreferences.getInstance();
 //          String socialProfileToJson = jsonEncode(socialProfile);
 //          preferences.setString("socialProfileToChat", socialProfileToJson);
-        var existsDoc = await Firestore.instance
+        var existsDoc = await FirebaseFirestore.instance
             .collection("chatRooms")
-            .document(chosenSocialProfile.id + "_" + socialProfile.id)
+            .doc(chosenSocialProfile.id + "_" + socialProfile.id)
             .get();
         if (existsDoc.exists) {
           // Check if document exists one way
           List<String> users = [];
-          users.add(existsDoc.data['users'][0]);
-          users.add(existsDoc.data['users'][1]);
-          ChatRoomModel chatRoomModel = new ChatRoomModel(existsDoc.documentID, users);
+          users.add(existsDoc.data()['users'][0]);
+          users.add(existsDoc.data()['users'][1]);
+          ChatRoomModel chatRoomModel = new ChatRoomModel(existsDoc.id, users);
           preferences.setString("chosenChatRoom", jsonEncode(chatRoomModel.chatRoomModelToJson()));
         } else {
           // Check if document exists the other way
-          var existsDoc2 = await Firestore.instance
+          var existsDoc2 = await FirebaseFirestore.instance
               .collection("chatRooms")
-              .document(socialProfile.id + "_" + chosenSocialProfile.id)
+              .doc(socialProfile.id + "_" + chosenSocialProfile.id)
               .get();
           if (existsDoc2.exists) {
             List<String> users = [];
-            users.add(existsDoc2.data['users'][0]);
-            users.add(existsDoc2.data['users'][1]);
-            ChatRoomModel chatRoomModel = new ChatRoomModel(existsDoc.documentID, users);
+            users.add(existsDoc2.data()['users'][0]);
+            users.add(existsDoc2.data()['users'][1]);
+            ChatRoomModel chatRoomModel = new ChatRoomModel(existsDoc.id, users);
             preferences.setString("chosenChatRoom", jsonEncode(chatRoomModel.chatRoomModelToJson()));
           } else {
             // None of previous exists, create a new chat room
             ChatRoomModel chatRoomModel = new ChatRoomModel(
                 chosenSocialProfile.id + "_" + socialProfile.id, [chosenSocialProfile.id, socialProfile.id]);
-            await Firestore.instance
+            await FirebaseFirestore.instance
                 .collection("chatRooms")
-                .document(chatRoomModel.id)
-                .setData(chatRoomModel.chatRoomModelToJson());
+                .doc(chatRoomModel.id)
+                .set(chatRoomModel.chatRoomModelToJson());
             preferences.setString("chosenChatRoom", jsonEncode(chatRoomModel.chatRoomModelToJson()));
           }
         }
@@ -316,37 +316,37 @@ class _ChatMain extends State<ChatMain> {
         SharedPreferences preferences = await SharedPreferences.getInstance();
 //          String socialProfileToJson = jsonEncode(socialProfile);
 //          preferences.setString("socialProfileToChat", socialProfileToJson);
-        var existsDoc = await Firestore.instance
+        var existsDoc = await FirebaseFirestore.instance
             .collection("chatRooms")
-            .document(chosenSocialProfile.id + "_" + socialProfile['id'])
+            .doc(chosenSocialProfile.id + "_" + socialProfile['id'])
             .get();
         if (existsDoc.exists) {
           // Check if document exists one way
           List<String> users = [];
-          users.add(existsDoc.data['users'][0]);
-          users.add(existsDoc.data['users'][1]);
-          ChatRoomModel chatRoomModel = new ChatRoomModel(existsDoc.documentID, users);
+          users.add(existsDoc.data()['users'][0]);
+          users.add(existsDoc.data()['users'][1]);
+          ChatRoomModel chatRoomModel = new ChatRoomModel(existsDoc.id, users);
           preferences.setString("chosenChatRoom", jsonEncode(chatRoomModel.chatRoomModelToJson()));
         } else {
           // Check if document exists the other way
-          var existsDoc2 = await Firestore.instance
+          var existsDoc2 = await FirebaseFirestore.instance
               .collection("chatRooms")
-              .document(socialProfile['id'] + "_" + chosenSocialProfile.id)
+              .doc(socialProfile['id'] + "_" + chosenSocialProfile.id)
               .get();
           if (existsDoc2.exists) {
             List<String> users = [];
-            users.add(existsDoc2.data['users'][0]);
-            users.add(existsDoc2.data['users'][1]);
-            ChatRoomModel chatRoomModel = new ChatRoomModel(existsDoc.documentID, users);
+            users.add(existsDoc2.data()['users'][0]);
+            users.add(existsDoc2.data()['users'][1]);
+            ChatRoomModel chatRoomModel = new ChatRoomModel(existsDoc.id, users);
             preferences.setString("chosenChatRoom", jsonEncode(chatRoomModel.chatRoomModelToJson()));
           } else {
             // None of previous exists, create a new chat room
             ChatRoomModel chatRoomModel = new ChatRoomModel(
                 chosenSocialProfile.id + "_" + socialProfile['id'], [chosenSocialProfile.id, socialProfile['id']]);
-            await Firestore.instance
+            await FirebaseFirestore.instance
                 .collection("chatRooms")
-                .document(chatRoomModel.id)
-                .setData(chatRoomModel.chatRoomModelToJson());
+                .doc(chatRoomModel.id)
+                .set(chatRoomModel.chatRoomModelToJson());
             preferences.setString("chosenChatRoom", jsonEncode(chatRoomModel.chatRoomModelToJson()));
           }
         }

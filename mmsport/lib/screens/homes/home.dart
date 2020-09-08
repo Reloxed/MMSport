@@ -30,11 +30,11 @@ class _Home extends State<Home> {
   Future<bool> _checkAdmin() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String userId = preferences.get("loggedInUserId");
-    await Firestore.instance
+    await FirebaseFirestore.instance
         .collection("admins")
         .where("userId", isEqualTo: userId)
-        .getDocuments()
-        .then((value) => value.documents.length != 0 ? isAdmin = true : isAdmin = false);
+        .get()
+        .then((value) => value.docs.length != 0 ? isAdmin = true : isAdmin = false);
     return isAdmin;
   }
 
@@ -254,14 +254,15 @@ class _Home extends State<Home> {
                 child: Text("ACEPTAR"),
                 onPressed: () async {
                   String json = "";
-                  await Firestore.instance
+                  await FirebaseFirestore.instance
                       .collection("socialProfiles")
                       .where("userAccountId", isEqualTo: socialProfile.userAccountId)
-                      .getDocuments()
-                      .then((value) => value.documents.forEach((element) {
+                      .get()
+                      .then((value) => value.docs.forEach((element) {
                             json += element.data.toString();
                           }));
-                  await FirebaseAuth.instance.currentUser().then((value) => json += "email: " + value.email);
+                  User user = FirebaseAuth.instance.currentUser;
+                  json += "email: " + user.email;
                   Navigator.pop(context, true);
                   _dataExported(json);
                 },

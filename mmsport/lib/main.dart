@@ -92,27 +92,27 @@ class MyApp extends StatelessWidget {
       map['loggedInUserId'] = false;
     }
     if (sharedPreferences.getString("loggedInUserId") != null) {
-      FirebaseUser user = await FirebaseAuth.instance.currentUser();
+      User user = FirebaseAuth.instance.currentUser;
       bool userExists = false;
       if (user != null) {
-        await FirebaseAuth.instance.fetchSignInMethodsForEmail(email: user.email).then((value) {
+        await FirebaseAuth.instance.fetchSignInMethodsForEmail(user.email).then((value) {
           value.length == 0 ? userExists = false : userExists = true;
         });
       }
       if (userExists) {
         map['loggedInUserId'] = true;
-        await Firestore.instance
+        await FirebaseFirestore.instance
             .collection("admins")
             .where("userId", isEqualTo: sharedPreferences.getString("loggedInUserId"))
-            .getDocuments()
-            .then((value) => value.documents.length != 0 ? isAdmin = true : isAdmin = false);
-        FirebaseUser user = await FirebaseAuth.instance.currentUser();
-        await Firestore.instance
+            .get()
+            .then((value) => value.docs.length != 0 ? isAdmin = true : isAdmin = false);
+        User user = FirebaseAuth.instance.currentUser;
+        await FirebaseFirestore.instance
             .collection("directorsWithoutSportSchool")
             .where("id", isEqualTo: user.uid)
-            .getDocuments()
+            .get()
             .then((value) {
-          if (value.documents.length > 0) {
+          if (value.docs.length > 0) {
             hasToCreateTheSportSchool = true;
           }
         });
@@ -122,7 +122,7 @@ class MyApp extends StatelessWidget {
     }
     if (sharedPreferences.getString("chosenSportSchool") != null) {
       SportSchool sportSchool = SportSchool.sportSchoolFromMap(jsonDecode(sharedPreferences.get("chosenSportSchool")));
-      var ref = await Firestore.instance.collection("sportSchools").document(sportSchool.id).get();
+      var ref = await FirebaseFirestore.instance.collection("sportSchools").doc(sportSchool.id).get();
       if (ref.exists) {
         map['chosenSportSchool'] = true;
       }
@@ -131,7 +131,7 @@ class MyApp extends StatelessWidget {
       Map aux = jsonDecode(sharedPreferences.get("chosenSocialProfile"));
       SocialProfile profile = SocialProfile.socialProfileFromMap(aux);
       profile.id = aux['id'];
-      var ref = await Firestore.instance.collection("socialProfiles").document(profile.id).get();
+      var ref = await FirebaseFirestore.instance.collection("socialProfiles").doc(profile.id).get();
       if (ref.exists) {
         map['chosenSocialProfile'] = true;
       }

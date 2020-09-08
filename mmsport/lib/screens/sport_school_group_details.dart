@@ -47,15 +47,15 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     Map aux = jsonDecode(preferences.get("chosenSportSchool"));
     SportSchool sportSchool = SportSchool.sportSchoolFromMap(aux);
-    await Firestore.instance
+    await FirebaseFirestore.instance
         .collection("socialProfiles")
         .where('role', isEqualTo: 'TRAINER')
         .where('sportSchoolId', isEqualTo: sportSchool.id)
-        .getDocuments()
+        .get()
         .then((value) {
-      value.documents.forEach((element) {
-        SocialProfile trainer = SocialProfile.socialProfileFromMap(element.data);
-        trainer.id = element.documentID;
+      value.docs.forEach((element) {
+        SocialProfile trainer = SocialProfile.socialProfileFromMap(element.data());
+        trainer.id = element.id;
         trainers.add(trainer);
       });
     });
@@ -83,9 +83,9 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     Group group = Group.groupFromMapWithId(jsonDecode(preferences.get("sportSchoolGroupToView")));
     SocialProfile trainer;
-    await Firestore.instance.collection("socialProfiles").document(group.trainerId).get().then((value) {
-      trainer = SocialProfile.socialProfileFromMap(value.data);
-      trainer.id = value.documentID;
+    await FirebaseFirestore.instance.collection("socialProfiles").doc(group.trainerId).get().then((value) {
+      trainer = SocialProfile.socialProfileFromMap(value.data());
+      trainer.id = value.id;
     });
 
     return trainer;
@@ -95,15 +95,15 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
     List<SocialProfile> students = new List();
     SharedPreferences preferences = await SharedPreferences.getInstance();
     Group group = Group.groupFromMapWithId(jsonDecode(preferences.get("sportSchoolGroupToView")));
-    await Firestore.instance
+    await FirebaseFirestore.instance
         .collection("socialProfiles")
         .where('role', isEqualTo: 'STUDENT')
         .where('groupId', isEqualTo: group.id)
-        .getDocuments()
+        .get()
         .then((value) {
-      value.documents.forEach((element) {
-        SocialProfile newStudent = SocialProfile.socialProfileFromMap(element.data);
-        newStudent.id = element.documentID;
+      value.docs.forEach((element) {
+        SocialProfile newStudent = SocialProfile.socialProfileFromMap(element.data());
+        newStudent.id = element.id;
         students.add(newStudent);
       });
     });
@@ -114,15 +114,15 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
   Future<List<SocialProfile>> loadStudentsToJoin() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     Group group = Group.groupFromMapWithId(jsonDecode(preferences.get("sportSchoolGroupToView")));
-    await Firestore.instance
+    await FirebaseFirestore.instance
         .collection("socialProfiles")
         .where('role', isEqualTo: 'STUDENT')
         .where('sportSchoolId', isEqualTo: group.sportSchoolId)
-        .getDocuments()
+        .get()
         .then((value) {
-      value.documents.forEach((element) {
-        SocialProfile newStudent = SocialProfile.socialProfileFromMap(element.data);
-        newStudent.id = element.documentID;
+      value.docs.forEach((element) {
+        SocialProfile newStudent = SocialProfile.socialProfileFromMap(element.data());
+        newStudent.id = element.id;
         SocialProfile first;
         first = studentsToEnroll.firstWhere((element) => element.id == newStudent.id, orElse: () => null);
         if (newStudent.groupId != group.id && first == null) {
@@ -698,21 +698,21 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
     bool confirm =
         await confirmDialogOnDeleteGroup(context, "¿Está seguro de que quiere eliminar el grupo?", groupEdited);
     if (confirm) {
-      final databaseReference = Firestore.instance;
+      final databaseReference = FirebaseFirestore.instance;
       List<String> studentsIds = new List();
       await databaseReference
           .collection("socialProfiles")
           .where("groupId", isEqualTo: groupEdited.id)
-          .getDocuments()
+          .get()
           .then((value) {
-        value.documents.forEach((element) {
-          studentsIds.add(element.data["id"]);
+        value.docs.forEach((element) {
+          studentsIds.add(element.data()["id"]);
         });
       });
       studentsIds.forEach((element) async {
-        await databaseReference.collection("socialProfiles").document(element).setData({"groupId": ""}, merge: true);
+        await databaseReference.collection("socialProfiles").doc(element).set({"groupId": ""}, SetOptions(merge: true));
       });
-      await databaseReference.collection("groups").document(groupEdited.id).delete();
+      await databaseReference.collection("groups").doc(groupEdited.id).delete();
       Navigator.pop(context);
     }
   }
@@ -727,19 +727,19 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
     } else if (selectedTrainerEdited != null && schedulesEdited.isNotEmpty) {
       groupEdited.schedule = schedulesEdited;
       groupEdited.trainerId = selectedTrainerEdited.id;
-      final databaseReference = Firestore.instance;
+      final databaseReference = FirebaseFirestore.instance;
       List<Map<String, dynamic>> groupSchedules = new List();
       for (Schedule actual in groupEdited.schedule) {
         groupSchedules.add(actual.scheduleToJson());
       }
-      await databaseReference.collection("groups").document(groupEdited.id).setData(
+      await databaseReference.collection("groups").doc(groupEdited.id).set(
           {"name": groupEdited.name, "schedule": groupSchedules, "trainerId": groupEdited.trainerId},
-          merge: true).whenComplete(() async {
+          SetOptions(merge: true)).whenComplete(() async {
         for (SocialProfile actualStudent in studentsEdited) {
           await databaseReference
               .collection("socialProfiles")
-              .document(actualStudent.id)
-              .setData({"groupId": groupEdited.id}, merge: true);
+              .doc(actualStudent.id)
+              .set({"groupId": groupEdited.id}, SetOptions(merge: true));
         }
         for (SocialProfile actualStudent in studentsGroupWithouEdit) {
           SocialProfile first =
@@ -747,8 +747,8 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
           if (first == null) {
             await databaseReference
                 .collection("socialProfiles")
-                .document(actualStudent.id)
-                .setData({"groupId": ""}, merge: true);
+                .doc(actualStudent.id)
+                .set({"groupId": ""}, SetOptions(merge: true));
           }
         }
       });

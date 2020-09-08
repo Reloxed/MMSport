@@ -18,26 +18,26 @@ class _AcceptRejectSchoolsState extends State<AcceptRejectSchools> {
 
   Future<Map<SportSchool, SocialProfile>> getSchoolsAndDirectorsPending() async {
     List<SportSchool> sportSchools = [];
-    await Firestore.instance
+    await FirebaseFirestore.instance
         .collection("sportSchools")
         .where("status", isEqualTo: "PENDING")
-        .getDocuments()
+        .get()
         .then((value) {
-      value.documents.forEach((element) {
-        SportSchool sportSchoolAux = SportSchool.sportSchoolFromMap(element.data);
-        sportSchoolAux.id = element.data['id'];
+      value.docs.forEach((element) {
+        SportSchool sportSchoolAux = SportSchool.sportSchoolFromMap(element.data());
+        sportSchoolAux.id = element.data()['id'];
         sportSchools.add(sportSchoolAux);
       });
     });
     for(SportSchool school in sportSchools){
-      await Firestore.instance
+      await FirebaseFirestore.instance
           .collection("socialProfiles")
           .where("sportSchoolId", isEqualTo: school.id)
           .where("role", isEqualTo: "DIRECTOR")
-          .getDocuments()
+          .get()
           .then((value) {
-        SocialProfile auxProfile = SocialProfile.socialProfileFromMap(value.documents[0].data);
-        auxProfile.id = value.documents[0].data['id'];
+        SocialProfile auxProfile = SocialProfile.socialProfileFromMap(value.docs[0].data());
+        auxProfile.id = value.docs[0].data()['id'];
         schoolsPending.putIfAbsent(school, () => auxProfile);
       });
     }
@@ -208,14 +208,14 @@ class _AcceptRejectSchoolsState extends State<AcceptRejectSchools> {
                 onPressed: () async {
                   Map<String, dynamic> aux = new Map();
                   aux.putIfAbsent("status", () => "ACCEPTED");
-                  await Firestore.instance
+                  await FirebaseFirestore.instance
                       .collection("sportSchools")
-                      .document(sportSchool.id)
-                      .setData(aux, merge: true);
-                  await Firestore.instance
+                      .doc(sportSchool.id)
+                      .set(aux, SetOptions(merge: true));
+                  await FirebaseFirestore.instance
                       .collection("socialProfiles")
-                      .document(socialProfile.id)
-                      .setData(aux, merge: true);
+                      .doc(socialProfile.id)
+                      .set(aux, SetOptions(merge: true));
                   Navigator.pop(context, true);
                   setState(() {
                     schoolsPending.clear();
@@ -258,8 +258,8 @@ class _AcceptRejectSchoolsState extends State<AcceptRejectSchools> {
                 textColor: Colors.blueAccent,
                 child: Text("RECHAZAR", style: TextStyle(color: Colors.red),),
                 onPressed: () async {
-                  await Firestore.instance.collection("sportSchools").document(sportSchool.id).delete();
-                  await Firestore.instance.collection("socialProfiles").document(socialProfile.id).delete();
+                  await FirebaseFirestore.instance.collection("sportSchools").doc(sportSchool.id).delete();
+                  await FirebaseFirestore.instance.collection("socialProfiles").doc(socialProfile.id).delete();
                   Navigator.pop(context, true);
                   setState(() {
                     schoolsPending.clear();

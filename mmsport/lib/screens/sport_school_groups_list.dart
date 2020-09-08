@@ -44,50 +44,50 @@ class _ListSportSchoolGroupsState extends State<ListSportSchoolGroups> {
     SocialProfile logged = SocialProfile.socialProfileFromMap(profileLogged);
     List<Group> allGroups = new List();
     if (logged.role == 'DIRECTOR') {
-      await Firestore.instance
+      await FirebaseFirestore.instance
           .collection("groups")
           .where('sportSchoolId', isEqualTo: _sportSchool.id)
-          .getDocuments()
+          .get()
           .then((value) {
-        value.documents.forEach((element) async {
+        value.docs.forEach((element) async {
           List<Schedule> groupSchedule = [];
-          element.data['schedule'].forEach((codedSchedule) {
+          element.data()['schedule'].forEach((codedSchedule) {
             groupSchedule.add(Schedule.scheduleFromMap(codedSchedule));
           });
-          Group newGroup = Group.groupFromMapWithIdFromFirebase(element.data, groupSchedule);
+          Group newGroup = Group.groupFromMapWithIdFromFirebase(element.data(), groupSchedule);
           allGroups.add(newGroup);
         });
       });
       for (Group element in allGroups) {
-        await Firestore.instance.collection('socialProfiles').document(element.trainerId).get().then((document) {
+        await FirebaseFirestore.instance.collection('socialProfiles').doc(element.trainerId).get().then((document) {
           if (document.exists) {
-            SocialProfile newTrainer = SocialProfile.socialProfileFromMap(document.data);
-            newTrainer.id = document.documentID;
+            SocialProfile newTrainer = SocialProfile.socialProfileFromMap(document.data());
+            newTrainer.id = document.id;
             res[element] = newTrainer;
           }
         });
       }
     } else if (logged.role == 'TRAINER') {
-      await Firestore.instance
+      await FirebaseFirestore.instance
           .collection("groups")
           .where('sportSchoolId', isEqualTo: _sportSchool.id)
           .where('trainerId', isEqualTo: logged.id)
-          .getDocuments()
+          .get()
           .then((value) {
-        value.documents.forEach((element) async {
+        value.docs.forEach((element) async {
           List<Schedule> groupSchedule = [];
-          element.data['schedule'].forEach((codedSchedule) {
+          element.data()['schedule'].forEach((codedSchedule) {
             groupSchedule.add(Schedule.scheduleFromMap(codedSchedule));
           });
-          Group newGroup = Group.groupFromMapWithIdFromFirebase(element.data, groupSchedule);
+          Group newGroup = Group.groupFromMapWithIdFromFirebase(element.data(), groupSchedule);
           allGroups.add(newGroup);
         });
       });
       for (Group element in allGroups) {
-        await Firestore.instance.collection('socialProfiles').document(element.trainerId).get().then((document) {
+        await FirebaseFirestore.instance.collection('socialProfiles').doc(element.trainerId).get().then((document) {
           if (document.exists) {
-            SocialProfile newTrainer = SocialProfile.socialProfileFromMap(document.data);
-            newTrainer.id = document.documentID;
+            SocialProfile newTrainer = SocialProfile.socialProfileFromMap(document.data());
+            newTrainer.id = document.id;
             res[element] = newTrainer;
           }
         });

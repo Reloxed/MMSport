@@ -25,14 +25,14 @@ class _AcceptRejectProfilesState extends State<AcceptRejectProfiles> {
     chosenSocialProfile = SocialProfile.socialProfileFromMap(aux);
     chosenSocialProfile.id = aux['id'];
     profilesPending.clear();
-    await Firestore.instance
+    await FirebaseFirestore.instance
         .collection("socialProfiles")
         .where("sportSchoolId", isEqualTo: chosenSocialProfile.sportSchoolId)
         .where("status", isEqualTo: "PENDING")
-        .getDocuments()
-        .then((value) => value.documents.forEach((element) {
-              SocialProfile auxProfile = SocialProfile.socialProfileFromMap(element.data);
-              auxProfile.id = element.data['id'];
+        .get()
+        .then((value) => value.docs.forEach((element) {
+              SocialProfile auxProfile = SocialProfile.socialProfileFromMap(element.data());
+              auxProfile.id = element.data()['id'];
               profilesPending.add(auxProfile);
             }));
     return profilesPending;
@@ -202,7 +202,7 @@ class _AcceptRejectProfilesState extends State<AcceptRejectProfiles> {
                 onPressed: () async {
                   Map<String, dynamic> aux = new Map();
                   aux.putIfAbsent("status", () => "ACCEPTED");
-                  await Firestore.instance.collection("socialProfiles").document(profile.id).setData(aux, merge: true);
+                  await FirebaseFirestore.instance.collection("socialProfiles").doc(profile.id).set(aux, SetOptions(merge: true));
                   Navigator.pop(context, true);
                   setState(() {});
                 },
@@ -243,7 +243,7 @@ class _AcceptRejectProfilesState extends State<AcceptRejectProfiles> {
                 textColor: Colors.blueAccent,
                 child: Text("RECHAZAR", style: TextStyle(color: Colors.red),),
                 onPressed: () async {
-                  await Firestore.instance.collection("socialProfiles").document(profile.id).delete();
+                  await FirebaseFirestore.instance.collection("socialProfiles").doc(profile.id).delete();
                   Navigator.pop(context, true);
                   setState(() {});
                 },

@@ -39,14 +39,14 @@ class _CalendarEventState extends State<CalendarEvent> {
     if (firstLoad) {
       SharedPreferences preferences = await SharedPreferences.getInstance();
       SportSchool _sportSchool = SportSchool.sportSchoolFromMap(await jsonDecode(preferences.get("chosenSportSchool")));
-      await Firestore.instance
+      await FirebaseFirestore.instance
           .collection("events")
           .where('sportSchoolId', isEqualTo: _sportSchool.id)
-          .getDocuments()
+          .get()
           .then((value) {
-        value.documents.forEach((element) async {
-          Event newEvent = Event.eventFromMap(element.data);
-          newEvent.id = element.documentID;
+        value.docs.forEach((element) async {
+          Event newEvent = Event.eventFromMap(element.data());
+          newEvent.id = element.id;
           if (_events[newEvent.day] == null) {
             _events[newEvent.day] = new List<Event>();
             _events[newEvent.day].add(newEvent);
@@ -62,14 +62,14 @@ class _CalendarEventState extends State<CalendarEvent> {
       _events = new Map();
       SharedPreferences preferences = await SharedPreferences.getInstance();
       SportSchool _sportSchool = SportSchool.sportSchoolFromMap(await jsonDecode(preferences.get("chosenSportSchool")));
-      await Firestore.instance
+      await FirebaseFirestore.instance
           .collection("events")
           .where('sportSchoolId', isEqualTo: _sportSchool.id)
-          .getDocuments()
+          .get()
           .then((value) {
-        value.documents.forEach((element) async {
-          Event newEvent = Event.eventFromMap(element.data);
-          newEvent.id = element.documentID;
+        value.docs.forEach((element) async {
+          Event newEvent = Event.eventFromMap(element.data());
+          newEvent.id = element.id;
           if (_events[newEvent.day] == null) {
             _events[newEvent.day] = new List<Event>();
             _events[newEvent.day].add(newEvent);
