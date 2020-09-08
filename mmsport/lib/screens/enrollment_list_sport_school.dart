@@ -23,11 +23,11 @@ class _EnrollmentListSportSchoolState extends State<EnrollmentListSportSchool> {
   // ignore: missing_return
   Future<List<SportSchool>> getAll() async {
     if (firstLoad) {
-      await FirebaseFirestore.instance
+      await Firestore.instance
           .collection("sportSchools")
-          .get()
-          .then((value) => value.docs.forEach((element) async {
-                SportSchool newSportSchool = SportSchool.sportSchoolFromMap(element.data());
+          .getDocuments()
+          .then((value) => value.documents.forEach((element) async {
+                SportSchool newSportSchool = SportSchool.sportSchoolFromMap(element.data);
                 _sportSchools.add(newSportSchool);
               }));
       _filtered.addAll(_sportSchools);

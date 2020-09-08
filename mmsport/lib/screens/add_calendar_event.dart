@@ -298,7 +298,7 @@ class _AddCalendarEventState extends State<AddCalendarEvent> {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     SportSchool _sportSchool = SportSchool.sportSchoolFromMap(await jsonDecode(preferences.get("chosenSportSchool")));
     Event newEvent = Event(eventName, selectedDay, selectedStartTimeEvent, selectedEndTimeEvent, _sportSchool.id);
-    final databaseReference = FirebaseFirestore.instance;
+    final databaseReference = Firestore.instance;
     await databaseReference.collection("events").add({
       "eventName": newEvent.eventName,
       "day": formatDateTime(newEvent.day),

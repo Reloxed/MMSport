@@ -234,12 +234,12 @@ class _EditSocialProfileState extends State<EditSocialProfile> {
       await ref.delete();
       await uploadPicProfile(context);
     }
-    await FirebaseFirestore.instance.collection("socialProfiles").doc(oldProfile.id).set({
+    await Firestore.instance.collection("socialProfiles").document(oldProfile.id).setData({
       "name": nameProfile,
       "firstSurname": firstSurnameProfile,
       "secondSurname": secondSurnameProfile,
       "urlImage": urlProfile,
-    }, SetOptions(merge: true));
+    }, merge: true);
     SharedPreferences preferences = await SharedPreferences.getInstance();
     SocialProfile newProfile = SocialProfile(
         oldProfile.id,

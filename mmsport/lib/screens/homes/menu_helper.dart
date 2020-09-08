@@ -93,14 +93,14 @@ void _navigatorHelper(String role, int i, BuildContext context) async {
   } else if (i == 2 && role == "STUDENT") {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     Map aux = await jsonDecode(preferences.get("chosenSocialProfile"));
-    await FirebaseFirestore.instance.collection("socialProfiles").doc(aux['id']).get().then((value) {
-      if (value.data()['groupId'] != null && value.data()['groupId'] != "") {
-        FirebaseFirestore.instance.collection("groups").doc(value.data()['groupId'].toString()).get().then((element) {
+    await Firestore.instance.collection("socialProfiles").document(aux['id']).get().then((value) {
+      if (value.data['groupId'] != null && value.data['groupId'] != "") {
+        Firestore.instance.collection("groups").document(value.data['groupId'].toString()).get().then((element) {
           List<Schedule> groupSchedule = [];
-          element.data()['schedule'].forEach((codedSchedule) {
+          element.data['schedule'].forEach((codedSchedule) {
             groupSchedule.add(Schedule.scheduleFromMap(codedSchedule));
           });
-          Group group = Group.groupFromMapWithIdFromFirebase(element.data(), groupSchedule);
+          Group group = Group.groupFromMapWithIdFromFirebase(element.data, groupSchedule);
           setSportSchoolGroupToView(group);
           navigateToSportSchoolGroupDetails(context);
         });

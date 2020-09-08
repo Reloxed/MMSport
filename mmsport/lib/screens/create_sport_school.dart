@@ -409,7 +409,7 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
     }
     SportSchool sportSchool =
         new SportSchool(nameSportSchool, addressSportSchool, townSportSchool, provinceSportSchool, "PENDING", urlLogo);
-    final databaseReference = FirebaseFirestore.instance;
+    final databaseReference = Firestore.instance;
     DocumentReference ref = await databaseReference.collection("sportSchools").add({
       "name": sportSchool.name,
       "address": sportSchool.address,
@@ -418,15 +418,15 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
       "status": sportSchool.status,
       "urlLogo": sportSchool.urlLogo
     });
-    String sportSchoolId = ref.id;
+    String sportSchoolId = ref.documentID;
     await databaseReference
         .collection("sportSchools")
-        .doc(ref.id)
-        .set({"id": ref.id},SetOptions(merge: true));
+        .document(ref.documentID)
+        .setData({"id": ref.documentID}, merge: true);
     if (imageProfile != null) {
       await uploadPicProfile(context);
     }
-    User firebaseUser = FirebaseAuth.instance.currentUser;
+    FirebaseUser firebaseUser = await FirebaseAuth.instance.currentUser();
     SocialProfile socialProfile = new SocialProfile("", firebaseUser.uid, nameProfile, firstSurnameProfile,
         secondSurnameProfile, "DIRECTOR", "PENDING", urlProfile, sportSchoolId, "");
     DocumentReference ref2 = await databaseReference.collection("socialProfiles").add({
@@ -442,15 +442,15 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
     });
     await databaseReference
         .collection("socialProfiles")
-        .doc(ref2.id)
-        .set({"id": ref2.id}, SetOptions(merge: true));
-    User user = FirebaseAuth.instance.currentUser;
+        .document(ref2.documentID)
+        .setData({"id": ref2.documentID}, merge: true);
+    FirebaseUser user = await FirebaseAuth.instance.currentUser();
     await databaseReference
         .collection("directorsWithoutSportSchool")
         .where("id", isEqualTo: user.uid)
-        .get()
-        .then((value) => value.docs.forEach((element) {
-              databaseReference.collection("directorsWithoutSportSchool").doc(element.id).delete();
+        .getDocuments()
+        .then((value) => value.documents.forEach((element) {
+              databaseReference.collection("directorsWithoutSportSchool").document(element.documentID).delete();
             }));
   }
 

@@ -130,9 +130,9 @@ dynamic confirmDialogOnCreateSchool(BuildContext context, String message) {
             FlatButton(
               color: Colors.white,
               textColor: Colors.blueAccent,
-              onPressed: () {
-                User user = FirebaseAuth.instance.currentUser;
-                if(user != null && user.emailVerified){
+              onPressed: () async{
+                FirebaseUser user = await FirebaseAuth.instance.currentUser();
+                if(user != null && user.isEmailVerified){
                   navigateToChooseSportSchool(context);
                 }
                 else{
@@ -174,10 +174,10 @@ Future<Void> confirmDialogOnDeleteEvent(BuildContext context, String message, Ev
               color: Colors.white,
               textColor: Colors.blueAccent,
               onPressed: () async {
-                final databaseReference = FirebaseFirestore.instance;
+                final databaseReference = Firestore.instance;
                 await databaseReference
                     .collection("events")
-                    .doc(event.id)
+                    .document(event.id)
                     .delete()
                     .then((value) => Navigator.of(context, rootNavigator: true).pop());
               },
@@ -258,15 +258,15 @@ class AddStudentsToGroupDialogState extends State<AddStudentsToGroupDialog> {
       SharedPreferences preferences = await SharedPreferences.getInstance();
       Map aux = jsonDecode(preferences.get("chosenSportSchool"));
       SportSchool sportSchool = SportSchool.sportSchoolFromMap(aux);
-      await FirebaseFirestore.instance
+      await Firestore.instance
           .collection("socialProfiles")
           .where('role', isEqualTo: 'STUDENT')
           .where('sportSchoolId', isEqualTo: sportSchool.id)
-          .get()
+          .getDocuments()
           .then((value) {
-        value.docs  .forEach((element) {
-          SocialProfile newStudent = SocialProfile.socialProfileFromMap(element.data());
-          newStudent.id = element.data()['id'];
+        value.documents.forEach((element) {
+          SocialProfile newStudent = SocialProfile.socialProfileFromMap(element.data);
+          newStudent.id = element.data['id'];
           SocialProfile first;
           first = studentsEdited.firstWhere((student) => student.id == newStudent.id, orElse: () => null);
           if (first == null) {
@@ -441,16 +441,16 @@ class SelectTrainerGroupDialogState extends State<SelectTrainerGroupDialog> {
       Map auxDirector = jsonDecode(preferences.get("chosenSocialProfile"));
       SocialProfile director = SocialProfile.socialProfileFromMap(auxDirector);
       director.id = auxDirector["id"];
-      await FirebaseFirestore.instance
+      await Firestore.instance
           .collection("socialProfiles")
           .where('role', isEqualTo: 'TRAINER')
           .where('status', isEqualTo: 'ACCEPTED')
           .where('sportSchoolId', isEqualTo: sportSchool.id)
-          .get()
+          .getDocuments()
           .then((value) {
-        value.docs.forEach((element) {
-          SocialProfile newTrainer = SocialProfile.socialProfileFromMap(element.data());
-          newTrainer.id = element.data()['id'];
+        value.documents.forEach((element) {
+          SocialProfile newTrainer = SocialProfile.socialProfileFromMap(element.data);
+          newTrainer.id = element.data['id'];
           if (trainerSelected != null) {
             if (trainerSelected.id == newTrainer.id) {
               trainerSelected = newTrainer;

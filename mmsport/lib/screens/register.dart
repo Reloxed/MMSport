@@ -194,7 +194,7 @@ class _RegisterState extends State<Register> {
             try {
               if (_formKey.currentState.validate()) {
                 loadingDialog(context);
-                final User newUser = (await _auth.createUserWithEmailAndPassword(
+                final FirebaseUser newUser = (await _auth.createUserWithEmailAndPassword(
                   email: email,
                   password: password,
                 ))
@@ -202,7 +202,7 @@ class _RegisterState extends State<Register> {
 
                 if (newUser != null) {
                   if (hasSchoolSport == "Sí") {
-                    await FirebaseFirestore.instance.collection("directorsWithoutSportSchool").add({"id": newUser.uid});
+                    await Firestore.instance.collection("directorsWithoutSportSchool").add({"id": newUser.uid});
                     Navigator.of(context, rootNavigator: true).pop();
                   } else {
                     Navigator.of(context, rootNavigator: true).pop();

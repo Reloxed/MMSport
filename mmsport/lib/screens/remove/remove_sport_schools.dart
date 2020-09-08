@@ -20,12 +20,12 @@ class _RemoveSportSchoolsState extends State<StatefulWidget> {
 
   Future<List<SportSchool>> getSchools() async {
     if (firstLoad) {
-      await FirebaseFirestore.instance
+      await Firestore.instance
           .collection("sportSchools")
           .where("status", isEqualTo: "ACCEPTED")
-          .get()
-          .then((value) => value.docs.forEach((element) {
-                SportSchool sportSchool = SportSchool.sportSchoolFromMap(element.data());
+          .getDocuments()
+          .then((value) => value.documents.forEach((element) {
+                SportSchool sportSchool = SportSchool.sportSchoolFromMap(element.data);
                 _sportSchools.add(sportSchool);
               }));
       _filteredSportSchools.addAll(_sportSchools);
@@ -183,45 +183,45 @@ class _RemoveSportSchoolsState extends State<StatefulWidget> {
                   loadingDialog(context);
                   // Profiles
                   List<String> profilesToDelete = [];
-                  await FirebaseFirestore.instance
+                  await Firestore.instance
                       .collection("socialProfiles")
                       .where("sportSchoolId", isEqualTo: sportSchool.id)
-                      .get()
-                      .then((value) => value.docs.forEach((element) {
-                            profilesToDelete.add(element.data()['id']);
+                      .getDocuments()
+                      .then((value) => value.documents.forEach((element) {
+                            profilesToDelete.add(element.data['id']);
                           }));
                   for (String id in profilesToDelete) {
                     // Chats
-                    await FirebaseFirestore.instance
+                    await Firestore.instance
                         .collection("chatRooms")
                         .where("users", arrayContains: id)
-                        .get()
-                        .then((value) => value.docs.forEach((element) {
-                      FirebaseFirestore.instance.collection("chatRooms").doc(element.id).delete();
+                        .getDocuments()
+                        .then((value) => value.documents.forEach((element) {
+                              Firestore.instance.collection("chatRooms").document(element.documentID).delete();
                             }));
-                    await FirebaseFirestore.instance.collection("socialProfiles").doc(id).delete();
+                    await Firestore.instance.collection("socialProfiles").document(id).delete();
                   }
                   // Groups
-                  await FirebaseFirestore.instance
+                  await Firestore.instance
                       .collection("groups")
                       .where("sportSchoolId", isEqualTo: sportSchool.id)
-                      .get()
-                      .then((value) => value.docs.forEach((element) {
-                    FirebaseFirestore.instance.collection("groups").doc(element.id).delete();
+                      .getDocuments()
+                      .then((value) => value.documents.forEach((element) {
+                            Firestore.instance.collection("groups").document(element.documentID).delete();
                           }));
                   // Events
-                  await FirebaseFirestore.instance
+                  await Firestore.instance
                       .collection("events")
                       .where("sportSchoolId", isEqualTo: sportSchool.id)
-                      .get()
-                      .then((value) => value.docs.forEach((element) {
-                    FirebaseFirestore.instance.collection("events").doc(element.id).delete();
+                      .getDocuments()
+                      .then((value) => value.documents.forEach((element) {
+                            Firestore.instance.collection("events").document(element.documentID).delete();
                           }));
                   // Logo
                   StorageReference ref = await FirebaseStorage.instance.getReferenceFromUrl(sportSchool.urlLogo);
                   await ref.delete();
                   // School
-                  await FirebaseFirestore.instance.collection("sportSchools").doc(sportSchool.id).delete();
+                  await Firestore.instance.collection("sportSchools").document(sportSchool.id).delete();
                   setState(() {
                     for (int i = 0; i < _sportSchools.length; i++) {
                       if (_sportSchools[i].id == sportSchool.id) {

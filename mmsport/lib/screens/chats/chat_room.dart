@@ -35,14 +35,14 @@ class _ChatRoom extends State<ChatRoom> {
     loggedSocialProfile.id = loggedSocialProfileMap['id'];
     if (loggedSocialProfile.id == chosenChatRoom.users[0]) {
       DocumentSnapshot aux =
-          await FirebaseFirestore.instance.collection("socialProfiles").doc(chosenChatRoom.users[1]).get();
-      socialProfileToChat = SocialProfile.socialProfileFromMap(aux.data());
-      socialProfileToChat.id = aux.data()['id'];
+          await Firestore.instance.collection("socialProfiles").document(chosenChatRoom.users[1]).get();
+      socialProfileToChat = SocialProfile.socialProfileFromMap(aux.data);
+      socialProfileToChat.id = aux.data['id'];
     } else {
       DocumentSnapshot aux =
-          await FirebaseFirestore.instance.collection("socialProfiles").doc(chosenChatRoom.users[0]).get();
-      socialProfileToChat = SocialProfile.socialProfileFromMap(aux.data());
-      socialProfileToChat.id = aux.data()['id'];
+          await Firestore.instance.collection("socialProfiles").document(chosenChatRoom.users[0]).get();
+      socialProfileToChat = SocialProfile.socialProfileFromMap(aux.data);
+      socialProfileToChat.id = aux.data['id'];
     }
     return socialProfileToChat;
   }
@@ -107,9 +107,9 @@ class _ChatRoom extends State<ChatRoom> {
                           child: Container(
                               decoration: BoxDecoration(color: Colors.black12),
                               child: StreamBuilder(
-                                stream: FirebaseFirestore.instance
+                                stream: Firestore.instance
                                     .collection("chatRooms")
-                                    .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
+                                    .document(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
                                     .collection("messages")
                                     .orderBy("sentDate", descending: true)
                                     .snapshots(),
@@ -120,7 +120,7 @@ class _ChatRoom extends State<ChatRoom> {
                                         reverse: true,
                                         itemBuilder: (context, index) {
                                           DocumentSnapshot document = listSnapshot.data.documents[index];
-                                          ChatMessage chatMessage = ChatMessage.chatMessageFromMap(document.data());
+                                          ChatMessage chatMessage = ChatMessage.chatMessageFromMap(document.data);
                                           bool isMe = chatMessage.senderId == loggedSocialProfile.id;
                                           return _buildMessage(chatMessage, isMe);
                                         });
@@ -151,9 +151,9 @@ class _ChatRoom extends State<ChatRoom> {
                                   isButtonEnabled = false;
                                   ChatMessage chatMessage =
                                       new ChatMessage(_textController.text, loggedSocialProfile.id, Timestamp.now());
-                                  await FirebaseFirestore.instance
+                                  await Firestore.instance
                                       .collection("chatRooms")
-                                      .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
+                                      .document(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
                                       .collection("messages")
                                       .add(chatMessage.chatMessageToJson())
                                       .then((value) => _textController.clear());

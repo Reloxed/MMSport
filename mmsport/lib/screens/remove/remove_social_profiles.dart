@@ -30,15 +30,15 @@ class _RemoveSocialProfilesState extends State<RemoveSocialProfiles> {
       Map aux = await jsonDecode(preferences.get("chosenSocialProfile"));
       SocialProfile loggedProfile = SocialProfile.socialProfileFromMap(aux);
       loggedProfile.id = aux['id'];
-      await FirebaseFirestore.instance
+      await Firestore.instance
           .collection("socialProfiles")
           .where("role", isEqualTo: "STUDENT")
           .where("sportSchoolId", isEqualTo: loggedProfile.sportSchoolId)
           .where("status", isEqualTo: "ACCEPTED")
-          .get()
-          .then((value) => value.docs.forEach((element) {
-                SocialProfile newProfile = SocialProfile.socialProfileFromMap(element.data());
-                newProfile.id = element.data()['id'];
+          .getDocuments()
+          .then((value) => value.documents.forEach((element) {
+                SocialProfile newProfile = SocialProfile.socialProfileFromMap(element.data);
+                newProfile.id = element.data['id'];
                 _students.add(newProfile);
               }));
       _filteredStudents.addAll(_students);
@@ -52,15 +52,15 @@ class _RemoveSocialProfilesState extends State<RemoveSocialProfiles> {
       Map aux = await jsonDecode(preferences.get("chosenSocialProfile"));
       SocialProfile loggedProfile = SocialProfile.socialProfileFromMap(aux);
       loggedProfile.id = aux['id'];
-      await FirebaseFirestore.instance
+      await Firestore.instance
           .collection("socialProfiles")
           .where("role", isEqualTo: "TRAINER")
           .where("sportSchoolId", isEqualTo: loggedProfile.sportSchoolId)
           .where("status", isEqualTo: "ACCEPTED")
-          .get()
-          .then((value) => value.docs.forEach((element) {
-                SocialProfile newProfile = SocialProfile.socialProfileFromMap(element.data());
-                newProfile.id = element.data()['id'];
+          .getDocuments()
+          .then((value) => value.documents.forEach((element) {
+                SocialProfile newProfile = SocialProfile.socialProfileFromMap(element.data);
+                newProfile.id = element.data['id'];
                 _trainers.add(newProfile);
               }));
       _filteredTrainers.addAll(_trainers);
@@ -221,8 +221,8 @@ class _RemoveSocialProfilesState extends State<RemoveSocialProfiles> {
     return ListTile(
       onTap: () async {
         if (profile.role == "TRAINER") {
-          await FirebaseFirestore.instance.collection("groups").where("trainerId", isEqualTo: profile.id).get().then(
-              (value) => value.docs.length == 0
+          await Firestore.instance.collection("groups").where("trainerId", isEqualTo: profile.id).getDocuments().then(
+              (value) => value.documents.length == 0
                   ? confirmDelete(context, profile)
                   : errorDialog(context, "Este entrenador está asignado a un grupo, no se puede eliminar."));
         } else {
@@ -292,31 +292,31 @@ class _RemoveSocialProfilesState extends State<RemoveSocialProfiles> {
                   });
                   Navigator.of(context, rootNavigator: true).pop();
                   loadingDialog(context);
-                  await FirebaseFirestore.instance
+                  await Firestore.instance
                       .collection("chatRooms")
                       .where("users", arrayContains: profile.id)
-                      .get()
-                      .then((value) => value.docs.forEach((element) {
-                    FirebaseFirestore.instance
+                      .getDocuments()
+                      .then((value) => value.documents.forEach((element) {
+                            Firestore.instance
                                 .collection("chatRooms")
-                                .doc(element.id)
+                                .document(element.documentID)
                                 .collection("messages")
-                                .get()
-                                .then((value) => value.docs.forEach((element2) {
-                              FirebaseFirestore.instance
+                                .getDocuments()
+                                .then((value) => value.documents.forEach((element2) {
+                                      Firestore.instance
                                           .collection("chatRooms")
-                                          .doc(element.id)
+                                          .document(element.documentID)
                                           .collection("messages")
-                                          .doc(element2.id)
+                                          .document(element2.documentID)
                                           .delete();
                                     }));
-                            FirebaseFirestore.instance.collection("chatRooms").doc(element.id).delete();
+                            Firestore.instance.collection("chatRooms").document(element.documentID).delete();
                           }));
                   if (profile.urlImage != null) {
                     StorageReference ref = await FirebaseStorage.instance.getReferenceFromUrl(profile.urlImage);
                     await ref.delete();
                   }
-                  await FirebaseFirestore.instance.collection("socialProfiles").doc(profile.id).delete();
+                  await Firestore.instance.collection("socialProfiles").document(profile.id).delete();
                   setState(() {
                     if (profile.role == "STUDENT") {
                       for (int i = 0; i < _students.length; i++) {

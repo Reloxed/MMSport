@@ -333,13 +333,13 @@ class _EditCalendarEventState extends State<EditCalendarEvent> {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     SportSchool _sportSchool = SportSchool.sportSchoolFromMap(await jsonDecode(preferences.get("chosenSportSchool")));
     Event newEvent = Event(eventName, selectedDay, selectedStartTimeEvent, selectedEndTimeEvent, _sportSchool.id);
-    final databaseReference = FirebaseFirestore.instance;
-    await databaseReference.collection("events").doc(_id).set({
+    final databaseReference = Firestore.instance;
+    await databaseReference.collection("events").document(_id).setData({
       "eventName": newEvent.eventName,
       "day": formatDateTime(newEvent.day),
       "startTimeEvent": timeOfDayToString(newEvent.startTimeEvent, context),
       "endTimeEvent": timeOfDayToString(newEvent.endTimeEvent, context),
       "sportSchoolId": newEvent.sportSchoolId
-    }, SetOptions(merge: true));
+    }, merge: true);
   }
 }
