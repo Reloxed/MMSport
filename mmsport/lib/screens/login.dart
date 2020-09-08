@@ -123,30 +123,30 @@ class _LoginState extends State<Login> {
             onPressed: () async {
               try {
                 if (_formKey.currentState.validate()) {
-                  final FirebaseUser user =
+                  final User user =
                       (await _auth.signInWithEmailAndPassword(email: email, password: password)).user;
 
                   if (user != null) {
-                    if (user.isEmailVerified) {
+                    if (user.emailVerified) {
                       bool withoutSportSchoolCreated = false;
                       SharedPreferences preferences = await SharedPreferences.getInstance();
                       preferences.setString("loggedInUserId", user.uid);
-                      await Firestore.instance
+                      await FirebaseFirestore.instance
                           .collection("directorsWithoutSportSchool")
                           .where("id", isEqualTo: user.uid)
-                          .getDocuments()
+                          .get()
                           .then((value) {
-                        if (value.documents.length > 0) {
+                        if (value.docs.length > 0) {
                           navigateToCreateSchool(context);
                           withoutSportSchoolCreated = true;
                         }
                       });
                       if (!withoutSportSchoolCreated) {
-                        await Firestore.instance
+                        await FirebaseFirestore.instance
                             .collection("admins")
                             .where("userId", isEqualTo: user.uid)
-                            .getDocuments()
-                            .then((value) => value.documents.length != 0
+                            .get()
+                            .then((value) => value.docs.length != 0
                                 ? navigateToHome(context)
                                 : navigateToChooseSportSchool(context));
                       }

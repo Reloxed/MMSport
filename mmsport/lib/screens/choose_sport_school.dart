@@ -34,25 +34,25 @@ class _ChooseSportSchoolState extends State<ChooseSportSchool> {
       SharedPreferences preferences = await SharedPreferences.getInstance();
       String firebaseUser = preferences.get("loggedInUserId");
       Map<SportSchool, int> auxMap = new Map<SportSchool, int>();
-      await Firestore.instance
+      await FirebaseFirestore.instance
           .collection("socialProfiles")
           .where('userAccountId', isEqualTo: firebaseUser)
           .where('status', isEqualTo: "ACCEPTED")
-          .getDocuments()
+          .get()
           .then((value) {
-        value.documents.forEach((element) async {
-          SocialProfile newProfile = SocialProfile.socialProfileFromMap(element.data);
-          newProfile.id = element.documentID;
+        value.docs.forEach((element) async {
+          SocialProfile newProfile = SocialProfile.socialProfileFromMap(element.data());
+          newProfile.id = element.id;
           profiles.add(newProfile);
         });
       });
       for (SocialProfile actualProfile in profiles) {
-        await Firestore.instance
+        await FirebaseFirestore.instance
             .collection('sportSchools')
-            .document(actualProfile.sportSchoolId)
+            .doc(actualProfile.sportSchoolId)
             .get()
             .then((document) {
-          SportSchool newSportSchool = SportSchool.sportSchoolFromMap(document.data);
+          SportSchool newSportSchool = SportSchool.sportSchoolFromMap(document.data());
           newSportSchool.id = actualProfile.sportSchoolId;
           if (sportSchoolIds.contains(newSportSchool.id)) {
             for (int i = 0; i <= auxMap.keys.length - 1; i++) {

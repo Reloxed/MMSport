@@ -208,7 +208,7 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
   // Auxiliary method to create the sport school and its director social profile.
 
   void _uploadAndCreate() async {
-    final databaseReference = Firestore.instance;
+    final databaseReference = FirebaseFirestore.instance;
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String jsonString = preferences.getString("sportSchoolToEnrollIn");
     SportSchool sportSchool = SportSchool.sportSchoolFromMap(jsonDecode(jsonString));
@@ -216,7 +216,7 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
     if (imageProfile != null) {
       await uploadPicProfile(context);
     }
-    FirebaseUser firebaseUser = await FirebaseAuth.instance.currentUser();
+    User firebaseUser = FirebaseAuth.instance.currentUser;
     SocialProfile socialProfile = new SocialProfile("", firebaseUser.uid, nameProfile, firstSurnameProfile,
         secondSurnameProfile, socialProfileRole, "PENDING", urlProfile, sportSchoolId, "");
     DocumentReference ref = await databaseReference.collection("socialProfiles").add({
@@ -232,8 +232,8 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
     });
     await databaseReference
         .collection("socialProfiles")
-        .document(ref.documentID)
-        .setData({"id": ref.documentID}, merge: true);
+        .doc(ref.id)
+        .set({"id": ref.id}, SetOptions(merge: true));
   }
 
   String getRandomString(int length) {

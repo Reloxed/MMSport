@@ -38,16 +38,16 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     Map aux = jsonDecode(preferences.get("chosenSportSchool"));
     SportSchool sportSchool = SportSchool.sportSchoolFromMap(aux);
-    await Firestore.instance
+    await FirebaseFirestore.instance
         .collection("socialProfiles")
         .where('role', isEqualTo: 'TRAINER')
         .where('role', isEqualTo: 'DIRECTOR')
         .where('sportSchoolId', isEqualTo: sportSchool.id)
-        .getDocuments()
+        .get()
         .then((value) {
-      value.documents.forEach((element) async {
-        SocialProfile trainer = SocialProfile.socialProfileFromMap(element.data);
-        trainer.id = element.documentID;
+      value.docs.forEach((element) async {
+        SocialProfile trainer = SocialProfile.socialProfileFromMap(element.data());
+        trainer.id = element.id;
         trainers.add(trainer);
       });
     });
@@ -339,7 +339,7 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
       errorDialog(context, message);
     } else if (selectedTrainer != null && schedules.isNotEmpty) {
       loadingDialog(context);
-      final databaseReference = Firestore.instance;
+      final databaseReference = FirebaseFirestore.instance;
       SharedPreferences preferences = await SharedPreferences.getInstance();
       Map aux = jsonDecode(preferences.get("chosenSportSchool"));
       SportSchool sportSchool = SportSchool.sportSchoolFromMap(aux);
@@ -356,8 +356,8 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
       });
       await databaseReference
           .collection("groups")
-          .document(ref.documentID)
-          .setData({"id": ref.documentID}, merge: true);
+          .doc(ref.id)
+          .set({"id": ref.id}, SetOptions(merge: true));
       Navigator.of(context, rootNavigator: true).pop();
       Navigator.of(context).pop();
     }

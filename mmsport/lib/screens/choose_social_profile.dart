@@ -28,15 +28,15 @@ class _ChooseSocialProfileState extends State<ChooseSocialProfile> {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     Map map = jsonDecode(preferences.get("chosenSportSchool"));
     SportSchool chosenSportSchool = SportSchool.sportSchoolFromMap(map);
-    await Firestore.instance
+    await FirebaseFirestore.instance
         .collection("socialProfiles")
         .where("userAccountId", isEqualTo: preferences.get("loggedInUserId"))
         .where("status", isEqualTo: "ACCEPTED")
         .where("sportSchoolId", isEqualTo: chosenSportSchool.id)
-        .getDocuments()
-        .then((value) => value.documents.forEach((element) {
-              SocialProfile newProfile = SocialProfile.socialProfileFromMap(element.data);
-              newProfile.id = element.documentID;
+        .get()
+        .then((value) => value.docs.forEach((element) {
+              SocialProfile newProfile = SocialProfile.socialProfileFromMap(element.data());
+              newProfile.id = element.id;
               socialProfiles.add(newProfile);
             }));
     return socialProfiles;
