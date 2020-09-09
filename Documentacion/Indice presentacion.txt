@@ -1,0 +1,27 @@
+1- Presentarnos
+
+2- ¿Qué es MMSport? Introducir con un elevator pitch lo que es MMSport (vale el primer párrafo de la wiki).
+
+3- Y... ¿Porqué MMSport? Explicar de donde viene la idea y porque decidimos hacerla (extraer de la documentacion)
+
+4- Objetivos del proyecto. Extraer de la documentacion tambien, de la parte de la introducción.
+
+5- Análisis de costes, hablar de los costes extrayendolos de la wiki.
+
+6- Planificación temporal, extraer de la wiki también.
+
+7- Problema tecnológico, hablar del problema de Android e iOS y el porqué se decide Flutter.
+
+8- Hablar de las tecnologías empleadas (docu).
+
+9- Demo del sistema
+
+10- Hablar de las pruebas unitarias y los tests de aceptación
+
+11- Retrospectiva, hablar de los problemas encontrados y las soluciones
+
+12- Lecciones aprendidas, se puede extraer de las conclusiones
+
+13- Futuras implementaciones
+
+14- Fin, agradecer a Muller e indicar que la app estará disponible en App Store y Google Play.
