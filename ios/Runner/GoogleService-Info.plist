@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>813564580173-mlfafvr7r6g133h7kmmslq8i7t8ortpv.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.813564580173-mlfafvr7r6g133h7kmmslq8i7t8ortpv</string>
+	<key>API_KEY</key>
+	<string>AIzaSyC4iQHhDuWYQlDC1A8uenjO4Hb9rBjgOpo</string>
+	<key>GCM_SENDER_ID</key>
+	<string>813564580173</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>io.flutter.flutter.app</string>
+	<key>PROJECT_ID</key>
+	<string>mmsport-514ac</string>
+	<key>STORAGE_BUCKET</key>
+	<string>mmsport-514ac.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:813564580173:ios:c7bdff20ff44dbe07f2704</string>
+	<key>DATABASE_URL</key>
+	<string>https://mmsport-514ac.firebaseio.com</string>
+</dict>
+</plist>
