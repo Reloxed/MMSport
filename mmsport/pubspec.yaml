@@ -39,7 +39,6 @@ dependencies:
   flutter_speed_dial: ^1.2.5
   json_serializable: ^3.3.0
   flappy_search_bar: ^1.7.2
-  flutter_clean_calendar: ^1.0.2+1
   intl: ^0.16.1
 
   flutter_localizations:
