@@ -215,7 +215,7 @@ class _ChatMain extends State<ChatMain> {
                               builder: (context, listSnapshot) {
                                 if (listSnapshot.hasData) {
                                   if (listSnapshot.data.documents.length > 0)
-                                    return Text(listSnapshot.data.documents.elementAt(0)['message']);
+                                    return Text(listSnapshot.data.documents.elementAt(0).get("message"));
                                   else
                                     return SizedBox.shrink();
                                 } else {
