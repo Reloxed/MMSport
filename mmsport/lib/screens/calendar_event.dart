@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_clean_calendar/flutter_clean_calendar.dart';
+import 'package:mmsport/components/calendar-widget/flutter_calendar.dart';
 import 'package:mmsport/components/dialogs.dart';
 import 'package:mmsport/components/utils.dart';
 import 'package:mmsport/models/event.dart';
