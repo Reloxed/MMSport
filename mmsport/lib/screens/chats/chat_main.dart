@@ -76,6 +76,54 @@ class _ChatMain extends State<ChatMain> {
     return openChats;
   }
 
+  Future<List<SocialProfile>> getTrainers(String sportSchoolId) async {
+    List<SocialProfile> trainers = [];
+    await FirebaseFirestore.instance
+        .collection("socialProfiles")
+        .where("sportSchoolId", isEqualTo: sportSchoolId)
+        .where("status", isEqualTo: "ACCEPTED")
+        .where("role", isEqualTo: "TRAINER")
+        .get()
+        .then((value) => value.docs.forEach((element) {
+              SocialProfile auxProfile = SocialProfile.socialProfileFromMap(element.data());
+              auxProfile.id = element.data()['id'];
+              trainers.add(auxProfile);
+            }));
+    return trainers;
+  }
+
+  Future<List<SocialProfile>> getDirector(String sportSchoolId) async {
+    List<SocialProfile> director = [];
+    await FirebaseFirestore.instance
+        .collection("socialProfiles")
+        .where("sportSchoolId", isEqualTo: sportSchoolId)
+        .where("status", isEqualTo: "ACCEPTED")
+        .where("role", isEqualTo: "DIRECTOR")
+        .get()
+        .then((value) => value.docs.forEach((element) {
+              SocialProfile auxProfile = SocialProfile.socialProfileFromMap(element.data());
+              auxProfile.id = element.data()['id'];
+              director.add(auxProfile);
+            }));
+    return director;
+  }
+
+  Future<List<SocialProfile>> getStudents(String sportSchoolId) async {
+    List<SocialProfile> students = [];
+    await FirebaseFirestore.instance
+        .collection("socialProfiles")
+        .where("sportSchoolId", isEqualTo: sportSchoolId)
+        .where("status", isEqualTo: "ACCEPTED")
+        .where("role", isEqualTo: "STUDENT")
+        .get()
+        .then((value) => value.docs.forEach((element) {
+              SocialProfile auxProfile = SocialProfile.socialProfileFromMap(element.data());
+              auxProfile.id = element.data()['id'];
+              students.add(auxProfile);
+            }));
+    return students;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -131,26 +179,41 @@ class _ChatMain extends State<ChatMain> {
                           }
                         },
                       ),
-                      StreamBuilder(
-                          stream: FirebaseFirestore.instance
-                              .collection("socialProfiles")
-                              .where("sportSchoolId", isEqualTo: snapshotSocialProfile.data.sportSchoolId)
-                              .where("status", isEqualTo: "ACCEPTED")
-                              .snapshots(),
+                      FutureBuilder(
+                          future: snapshotSocialProfile.data.role == "DIRECTOR"
+                              ? Future.wait([
+                                  getTrainers(snapshotSocialProfile.data.sportSchoolId),
+                                  getStudents(snapshotSocialProfile.data.sportSchoolId)
+                                ])
+                              : snapshotSocialProfile.data.role == "TRAINER"
+                                  ? Future.wait([
+                                      getDirector(snapshotSocialProfile.data.sportSchoolId),
+                                      getStudents(snapshotSocialProfile.data.sportSchoolId)
+                                    ])
+                                  : Future.wait([
+                                      getDirector(snapshotSocialProfile.data.sportSchoolId),
+                                      getTrainers(snapshotSocialProfile.data.sportSchoolId)
+                                    ]),
                           builder: (context, listSnapshot) {
                             if (listSnapshot.hasData) {
+                              List<SocialProfile> profilesList = [];
+                              profilesList.addAll(listSnapshot.data.elementAt(0));
+                              profilesList.addAll(listSnapshot.data.elementAt(1));
                               return ListView.builder(
-                                  itemCount: listSnapshot.data.documents.length,
+                                  itemCount: profilesList.length,
                                   // ignore: missing_return
                                   itemBuilder: (context, index) {
-                                    DocumentSnapshot document = listSnapshot.data.documents[index];
-                                    if (document.id != snapshotSocialProfile.data.id) {
-                                      if (index + 1 < listSnapshot.data.documents.length) {
+                                    SocialProfile profile = profilesList[index];
+                                    if (profile.id != snapshotSocialProfile.data.id) {
+                                      if (index + 1 < profilesList.length) {
                                         return Column(
-                                          children: <Widget>[_listItem(document.data()), Divider(color: Colors.black38)],
+                                          children: <Widget>[
+                                            _listItem(profile.socialProfileToJson()),
+                                            Divider(color: Colors.black38)
+                                          ],
                                         );
                                       } else {
-                                        return _listItem(document.data());
+                                        return _listItem(profile.socialProfileToJson());
                                       }
                                     } else {
                                       return Container();
