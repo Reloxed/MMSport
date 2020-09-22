@@ -110,6 +110,7 @@ void _navigatorHelper(String role, int i, BuildContext context) async {
       }
     });
   } else if (i == 3 && (role == "TRAINER" || role == "STUDENT")) {
+    navigateToCalendarEvent(context);
   } else if (i == 3 && role == "DIRECTOR") {
     navigateToCalendarEvent(context);
   } else if (i == 4 && role == "DIRECTOR") {

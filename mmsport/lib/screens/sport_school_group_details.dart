@@ -25,6 +25,7 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
   final _formKey = GlobalKey<FormState>();
   bool _editMode = false;
   bool notAllowedToEdit = true;
+  bool isStudent = true;
 
   List<String> daysOfTheWeek = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
   String selectedDay;
@@ -68,6 +69,9 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
     SocialProfile logged = SocialProfile.socialProfileFromMap(profileLogged);
     if (logged.role == 'DIRECTOR') {
       notAllowedToEdit = false;
+    }
+    if (logged.role == 'DIRECTOR' || logged.role == 'TRAINER') {
+      isStudent = false;
     }
     Group group = Group.groupFromMapWithId(jsonDecode(preferences.get("sportSchoolGroupToView")));
     return group;
@@ -337,7 +341,7 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
   Widget editButton(
       List<Schedule> schedules, List<SocialProfile> groupStudents, SocialProfile groupTrainer, Group group) {
     if (notAllowedToEdit) {
-      return SizedBox.shrink();
+      return Container();
     } else {
       return FloatingActionButton(
           onPressed: () {
@@ -436,43 +440,47 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
           child: Text("No hay ningún alumno en este grupo", style: TextStyle(fontSize: 24.0)),
         );
       } else {
-        return ListView.builder(
-          itemCount: students.length,
-          shrinkWrap: true,
-          itemBuilder: (context, index) {
-            if (students[index].urlImage != null) {
-              return ListTile(
-                leading: CircleAvatar(
-                  backgroundImage: NetworkImage(students[index].urlImage),
-                  radius: 16.0,
-                ),
-                title: Text(
-                  students[index].name,
-                  style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
-                ),
-                subtitle: students[index].secondSurname == null
-                    ? Text(students[index].firstSurname, style: TextStyle(fontSize: 16.0))
-                    : Text(students[index].firstSurname + " " + students[index].secondSurname,
-                        style: TextStyle(fontSize: 16.0)),
-              );
-            } else {
-              return ListTile(
-                leading: CircleAvatar(
-                  child: Icon(Icons.person),
-                  radius: 16.0,
-                ),
-                title: Text(
-                  students[index].name,
-                  style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
-                ),
-                subtitle: students[index].secondSurname == null
-                    ? Text(students[index].firstSurname, style: TextStyle(fontSize: 16.0))
-                    : Text(students[index].firstSurname + " " + students[index].secondSurname,
-                        style: TextStyle(fontSize: 16.0)),
-              );
-            }
-          },
-        );
+        if (isStudent) {
+          return Container();
+        } else {
+          return ListView.builder(
+            itemCount: students.length,
+            shrinkWrap: true,
+            itemBuilder: (context, index) {
+              if (students[index].urlImage != null) {
+                return ListTile(
+                  leading: CircleAvatar(
+                    backgroundImage: NetworkImage(students[index].urlImage),
+                    radius: 16.0,
+                  ),
+                  title: Text(
+                    students[index].name,
+                    style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: students[index].secondSurname == null
+                      ? Text(students[index].firstSurname, style: TextStyle(fontSize: 16.0))
+                      : Text(students[index].firstSurname + " " + students[index].secondSurname,
+                          style: TextStyle(fontSize: 16.0)),
+                );
+              } else {
+                return ListTile(
+                  leading: CircleAvatar(
+                    child: Icon(Icons.person),
+                    radius: 16.0,
+                  ),
+                  title: Text(
+                    students[index].name,
+                    style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: students[index].secondSurname == null
+                      ? Text(students[index].firstSurname, style: TextStyle(fontSize: 16.0))
+                      : Text(students[index].firstSurname + " " + students[index].secondSurname,
+                          style: TextStyle(fontSize: 16.0)),
+                );
+              }
+            },
+          );
+        }
       }
     }
   }

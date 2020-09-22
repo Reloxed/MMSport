@@ -67,11 +67,11 @@ class _ListSportSchoolGroupsState extends State<ListSportSchoolGroups> {
           }
         });
       }
-    } else if (logged.role == 'TRAINER') {
+    } else{
       await FirebaseFirestore.instance
           .collection("groups")
           .where('sportSchoolId', isEqualTo: _sportSchool.id)
-          .where('trainerId', isEqualTo: logged.id)
+          .where('trainerId', isEqualTo: profileLogged['id'])
           .get()
           .then((value) {
         value.docs.forEach((element) async {

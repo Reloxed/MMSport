@@ -6,6 +6,7 @@ import 'package:mmsport/components/calendar-widget/flutter_calendar.dart';
 import 'package:mmsport/components/dialogs.dart';
 import 'package:mmsport/components/utils.dart';
 import 'package:mmsport/models/event.dart';
+import 'package:mmsport/models/socialProfile.dart';
 import 'package:mmsport/models/sportSchool.dart';
 import 'package:mmsport/navigations/navigations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -19,6 +20,7 @@ class CalendarEvent extends StatefulWidget {
 }
 
 class _CalendarEventState extends State<CalendarEvent> {
+  bool notAllowedToEdit = true;
   Map<DateTime, List<Event>> _events = new Map<DateTime, List<Event>>();
   List<Event> _selectedEvents = new List();
   DateTime _selectedDay;
@@ -80,6 +82,12 @@ class _CalendarEventState extends State<CalendarEvent> {
         });
       });
     }
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    Map profileLogged = await jsonDecode(preferences.get("chosenSocialProfile"));
+    SocialProfile logged = SocialProfile.socialProfileFromMap(profileLogged);
+    if (logged.role == 'DIRECTOR') {
+      notAllowedToEdit = false;
+    }
     return _events;
   }
 
@@ -121,7 +129,7 @@ class _CalendarEventState extends State<CalendarEvent> {
                   ],
                 ),
               ),
-              floatingActionButton: FloatingActionButton(
+              floatingActionButton: notAllowedToEdit? Container() : FloatingActionButton(
                 onPressed: () {
                   navigateToAddCalendarEvent(context).then((value) {
                     setState(() {
@@ -168,7 +176,7 @@ class _CalendarEventState extends State<CalendarEvent> {
   Widget trailingButtons(Event event) {
     DateTime now = DateTime.now();
     int diffDays = now.difference(event.day).inDays;
-    if (diffDays <= 0 && event.day.day != now.day) {
+    if (diffDays <= 0 && event.day.day != now.day && !notAllowedToEdit) {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
