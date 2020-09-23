@@ -151,8 +151,9 @@ class _LoginState extends State<Login> {
                                 : navigateToChooseSportSchool(context));
                       }
                     } else {
+                      await user.sendEmailVerification();
                       errorDialog(
-                          context, "Necesita verificar su cuenta mediante el correo que le enviamos al registrarse");
+                          context, "Necesita verificar su cuenta. Le hemos vuelto a enviar otro correo de verificación.");
                     }
                   }
                 }
