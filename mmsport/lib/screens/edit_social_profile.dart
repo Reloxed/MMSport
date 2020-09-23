@@ -229,11 +229,7 @@ class _EditSocialProfileState extends State<EditSocialProfile> {
   }
 
   void _uploadAndCreate(SocialProfile oldProfile) async {
-    if (imageProfile != null) {
-      StorageReference ref = await FirebaseStorage.instance.getReferenceFromUrl(oldProfile.urlImage);
-      await ref.delete();
-      await uploadPicProfile(context);
-    }
+    await uploadPicProfile(oldProfile, context);
     await FirebaseFirestore.instance.collection("socialProfiles").doc(oldProfile.id).set({
       "name": nameProfile,
       "firstSurname": firstSurnameProfile,
@@ -252,6 +248,7 @@ class _EditSocialProfileState extends State<EditSocialProfile> {
         urlProfile,
         oldProfile.sportSchoolId,
         oldProfile.groupId);
+    newProfile.id = oldProfile.id;
     String newProfileToJson = jsonEncode(newProfile.socialProfileToJson());
     preferences.setString("chosenSocialProfile", newProfileToJson);
   }
@@ -263,17 +260,23 @@ class _EditSocialProfileState extends State<EditSocialProfile> {
     return String.fromCharCodes(Iterable.generate(length, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
   }
 
-  Future uploadPicProfile(BuildContext context) async {
-    String fileName;
-    if (secondSurnameProfile != null) {
-      fileName = nameProfile + firstSurnameProfile + secondSurnameProfile;
-    } else {
-      fileName = nameProfile + firstSurnameProfile;
+  Future uploadPicProfile(SocialProfile oldProfile, BuildContext context) async {
+    if (imageProfile != null) {
+      if (oldProfile.urlImage != null) {
+        StorageReference ref = await FirebaseStorage.instance.getReferenceFromUrl(oldProfile.urlImage);
+        await ref.delete();
+      }
+      String fileName;
+      if (secondSurnameProfile != null) {
+        fileName = nameProfile + firstSurnameProfile + secondSurnameProfile;
+      } else {
+        fileName = nameProfile + firstSurnameProfile;
+      }
+      StorageReference storageReference = FirebaseStorage.instance.ref().child(fileName + getRandomString(12));
+      StorageUploadTask uploadTask = storageReference.putFile(imageProfile);
+      StorageTaskSnapshot taskSnapshot = await uploadTask.onComplete;
+      var url = await taskSnapshot.ref.getDownloadURL();
+      urlProfile = url;
     }
-    StorageReference storageReference = FirebaseStorage.instance.ref().child(fileName + getRandomString(12));
-    StorageUploadTask uploadTask = storageReference.putFile(imageProfile);
-    StorageTaskSnapshot taskSnapshot = await uploadTask.onComplete;
-    var url = await taskSnapshot.ref.getDownloadURL();
-    urlProfile = url;
   }
 }
