@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_pickers/flutter_material_pickers.dart';
-import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:mmsport/components/dialogs.dart';
 import 'package:mmsport/components/utils.dart';
 import 'package:mmsport/constants/constants.dart';
@@ -138,6 +137,36 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
     return studentsToEnroll;
   }
 
+  Widget _editModePopUp() => PopupMenuButton<int>(
+        itemBuilder: (context) => [
+          PopupMenuItem(
+            value: 1,
+            child: Text("Guardar"),
+          ),
+          PopupMenuItem(
+            value: 2,
+            child: Text("Cancelar"),
+          ),
+          PopupMenuItem(
+            value: 3,
+            child: Text("Eliminar"),
+          ),
+        ],
+        onSelected: (value) {
+          if (value == 1) {
+            editGroup();
+          }
+          if (value == 2) {
+            setState(() {
+              _editMode = false;
+            });
+          }
+          if (value == 3) {
+            deleteGroup();
+          }
+        },
+      );
+
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -151,120 +180,248 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
           List<Schedule> schedules = snapshots.data[3];
           if (_editMode) {
             return Scaffold(
-                appBar: AppBar(
-                  title: Text("Editar grupo"),
+              appBar: AppBar(
+                title: Text("Editar grupo"),
+                actions: [_editModePopUp()],
+              ),
+              body: CustomScrollView(slivers: <Widget>[
+                SliverList(
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        _groupNameField("Nombre del grupo", groupEdited),
+                        Container(
+                          margin: EdgeInsets.only(top: 8.0, bottom: 4.0, right: 24.0, left: 24.0),
+                          child: selectTrainer(),
+                        ),
+                        addSchedule(),
+                      ],
+                    ),
+                  );
+                }, childCount: 1)),
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      return ListTile(
+                          title: Text(
+                            schedulesEdited[index].dayOfTheWeek,
+                            style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Text(
+                              "De " +
+                                  schedulesEdited[index].startTimeSchedule.format(context) +
+                                  " a " +
+                                  schedulesEdited[index].endTimeSchedule.format(context),
+                              style: TextStyle(fontSize: 16.0)),
+                          trailing: Ink(
+                            decoration: const ShapeDecoration(
+                              color: Colors.red,
+                              shape: BeveledRectangleBorder(),
+                            ),
+                            child: IconButton(
+                              icon: Icon(Icons.delete),
+                              color: Colors.white,
+                              onPressed: () {
+                                setState(() {
+                                  schedulesEdited.remove(schedulesEdited[index]);
+                                });
+                              },
+                            ),
+                          ));
+                    },
+                    childCount: schedulesEdited.length,
+                  ),
                 ),
-                body: Center(
-                  child: SingleChildScrollView(
-                      padding: EdgeInsets.symmetric(horizontal: 30),
-                      child: Form(
-                          key: _formKey,
-                          autovalidate: false,
-                          child: Column(
-                            children: <Widget>[
-                              Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: <Widget>[
-                                    _groupNameField("Nombre del grupo", groupEdited),
-                                    Container(
-                                      margin: const EdgeInsets.only(top: 4.0),
-                                      child: selectTrainer(),
+                SliverList(
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                  return Center(
+                    child: addSStudentsButton(),
+                  );
+                }, childCount: 1)),
+                SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            if (studentsEdited[index].urlImage != null) {
+                              return ListTile(
+                                  leading: CircleAvatar(
+                                    backgroundImage: NetworkImage(studentsEdited[index].urlImage),
+                                    radius: 16.0,
+                                  ),
+                                  title: Text(
+                                    studentsEdited[index].name,
+                                    style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+                                  ),
+                                  subtitle: studentsEdited[index].secondSurname == null
+                                      ? Text(studentsEdited[index].firstSurname, style: TextStyle(fontSize: 16.0))
+                                      : Text(
+                                          studentsEdited[index].firstSurname +
+                                              " " +
+                                              studentsEdited[index].secondSurname,
+                                          style: TextStyle(fontSize: 16.0)),
+                                  trailing: Ink(
+                                    decoration: const ShapeDecoration(
+                                      color: Colors.red,
+                                      shape: BeveledRectangleBorder(),
                                     ),
-                                    Container(
-                                      margin: const EdgeInsets.only(top: 4.0),
-                                      child: ListView.builder(
-                                        itemCount: schedulesEdited.length,
-                                        shrinkWrap: true,
-                                        itemBuilder: (context, index) {
-                                          return ListTile(
-                                              title: Text(
-                                                schedulesEdited[index].dayOfTheWeek,
-                                                style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
-                                              ),
-                                              subtitle: Text(
-                                                  "De " +
-                                                      schedulesEdited[index].startTimeSchedule.format(context) +
-                                                      " a " +
-                                                      schedulesEdited[index].endTimeSchedule.format(context),
-                                                  style: TextStyle(fontSize: 16.0)),
-                                              trailing: Ink(
-                                                decoration: const ShapeDecoration(
-                                                  color: Colors.red,
-                                                  shape: BeveledRectangleBorder(),
-                                                ),
-                                                child: IconButton(
-                                                  icon: Icon(Icons.delete),
-                                                  color: Colors.white,
-                                                  onPressed: () {
-                                                    setState(() {
-                                                      schedulesEdited.remove(schedulesEdited[index]);
-                                                    });
-                                                  },
-                                                ),
-                                              ));
-                                        },
-                                      ),
+                                    child: IconButton(
+                                      icon: Icon(Icons.delete),
+                                      color: Colors.white,
+                                      onPressed: () {
+                                        setState(() {
+                                          studentsEdited.remove(studentsEdited[index]);
+                                        });
+                                      },
                                     ),
-                                    addSchedule(),
-                                    Container(
-                                      margin: const EdgeInsets.only(top: 4.0),
-                                      child: studentsList(studentsEdited),
+                                  ));
+                            } else {
+                              return ListTile(
+                                  leading: CircleAvatar(
+                                    child: Icon(Icons.person),
+                                    radius: 16.0,
+                                  ),
+                                  title: Text(
+                                    studentsEdited[index].name,
+                                    style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+                                  ),
+                                  subtitle: studentsEdited[index].secondSurname == null
+                                      ? Text(studentsEdited[index].firstSurname, style: TextStyle(fontSize: 16.0))
+                                      : Text(
+                                          studentsEdited[index].firstSurname +
+                                              " " +
+                                              studentsEdited[index].secondSurname,
+                                          style: TextStyle(fontSize: 16.0)),
+                                  trailing: Ink(
+                                    decoration: const ShapeDecoration(
+                                      color: Colors.red,
+                                      shape: BeveledRectangleBorder(),
                                     ),
-                                    addSStudentsButton(),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ))),
-                ),
-                floatingActionButton: SpeedDial(
-                  curve: Curves.bounceIn,
-                  animatedIcon: AnimatedIcons.menu_close,
-                  animatedIconTheme: IconThemeData(size: 22.0),
-                  children: [
-                    SpeedDialChild(
-                        onTap: () async {
-                          editGroup();
-                        },
-                        child: Icon(
-                          Icons.save,
-                          color: Colors.white,
+                                    child: IconButton(
+                                      icon: Icon(Icons.delete),
+                                      color: Colors.white,
+                                      onPressed: () {
+                                        setState(() {
+                                          studentsEdited.remove(studentsEdited[index]);
+                                        });
+                                      },
+                                    ),
+                                  ));
+                            }
+                          },
+                          childCount: studentsEdited.length,
                         ),
-                        label: 'Guardar',
-                        backgroundColor: Colors.blueAccent),
-                    SpeedDialChild(
-                        onTap: () {
-                          setState(() {
-                            _editMode = false;
-                          });
-                        },
-                        child: Icon(
-                          Icons.clear,
-                          color: Colors.white,
-                        ),
-                        label: 'Cancelar',
-                        backgroundColor: Colors.deepOrange),
-                    SpeedDialChild(
-                        onTap: () async {
-                          deleteGroup();
-                        },
-                        child: Icon(
-                          Icons.delete,
-                          color: Colors.white,
-                        ),
-                        label: 'Eliminar',
-                        backgroundColor: Colors.red),
-                  ],
-                ));
+                      ),
+              ]),
+            );
           } else {
             return Scaffold(
                 appBar: AppBar(
                   title: Text(group.name),
                   centerTitle: true,
                 ),
-                body: Center(
+                body: CustomScrollView(slivers: <Widget>[
+                  SliverList(
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                    return Container(
+                      margin: const EdgeInsets.only(top: 16.0),
+                      child: Column(children: <Widget>[
+                        CircleAvatar(
+                          radius: 56,
+                          backgroundImage: NetworkImage(groupTrainer.urlImage),
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(top: 8.0, bottom: 16.0),
+                          child: groupTrainer.secondSurname == null
+                              ? Text(
+                                  groupTrainer.name + " " + groupTrainer.firstSurname,
+                                  style: TextStyle(fontSize: 16, color: Colors.blueAccent),
+                                )
+                              : Text(
+                                  groupTrainer.name +
+                                      " " +
+                                      groupTrainer.firstSurname +
+                                      " " +
+                                      groupTrainer.secondSurname,
+                                  style: TextStyle(fontSize: 16, color: Colors.blueAccent),
+                                ),
+                        )
+                      ]),
+                    );
+                  }, childCount: 1)),
+                  SliverList(
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                    return ListTile(
+                      title: Text(
+                        schedules[index].dayOfTheWeek,
+                        style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Text(
+                          "De " +
+                              schedules[index].startTimeSchedule.format(context) +
+                              " a " +
+                              schedules[index].endTimeSchedule.format(context),
+                          style: TextStyle(fontSize: 16.0)),
+                    );
+                  }, childCount: schedules.length)),
+
+                  SliverList(
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 16.0),
+                        );
+                      }, childCount: 1)),
+
+                  isStudent == true
+                      ? SliverList(
+                          delegate: SliverChildBuilderDelegate((context, index) {
+                            return Container();
+                          }),
+                        )
+                      : SliverList(
+                          delegate: SliverChildBuilderDelegate((context, index) {
+                            if (groupStudents[index].urlImage != null) {
+                              return ListTile(
+                                leading: CircleAvatar(
+                                  backgroundImage: NetworkImage(groupStudents[index].urlImage),
+                                  radius: 16.0,
+                                ),
+                                title: Text(
+                                  groupStudents[index].name,
+                                  style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+                                ),
+                                subtitle: groupStudents[index].secondSurname == null
+                                    ? Text(groupStudents[index].firstSurname, style: TextStyle(fontSize: 16.0))
+                                    : Text(groupStudents[index].firstSurname + " " + groupStudents[index].secondSurname,
+                                    style: TextStyle(fontSize: 16.0)),
+                              );
+                            } else {
+                              return ListTile(
+                                leading: CircleAvatar(
+                                  child: Icon(Icons.person),
+                                  radius: 16.0,
+                                ),
+                                title: Text(
+                                  groupStudents[index].name,
+                                  style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+                                ),
+                                subtitle: groupStudents[index].secondSurname == null
+                                    ? Text(groupStudents[index].firstSurname, style: TextStyle(fontSize: 16.0))
+                                    : Text(groupStudents[index].firstSurname + " " + groupStudents[index].secondSurname,
+                                    style: TextStyle(fontSize: 16.0)),
+                              );
+                            }
+                          }, childCount: groupStudents.length,),
+                        ),
+                  SliverList(
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 16.0),
+                        );
+                      }, childCount: 1)),
+                ]),
+                /*body: Center(
                     child: SingleChildScrollView(
                   padding: EdgeInsets.symmetric(horizontal: 30),
                   child: Center(
@@ -328,7 +485,7 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
                       ),
                     ],
                   )),
-                )),
+                )),*/
                 floatingActionButton: editButton(schedules, groupStudents, groupTrainer, group));
           }
         } else {
@@ -489,7 +646,7 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
     IconData icon;
     icon = Icons.group;
     return Container(
-      margin: EdgeInsets.only(top: 8.0, bottom: 4.0),
+      margin: EdgeInsets.only(top: 32.0, bottom: 4.0, right: 24.0, left: 24.0),
       child: Column(
         children: <Widget>[
           TextFormField(
@@ -555,7 +712,7 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
 
   Widget addSchedule() {
     return Container(
-        margin: EdgeInsets.all(4.0),
+        margin: EdgeInsets.only(bottom: 4.0, top: 16.0),
         child: OutlineButton.icon(
           onPressed: () => showSchedulePickers(),
           icon: new IconTheme(
@@ -575,7 +732,7 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
 
   Widget addSStudentsButton() {
     return Container(
-        margin: EdgeInsets.all(4.0),
+        margin: EdgeInsets.only(bottom: 4.0, top: 16.0),
         child: OutlineButton.icon(
           onPressed: () => addStudentsList(),
           icon: new IconTheme(
@@ -639,10 +796,12 @@ class _SportSchoolGroupDetailsState extends State<SportSchoolGroupDetails> {
         );
       },
     );
-    setState(() {
-      selectedStartTimeSchedule = selectedTime;
-    });
-    showEndTimeSchedulePicker();
+    if (selectedTime != null) {
+      setState(() {
+        selectedStartTimeSchedule = selectedTime;
+      });
+      showEndTimeSchedulePicker();
+    }
   }
 
   void showEndTimeSchedulePicker() async {
