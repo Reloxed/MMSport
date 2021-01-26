@@ -160,6 +160,10 @@ class _ChatRoom extends State<ChatRoom> {
                                       .collection("messages")
                                       .add(chatMessage.chatMessageToJson())
                                       .then((value) => _textController.clear());
+                                  await FirebaseFirestore.instance
+                                      .collection("chatRooms")
+                                      .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
+                                      .update({'sentDate': chatMessage.sentDate});
                                   isButtonEnabled = true;
                                 }
                               },
