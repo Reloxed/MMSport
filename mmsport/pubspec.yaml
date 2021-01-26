@@ -40,6 +40,7 @@ dependencies:
   json_serializable: ^3.3.0
   flappy_search_bar: ^1.7.2
   intl: ^0.16.1
+  firebase_messaging: ^7.0.3
 
   flutter_localizations:
     sdk: flutter

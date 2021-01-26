@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:mmsport/models/chat_message.dart';
 import 'package:mmsport/models/chat_room.dart';
@@ -150,7 +152,8 @@ class _ChatRoom extends State<ChatRoom> {
                                 if (_textController.text.isNotEmpty && isButtonEnabled == true) {
                                   isButtonEnabled = false;
                                   ChatMessage chatMessage =
-                                      new ChatMessage(_textController.text, loggedSocialProfile.id, Timestamp.now());
+                                      new ChatMessage(_textController.text, loggedSocialProfile.id,
+                                          socialProfileToChat.id, Timestamp.now());
                                   await FirebaseFirestore.instance
                                       .collection("chatRooms")
                                       .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
