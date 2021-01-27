@@ -44,7 +44,7 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
   Widget _studentProfileForm() {
     return Form(
         key: _formKey,
-        autovalidate: false,
+        autovalidateMode: AutovalidateMode.disabled,
         child: ListView(
           children: <Widget>[
             _profileImage(),
@@ -281,13 +281,12 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
   Widget chooseTypeOfSocialProfile() {
     return Container(
       margin: const EdgeInsets.only(top: 4.0),
-      child: FormBuilderRadio(
-        decoration: InputDecoration(),
+      child: FormBuilderRadioGroup(
         initialValue: "",
-        attribute: "¿Eres entrenador o alumno?",
-        leadingInput: true,
+        decoration:
+        InputDecoration(labelText: '¿Eres entrenador o alumno?'),
         onChanged: _handleRadioValueChange,
-        validators: [_checkSelectedRadioButton],
+        validator: _checkSelectedRadioButton,
         options: ["Entrenador", "Alumno"]
             .map((lang) => FormBuilderFieldOption(
                   value: lang,
@@ -296,7 +295,7 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
                     style: TextStyle(fontSize: 16.0),
                   ),
                 ))
-            .toList(growable: false),
+            .toList(growable: false), name: null,
       ),
     );
   }

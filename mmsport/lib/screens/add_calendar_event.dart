@@ -46,7 +46,7 @@ class _AddCalendarEventState extends State<AddCalendarEvent> {
                 padding: EdgeInsets.symmetric(horizontal: 30),
                 child: Form(
                     key: _formKey,
-                    autovalidate: false,
+                    autovalidateMode: AutovalidateMode.disabled,
                     child: Column(
                       children: <Widget>[
                         Column(

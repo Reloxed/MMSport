@@ -67,7 +67,7 @@ class _CreateSportSchoolGroupState extends State<CreateSportSchoolGroup> {
           padding: EdgeInsets.symmetric(horizontal: 30),
           child: Form(
               key: _formKey,
-              autovalidate: false,
+              autovalidateMode: AutovalidateMode.disabled,
               child: Column(
                 children: <Widget>[
                   Center(

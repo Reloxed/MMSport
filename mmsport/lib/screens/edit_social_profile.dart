@@ -65,7 +65,7 @@ class _EditSocialProfileState extends State<EditSocialProfile> {
   Widget _directorProfileForm(SocialProfile socialProfile) {
     return Form(
         key: _formKey,
-        autovalidate: false,
+        autovalidateMode: AutovalidateMode.disabled,
         child: ListView(
           children: <Widget>[
             _profileImage(socialProfile.urlImage),

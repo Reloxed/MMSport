@@ -50,7 +50,7 @@ class _RegisterState extends State<Register> {
                 padding: EdgeInsets.symmetric(horizontal: 30),
                 child: Form(
                     key: _formKey,
-                    autovalidate: false,
+                    autovalidateMode: AutovalidateMode.disabled,
                     child: Column(
                       children: <Widget>[
                         _logoImage(),
@@ -72,13 +72,12 @@ class _RegisterState extends State<Register> {
                               ),
                               Container(
                                 margin: const EdgeInsets.only(top: 4.0),
-                                child: FormBuilderRadio(
+                                child: FormBuilderRadioGroup(
                                   decoration: InputDecoration(),
                                   initialValue: "",
-                                  attribute: "has_school_sport",
-                                  leadingInput: true,
+                                  name: "has_school_sport",
                                   onChanged: _handleRadioValueChange,
-                                  validators: [_checkSelectedRadioButton],
+                                  validator: _checkSelectedRadioButton,
                                   options: ["Sí", "No"]
                                       .map((lang) => FormBuilderFieldOption(
                                             value: lang,

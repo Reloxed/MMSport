@@ -39,7 +39,7 @@ class _LoginState extends State<Login> {
                 padding: EdgeInsets.symmetric(horizontal: 30),
                 child: Form(
                     key: _formKey,
-                    autovalidate: false,
+                    autovalidateMode: AutovalidateMode.disabled,
                     child: Column(
                       children: <Widget>[
                         _logoImage(),

@@ -55,7 +55,7 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
   Widget _sportSchoolForm() {
     return Form(
         key: _formKey,
-        autovalidate: false,
+        autovalidateMode: AutovalidateMode.disabled,
         child: ListView(
           children: <Widget>[
             _logoImage(),
@@ -245,7 +245,7 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
   Widget _directorProfileForm() {
     return Form(
         key: _formKey2,
-        autovalidate: false,
+        autovalidateMode: AutovalidateMode.disabled,
         child: ListView(
           children: <Widget>[
             _profileImage(),
