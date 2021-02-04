@@ -2,11 +2,11 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:mmsport/components/dialogs.dart';
 import 'package:mmsport/models/chat_message.dart';
 import 'package:mmsport/models/chat_room.dart';
 import 'package:mmsport/models/socialProfile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:mmsport/components/dialogs.dart';
 
 class ChatRoom extends StatefulWidget {
   State<ChatRoom> createState() {
@@ -25,6 +25,54 @@ class _ChatRoom extends State<ChatRoom> {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     Map aux = jsonDecode(preferences.get("chosenChatRoom"));
     chosenChatRoom = ChatRoomModel.chatRoomModelFromMap(aux);
+    Map profile = await jsonDecode(preferences.get("chosenSocialProfile"));
+    SocialProfile chosenSocialProfile = SocialProfile.socialProfileFromMap(profile);
+    List<String> nonReadMessagesId = new List<String>();
+    chosenSocialProfile.id = profile['id'];
+    List<String> socialIds = chosenChatRoom.id.split("_");
+    var existsDoc =
+        await FirebaseFirestore.instance.collection("chatRooms").doc(socialIds[0] + "_" + socialIds[1]).get();
+    if (existsDoc.exists) {
+      await FirebaseFirestore.instance
+          .collection("chatRooms")
+          .doc(existsDoc.id)
+          .collection("messages")
+          .where("read", isEqualTo: false)
+          .where("receiverId", isEqualTo: chosenSocialProfile.id)
+          .get()
+          .then((value) => value.docs.forEach((document) {
+                nonReadMessagesId.add(document.id);
+              }));
+      for (String id in nonReadMessagesId) {
+        await FirebaseFirestore.instance
+            .collection("chatRooms")
+            .doc(chosenChatRoom.id)
+            .collection("messages")
+            .doc(id)
+            .set({"read": true}, SetOptions(merge: true));
+      }
+    } else {
+      existsDoc = await FirebaseFirestore.instance.collection("chatRooms").doc(socialIds[1] + "_" + socialIds[0]).get();
+      await FirebaseFirestore.instance
+          .collection("chatRooms")
+          .doc(existsDoc.id)
+          .collection("messages")
+          .where("read", isEqualTo: false)
+          .where("receiverId", isEqualTo: chosenSocialProfile.id)
+          .get()
+          .then((value) => value.docs.forEach((document) {
+                nonReadMessagesId.add(document.id);
+              }));
+      for (String id in nonReadMessagesId) {
+        await FirebaseFirestore.instance
+            .collection("chatRooms")
+            .doc(existsDoc.id)
+            .collection("messages")
+            .doc(id)
+            .set({"read": true}, SetOptions(merge: true));
+      }
+    }
+
     return chosenChatRoom;
   }
 
@@ -149,9 +197,10 @@ class _ChatRoom extends State<ChatRoom> {
                               onPressed: () async {
                                 if (_textController.text.isNotEmpty && isButtonEnabled == true) {
                                   isButtonEnabled = false;
-                                  ChatMessage chatMessage =
-                                      new ChatMessage(_textController.text, loggedSocialProfile.id,
-                                          socialProfileToChat.id, Timestamp.now());
+                                  String text = _textController.text;
+                                  _textController.clear();
+                                  ChatMessage chatMessage = new ChatMessage(text,
+                                      loggedSocialProfile.id, socialProfileToChat.id, false, Timestamp.now());
                                   await FirebaseFirestore.instance
                                       .collection("chatRooms")
                                       .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])

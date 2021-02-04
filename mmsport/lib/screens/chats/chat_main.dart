@@ -2,11 +2,11 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:mmsport/components/dialogs.dart';
 import 'package:mmsport/models/chat_room.dart';
 import 'package:mmsport/models/socialProfile.dart';
 import 'package:mmsport/navigations/navigations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:mmsport/components/dialogs.dart';
 
 class ChatMain extends StatefulWidget {
   State<ChatMain> createState() {
@@ -36,6 +36,7 @@ class _ChatMain extends State<ChatMain> {
     await FirebaseFirestore.instance
         .collection("chatRooms")
         .where("users", arrayContains: chosenSocialProfile.id)
+        .orderBy("sentDate", descending: true)
         .get()
         .then((value) => value.docs.forEach((document) {
               if (document.data()['users'][0] == chosenSocialProfile.id) {
@@ -231,104 +232,225 @@ class _ChatMain extends State<ChatMain> {
   }
 
   Widget _listItemOpenChat(SocialProfile socialProfile, String chatRoomId) {
-    return InkWell(
-      child: Container(
-          padding: EdgeInsets.all(10.0),
-          child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: <Widget>[
-            Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
-              socialProfile.urlImage != null
-                  ? CircleAvatar(
-                      radius: 24,
-                      backgroundImage: NetworkImage(socialProfile.urlImage),
-                    )
-                  : CircleAvatar(
-                      radius: 24,
-                      child: ClipOval(
-                          child: Icon(
-                        Icons.person,
-                        size: 44,
-                      ))),
-              SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.7,
-                  child: Container(
-                      padding: EdgeInsets.all(10.0),
-                      child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            socialProfile.secondSurname != null
-                                ? Text(
-                                    socialProfile.name +
-                                        " " +
-                                        socialProfile.firstSurname +
-                                        " " +
-                                        socialProfile.secondSurname,
-                                    overflow: TextOverflow.ellipsis,
-                                    softWrap: true,
-                                    style: TextStyle(fontSize: 16))
-                                : Text(socialProfile.name + " " + socialProfile.firstSurname,
-                                    overflow: TextOverflow.ellipsis, softWrap: true, style: TextStyle(fontSize: 16)),
-                            StreamBuilder(
-                              stream: FirebaseFirestore.instance
-                                  .collection("chatRooms")
-                                  .doc(chatRoomId)
-                                  .collection("messages")
-                                  .orderBy("sentDate", descending: true)
-                                  .snapshots(),
-                              builder: (context, listSnapshot) {
-                                if (listSnapshot.hasData) {
-                                  if (listSnapshot.data.documents.length > 0)
-                                    return Text(listSnapshot.data.documents.elementAt(0).get("message"));
-                                  else
-                                    return SizedBox.shrink();
-                                } else {
-                                  return SizedBox.shrink();
-                                }
-                              },
-                            )
-                          ]))),
-              Container(child: Icon(Icons.chevron_right))
-            ]),
-          ])),
-      onTap: () async {
-        SharedPreferences preferences = await SharedPreferences.getInstance();
+    return StreamBuilder(
+      stream: FirebaseFirestore.instance
+          .collection("chatRooms")
+          .doc(chatRoomId)
+          .collection("messages")
+          .orderBy("sentDate", descending: true)
+          .snapshots(),
+      builder: (context, listSnapshot) {
+        return StreamBuilder(
+          stream: FirebaseFirestore.instance
+              .collection("chatRooms")
+              .doc(chatRoomId)
+              .collection("messages")
+              .where("read", isEqualTo: false)
+              .where("receiverId", isEqualTo: chosenSocialProfile.id)
+              .snapshots(),
+          builder: (context, snapshot2) {
+            if (listSnapshot.hasData) {
+              if (snapshot2.hasData) {
+                return ListTile(
+                  leading: socialProfile.urlImage != null
+                      ? CircleAvatar(
+                          radius: 24,
+                          backgroundImage: NetworkImage(socialProfile.urlImage),
+                        )
+                      : CircleAvatar(
+                          radius: 24,
+                          child: ClipOval(
+                              child: Icon(
+                            Icons.person,
+                            size: 44,
+                          ))),
+                  title: socialProfile.secondSurname != null
+                      ? Text(socialProfile.name + " " + socialProfile.firstSurname + " " + socialProfile.secondSurname,
+                          overflow: TextOverflow.ellipsis, softWrap: true, style: TextStyle(fontSize: 16))
+                      : Text(socialProfile.name + " " + socialProfile.firstSurname,
+                          overflow: TextOverflow.ellipsis, softWrap: true, style: TextStyle(fontSize: 16)),
+                  subtitle: listSnapshot.data.documents.length > 0
+                      ? Text(listSnapshot.data.documents.elementAt(0).get("message"))
+                      : SizedBox.shrink(),
+                  trailing: snapshot2.data.documents.length > 0
+                      ? Container(
+                          width: 40.0,
+                          height: 40.0,
+                          decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.lightBlueAccent),
+                          child: Center(
+                            child: Text(snapshot2.data.documents.length.toString()),
+                          ))
+                      : SizedBox.shrink(),
+                  onTap: () async {
+                    SharedPreferences preferences = await SharedPreferences.getInstance();
 //          String socialProfileToJson = jsonEncode(socialProfile);
 //          preferences.setString("socialProfileToChat", socialProfileToJson);
-        var existsDoc = await FirebaseFirestore.instance
-            .collection("chatRooms")
-            .doc(chosenSocialProfile.id + "_" + socialProfile.id)
-            .get();
-        if (existsDoc.exists) {
-          // Check if document exists one way
-          List<String> users = [];
-          users.add(existsDoc.data()['users'][0]);
-          users.add(existsDoc.data()['users'][1]);
-          ChatRoomModel chatRoomModel = new ChatRoomModel(existsDoc.id, users);
-          preferences.setString("chosenChatRoom", jsonEncode(chatRoomModel.chatRoomModelToJson()));
-        } else {
-          // Check if document exists the other way
-          var existsDoc2 = await FirebaseFirestore.instance
-              .collection("chatRooms")
-              .doc(socialProfile.id + "_" + chosenSocialProfile.id)
-              .get();
-          if (existsDoc2.exists) {
-            List<String> users = [];
-            users.add(existsDoc2.data()['users'][0]);
-            users.add(existsDoc2.data()['users'][1]);
-            ChatRoomModel chatRoomModel = new ChatRoomModel(existsDoc.id, users);
-            preferences.setString("chosenChatRoom", jsonEncode(chatRoomModel.chatRoomModelToJson()));
-          } else {
-            // None of previous exists, create a new chat room
-            ChatRoomModel chatRoomModel = new ChatRoomModel(
-                chosenSocialProfile.id + "_" + socialProfile.id, [chosenSocialProfile.id, socialProfile.id]);
-            await FirebaseFirestore.instance
-                .collection("chatRooms")
-                .doc(chatRoomModel.id)
-                .set(chatRoomModel.chatRoomModelToJson());
-            preferences.setString("chosenChatRoom", jsonEncode(chatRoomModel.chatRoomModelToJson()));
-          }
-        }
-        navigateToChatRoom(context);
+                    var existsDoc = await FirebaseFirestore.instance
+                        .collection("chatRooms")
+                        .doc(chosenSocialProfile.id + "_" + socialProfile.id)
+                        .get();
+                    if (existsDoc.exists) {
+                      // Check if document exists one way
+                      List<String> users = [];
+                      users.add(existsDoc.data()['users'][0]);
+                      users.add(existsDoc.data()['users'][1]);
+                      ChatRoomModel chatRoomModel = new ChatRoomModel(existsDoc.id, users);
+                      preferences.setString("chosenChatRoom", jsonEncode(chatRoomModel.chatRoomModelToJson()));
+                    } else {
+                      // Check if document exists the other way
+                      var existsDoc2 = await FirebaseFirestore.instance
+                          .collection("chatRooms")
+                          .doc(socialProfile.id + "_" + chosenSocialProfile.id)
+                          .get();
+                      if (existsDoc2.exists) {
+                        List<String> users = [];
+                        users.add(existsDoc2.data()['users'][0]);
+                        users.add(existsDoc2.data()['users'][1]);
+                        ChatRoomModel chatRoomModel = new ChatRoomModel(existsDoc.id, users);
+                        preferences.setString("chosenChatRoom", jsonEncode(chatRoomModel.chatRoomModelToJson()));
+                      } else {
+                        // None of previous exists, create a new chat room
+                        ChatRoomModel chatRoomModel = new ChatRoomModel(chosenSocialProfile.id + "_" + socialProfile.id,
+                            [chosenSocialProfile.id, socialProfile.id]);
+                        await FirebaseFirestore.instance
+                            .collection("chatRooms")
+                            .doc(chatRoomModel.id)
+                            .set(chatRoomModel.chatRoomModelToJson());
+                        preferences.setString("chosenChatRoom", jsonEncode(chatRoomModel.chatRoomModelToJson()));
+                      }
+                    }
+                    navigateToChatRoom(context);
+                  },
+                );
+              } else {
+                return ListTile(
+                  leading: socialProfile.urlImage != null
+                      ? CircleAvatar(
+                          radius: 24,
+                          backgroundImage: NetworkImage(socialProfile.urlImage),
+                        )
+                      : CircleAvatar(
+                          radius: 24,
+                          child: ClipOval(
+                              child: Icon(
+                            Icons.person,
+                            size: 44,
+                          ))),
+                  title: socialProfile.secondSurname != null
+                      ? Text(socialProfile.name + " " + socialProfile.firstSurname + " " + socialProfile.secondSurname,
+                          overflow: TextOverflow.ellipsis, softWrap: true, style: TextStyle(fontSize: 16))
+                      : Text(socialProfile.name + " " + socialProfile.firstSurname,
+                          overflow: TextOverflow.ellipsis, softWrap: true, style: TextStyle(fontSize: 16)),
+                  subtitle: listSnapshot.data.documents.length > 0
+                      ? Text(listSnapshot.data.documents.elementAt(0).get("message"))
+                      : SizedBox.shrink(),
+                  onTap: () async {
+                    SharedPreferences preferences = await SharedPreferences.getInstance();
+//          String socialProfileToJson = jsonEncode(socialProfile);
+//          preferences.setString("socialProfileToChat", socialProfileToJson);
+                    var existsDoc = await FirebaseFirestore.instance
+                        .collection("chatRooms")
+                        .doc(chosenSocialProfile.id + "_" + socialProfile.id)
+                        .get();
+                    if (existsDoc.exists) {
+                      // Check if document exists one way
+                      List<String> users = [];
+                      users.add(existsDoc.data()['users'][0]);
+                      users.add(existsDoc.data()['users'][1]);
+                      ChatRoomModel chatRoomModel = new ChatRoomModel(existsDoc.id, users);
+                      preferences.setString("chosenChatRoom", jsonEncode(chatRoomModel.chatRoomModelToJson()));
+                    } else {
+                      // Check if document exists the other way
+                      var existsDoc2 = await FirebaseFirestore.instance
+                          .collection("chatRooms")
+                          .doc(socialProfile.id + "_" + chosenSocialProfile.id)
+                          .get();
+                      if (existsDoc2.exists) {
+                        List<String> users = [];
+                        users.add(existsDoc2.data()['users'][0]);
+                        users.add(existsDoc2.data()['users'][1]);
+                        ChatRoomModel chatRoomModel = new ChatRoomModel(existsDoc.id, users);
+                        preferences.setString("chosenChatRoom", jsonEncode(chatRoomModel.chatRoomModelToJson()));
+                      } else {
+                        // None of previous exists, create a new chat room
+                        ChatRoomModel chatRoomModel = new ChatRoomModel(chosenSocialProfile.id + "_" + socialProfile.id,
+                            [chosenSocialProfile.id, socialProfile.id]);
+                        await FirebaseFirestore.instance
+                            .collection("chatRooms")
+                            .doc(chatRoomModel.id)
+                            .set(chatRoomModel.chatRoomModelToJson());
+                        preferences.setString("chosenChatRoom", jsonEncode(chatRoomModel.chatRoomModelToJson()));
+                      }
+                    }
+                    navigateToChatRoom(context);
+                  },
+                );
+              }
+            } else {
+              return ListTile(
+                leading: socialProfile.urlImage != null
+                    ? CircleAvatar(
+                        radius: 24,
+                        backgroundImage: NetworkImage(socialProfile.urlImage),
+                      )
+                    : CircleAvatar(
+                        radius: 24,
+                        child: ClipOval(
+                            child: Icon(
+                          Icons.person,
+                          size: 44,
+                        ))),
+                title: socialProfile.secondSurname != null
+                    ? Text(socialProfile.name + " " + socialProfile.firstSurname + " " + socialProfile.secondSurname,
+                        overflow: TextOverflow.ellipsis, softWrap: true, style: TextStyle(fontSize: 16))
+                    : Text(socialProfile.name + " " + socialProfile.firstSurname,
+                        overflow: TextOverflow.ellipsis, softWrap: true, style: TextStyle(fontSize: 16)),
+                subtitle: SizedBox.shrink(),
+                onTap: () async {
+                  SharedPreferences preferences = await SharedPreferences.getInstance();
+//          String socialProfileToJson = jsonEncode(socialProfile);
+//          preferences.setString("socialProfileToChat", socialProfileToJson);
+                  var existsDoc = await FirebaseFirestore.instance
+                      .collection("chatRooms")
+                      .doc(chosenSocialProfile.id + "_" + socialProfile.id)
+                      .get();
+                  if (existsDoc.exists) {
+                    // Check if document exists one way
+                    List<String> users = [];
+                    users.add(existsDoc.data()['users'][0]);
+                    users.add(existsDoc.data()['users'][1]);
+                    ChatRoomModel chatRoomModel = new ChatRoomModel(existsDoc.id, users);
+                    preferences.setString("chosenChatRoom", jsonEncode(chatRoomModel.chatRoomModelToJson()));
+                  } else {
+                    // Check if document exists the other way
+                    var existsDoc2 = await FirebaseFirestore.instance
+                        .collection("chatRooms")
+                        .doc(socialProfile.id + "_" + chosenSocialProfile.id)
+                        .get();
+                    if (existsDoc2.exists) {
+                      List<String> users = [];
+                      users.add(existsDoc2.data()['users'][0]);
+                      users.add(existsDoc2.data()['users'][1]);
+                      ChatRoomModel chatRoomModel = new ChatRoomModel(existsDoc.id, users);
+                      preferences.setString("chosenChatRoom", jsonEncode(chatRoomModel.chatRoomModelToJson()));
+                    } else {
+                      // None of previous exists, create a new chat room
+                      ChatRoomModel chatRoomModel = new ChatRoomModel(
+                          chosenSocialProfile.id + "_" + socialProfile.id, [chosenSocialProfile.id, socialProfile.id]);
+                      await FirebaseFirestore.instance
+                          .collection("chatRooms")
+                          .doc(chatRoomModel.id)
+                          .set(chatRoomModel.chatRoomModelToJson());
+                      preferences.setString("chosenChatRoom", jsonEncode(chatRoomModel.chatRoomModelToJson()));
+                    }
+                  }
+                  navigateToChatRoom(context);
+                },
+              );
+              //return SizedBox.shrink();
+            }
+          },
+        );
       },
     );
   }
