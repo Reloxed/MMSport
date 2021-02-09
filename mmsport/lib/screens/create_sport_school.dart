@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -452,6 +453,7 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
         .then((value) => value.docs.forEach((element) {
               databaseReference.collection("directorsWithoutSportSchool").doc(element.id).delete();
             }));
+    registerNotification(firebaseUser.uid);
   }
 
   String getRandomString(int length) {
@@ -485,5 +487,30 @@ class _CreateSportSchoolState extends State<CreateSportSchool> {
     StorageTaskSnapshot taskSnapshot = await uploadTask.onComplete;
     var url = await taskSnapshot.ref.getDownloadURL();
     urlProfile = url;
+  }
+
+  void registerNotification(String userId) {
+    FirebaseMessaging firebaseMessaging = FirebaseMessaging();
+    firebaseMessaging.requestNotificationPermissions();
+
+    firebaseMessaging.configure(onMessage: (Map<String, dynamic> message){
+      Platform.isAndroid
+          ? showNotification(message['notification'])
+          : showNotification(message['aps']['alert']);
+      return;
+    });
+
+    firebaseMessaging.getToken().then((token) {
+      FirebaseFirestore.instance.collection("socialProfiles").where("userAccountId", isEqualTo: userId).get()
+          .then((value) => value.docs.forEach((element) {
+        SocialProfile profile = SocialProfile.socialProfileFromMap(element.data());
+        profile.id = element.id;
+        FirebaseFirestore.instance.collection("socialProfiles").doc(profile.id).update({'pushToken': token});
+      }));
+    });
+  }
+
+  void showNotification(message) async {
+
   }
 }

@@ -235,11 +235,15 @@ class _LoginState extends State<Login> {
 
     firebaseMessaging.getToken().then((token) {
       FirebaseFirestore.instance.collection("socialProfiles").where("userAccountId", isEqualTo: userId).get()
-          .then((value) => value.docs.forEach((element) {
+          .then((value) => value.docs.length > 0 ? value.docs.forEach((element) {
             SocialProfile profile = SocialProfile.socialProfileFromMap(element.data());
             profile.id = element.id;
             FirebaseFirestore.instance.collection("socialProfiles").doc(profile.id).update({'pushToken': token});
-      }));
+      }) :
+            FirebaseFirestore.instance.collection("admins").where("userId", isEqualTo: userId).get()
+            .then((value) => value.docs.forEach((element) {
+            FirebaseFirestore.instance.collection("admins").doc(element.id).update({'pushToken': token});
+      })));
     });
   }
 
