@@ -41,6 +41,12 @@ dependencies:
   flappy_search_bar: ^1.7.2
   intl: ^0.16.1
   firebase_messaging: ^7.0.3
+  file_picker: ^1.4.0+1
+  emoji_picker: ^0.0.2
+  video_player: ^0.10.2+1
+  flutter_downloader: ^1.2.2
+  downloads_path_provider: ^0.1.0
+  flushbar: ^1.9.0
 
   flutter_localizations:
     sdk: flutter

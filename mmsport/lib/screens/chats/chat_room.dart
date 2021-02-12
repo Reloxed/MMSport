@@ -1,6 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:mmsport/components/dialogs.dart';
 import 'package:mmsport/models/chat_message.dart';
@@ -20,6 +23,91 @@ class _ChatRoom extends State<ChatRoom> {
   SocialProfile loggedSocialProfile;
   bool isButtonEnabled = true;
   TextEditingController _textController = TextEditingController();
+
+  showAttachmentBottomSheet(context) {
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext bc) {
+          return Container(
+            child: Wrap(
+              children: <Widget>[
+                ListTile(leading: Icon(Icons.image), title: Text('Image'), onTap: () => showFilePicker(FileType.image)),
+                ListTile(
+                    leading: Icon(Icons.videocam), title: Text('Video'), onTap: () => showFilePicker(FileType.video)),
+                ListTile(
+                  leading: Icon(Icons.insert_drive_file),
+                  title: Text('File'),
+                  onTap: () => showFilePicker(FileType.any),
+                ),
+              ],
+            ),
+          );
+        });
+  }
+
+  showFilePicker(FileType fileType) async {
+    File file = await FilePicker.getFile(type: fileType);
+    Navigator.pop(context);
+    String url = await uploadFile(file, file.path);
+    switch (fileType) {
+      case FileType.any:
+        ChatMessage chatMessage =
+            new ChatMessage(null, loggedSocialProfile.id, socialProfileToChat.id, false, Timestamp.now(), url, "file");
+        await FirebaseFirestore.instance
+            .collection("chatRooms")
+            .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
+            .collection("messages")
+            .add(chatMessage.chatMessageToJson())
+            .then((value) => _textController.clear());
+        await FirebaseFirestore.instance
+            .collection("chatRooms")
+            .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
+            .update({'sentDate': chatMessage.sentDate});
+        break;
+      case FileType.image:
+        ChatMessage chatMessage =
+            new ChatMessage(null, loggedSocialProfile.id, socialProfileToChat.id, false, Timestamp.now(), url, "image");
+        await FirebaseFirestore.instance
+            .collection("chatRooms")
+            .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
+            .collection("messages")
+            .add(chatMessage.chatMessageToJson())
+            .then((value) => _textController.clear());
+        await FirebaseFirestore.instance
+            .collection("chatRooms")
+            .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
+            .update({'sentDate': chatMessage.sentDate});
+        break;
+      case FileType.video:
+        ChatMessage chatMessage =
+            new ChatMessage(null, loggedSocialProfile.id, socialProfileToChat.id, false, Timestamp.now(), url, "video");
+        await FirebaseFirestore.instance
+            .collection("chatRooms")
+            .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
+            .collection("messages")
+            .add(chatMessage.chatMessageToJson())
+            .then((value) => _textController.clear());
+        await FirebaseFirestore.instance
+            .collection("chatRooms")
+            .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
+            .update({'sentDate': chatMessage.sentDate});
+    }
+  }
+
+  Future<String> uploadFile(File file, String path) async {
+    final FirebaseStorage firebaseStorage = new FirebaseStorage();
+    String fileName = file.path.split('/').last;
+    String chatId = chosenChatRoom.id;
+    String loggedProfileId = loggedSocialProfile.id;
+    StorageReference reference = firebaseStorage.ref().child(
+        '$path/$chatId/$loggedProfileId-${DateTime.now().millisecondsSinceEpoch}-$fileName'); // get a reference to the path of the image directory
+    String p = await reference.getPath();
+    print('uploading to $p');
+    StorageUploadTask uploadTask = reference.putFile(file); // put the file in the path
+    StorageTaskSnapshot result = await uploadTask.onComplete; // wait for the upload to complete
+    String url = await result.ref.getDownloadURL(); //retrieve the download link and return it
+    return url;
+  }
 
   Future<ChatRoomModel> _loadDataChatRoom() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
@@ -199,8 +287,8 @@ class _ChatRoom extends State<ChatRoom> {
                                   isButtonEnabled = false;
                                   String text = _textController.text;
                                   _textController.clear();
-                                  ChatMessage chatMessage = new ChatMessage(text,
-                                      loggedSocialProfile.id, socialProfileToChat.id, false, Timestamp.now());
+                                  ChatMessage chatMessage = new ChatMessage(
+                                      text, loggedSocialProfile.id, socialProfileToChat.id, false, Timestamp.now(), null, null);
                                   await FirebaseFirestore.instance
                                       .collection("chatRooms")
                                       .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
