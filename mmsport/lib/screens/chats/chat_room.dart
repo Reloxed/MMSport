@@ -2,10 +2,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:downloads_path_provider/downloads_path_provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:mmsport/components/dialogs.dart';
+import 'package:mmsport/components/video_player_widget.dart';
 import 'package:mmsport/models/chat_message.dart';
 import 'package:mmsport/models/chat_room.dart';
 import 'package:mmsport/models/socialProfile.dart';
@@ -24,19 +27,19 @@ class _ChatRoom extends State<ChatRoom> {
   bool isButtonEnabled = true;
   TextEditingController _textController = TextEditingController();
 
-  showAttachmentBottomSheet(context) {
+  void showAttachmentBottomSheet(context) {
     showModalBottomSheet(
         context: context,
         builder: (BuildContext bc) {
           return Container(
             child: Wrap(
               children: <Widget>[
-                ListTile(leading: Icon(Icons.image), title: Text('Image'), onTap: () => showFilePicker(FileType.image)),
+                ListTile(leading: Icon(Icons.image), title: Text('Imagen'), onTap: () => showFilePicker(FileType.image)),
                 ListTile(
-                    leading: Icon(Icons.videocam), title: Text('Video'), onTap: () => showFilePicker(FileType.video)),
+                    leading: Icon(Icons.videocam), title: Text('Vídeo'), onTap: () => showFilePicker(FileType.video)),
                 ListTile(
                   leading: Icon(Icons.insert_drive_file),
-                  title: Text('File'),
+                  title: Text('Archivo'),
                   onTap: () => showFilePicker(FileType.any),
                 ),
               ],
@@ -45,7 +48,7 @@ class _ChatRoom extends State<ChatRoom> {
         });
   }
 
-  showFilePicker(FileType fileType) async {
+  void showFilePicker(FileType fileType) async {
     File file = await FilePicker.getFile(type: fileType);
     Navigator.pop(context);
     String url = await uploadFile(file, file.path);
@@ -91,6 +94,9 @@ class _ChatRoom extends State<ChatRoom> {
             .collection("chatRooms")
             .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
             .update({'sentDate': chatMessage.sentDate});
+        break;
+      default:
+        break;
     }
   }
 
@@ -102,7 +108,7 @@ class _ChatRoom extends State<ChatRoom> {
     StorageReference reference = firebaseStorage.ref().child(
         '$path/$chatId/$loggedProfileId-${DateTime.now().millisecondsSinceEpoch}-$fileName'); // get a reference to the path of the image directory
     String p = await reference.getPath();
-    print('uploading to $p');
+    print('Subiendo archivo a $p');
     StorageUploadTask uploadTask = reference.putFile(file); // put the file in the path
     StorageTaskSnapshot result = await uploadTask.onComplete; // wait for the upload to complete
     String url = await result.ref.getDownloadURL(); //retrieve the download link and return it
@@ -192,6 +198,7 @@ class _ChatRoom extends State<ChatRoom> {
 
   @override
   Widget build(BuildContext context) {
+
     return FutureBuilder<List<dynamic>>(
         future: Future.wait([_loadDataChatRoom(), _loadDataSocialProfile()]),
         builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
@@ -271,6 +278,11 @@ class _ChatRoom extends State<ChatRoom> {
                         color: Colors.white,
                         child: Row(
                           children: <Widget>[
+                            IconButton(
+                                icon: Icon(Icons.attach_file),
+                                iconSize: 25.0,
+                                color: Colors.blueAccent,
+                                onPressed: () => showAttachmentBottomSheet(context)),
                             Expanded(
                               child: TextField(
                                 controller: _textController,
@@ -287,8 +299,8 @@ class _ChatRoom extends State<ChatRoom> {
                                   isButtonEnabled = false;
                                   String text = _textController.text;
                                   _textController.clear();
-                                  ChatMessage chatMessage = new ChatMessage(
-                                      text, loggedSocialProfile.id, socialProfileToChat.id, false, Timestamp.now(), null, null);
+                                  ChatMessage chatMessage = new ChatMessage(text, loggedSocialProfile.id,
+                                      socialProfileToChat.id, false, Timestamp.now(), null, null);
                                   await FirebaseFirestore.instance
                                       .collection("chatRooms")
                                       .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
@@ -318,16 +330,133 @@ class _ChatRoom extends State<ChatRoom> {
       margin: isMe
           ? EdgeInsets.only(top: 8.0, bottom: 8.0, left: MediaQuery.of(context).size.width * 0.25)
           : EdgeInsets.only(top: 8.0, bottom: 8.0, right: MediaQuery.of(context).size.width * 0.25),
-      padding: EdgeInsets.symmetric(horizontal: 25.0, vertical: 15.0),
+      padding: EdgeInsets.symmetric(horizontal: 35.0, vertical: 15.0),
       width: MediaQuery.of(context).size.width * 0.75,
       decoration: BoxDecoration(
           color: isMe ? Colors.blueAccent : Colors.white,
           borderRadius: isMe
               ? BorderRadius.only(topLeft: Radius.circular(15.0), bottomLeft: Radius.circular(15.0))
               : BorderRadius.only(topRight: Radius.circular(15.0), bottomRight: Radius.circular(15.0))),
-      child: Text(message.message,
-          style:
-              isMe ? TextStyle(color: Colors.white, fontSize: 16.0) : TextStyle(color: Colors.black, fontSize: 16.0)),
+      child: _buildMessageContent(isMe, message, context),
+    );
+  }
+
+  Widget _buildMessageContent(bool isSelf, ChatMessage message, BuildContext context) {
+    if (message.message != null) {
+      return Text(
+        message.message,
+        style: isSelf ? TextStyle(color: Colors.white, fontSize: 16.0) : TextStyle(color: Colors.black, fontSize: 16.0),
+      );
+    } else if (message.type == "image") {
+      return ClipRRect(
+          borderRadius: BorderRadius.circular(8.0),
+          child: FadeInImage(placeholder: AssetImage("imagen"), image: NetworkImage(message.url)));
+    } else if (message.type == "video") {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(8.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            Stack(
+              alignment: AlignmentDirectional.center,
+              children: <Widget>[
+                Container(
+                  width: 140,
+                  color: isSelf ? Colors.white : Colors.blueAccent,
+                  height: 80,
+                ),
+                Column(
+                  children: <Widget>[
+                    Icon(
+                      Icons.videocam,
+                      color: Colors.blueAccent,
+                    ),
+                    SizedBox(
+                      height: 5,
+                    ),
+                    Text(
+                      'Video',
+                      style: TextStyle(fontSize: 20, color: isSelf ? Colors.blueAccent : Colors.white),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            Container(
+                height: 40,
+                child: IconButton(
+                    icon: Icon(
+                      Icons.play_arrow,
+                      color: isSelf ? Colors.white : Colors.blueAccent,
+                    ),
+                    onPressed: () => showVideoPlayer(context, message.url)))
+          ],
+        ),
+      );
+    } else if (message.type == "file") {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(8.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            Stack(
+              alignment: AlignmentDirectional.center,
+              children: <Widget>[
+                Container(
+                  width: 140,
+                  color: Colors.white,
+                  height: 80,
+                ),
+                Column(
+                  children: <Widget>[
+                    Icon(
+                      Icons.insert_drive_file,
+                      color: Colors.blueAccent,
+                    ),
+                    SizedBox(
+                      height: 5,
+                    ),
+                    Text(
+                      'Archivo',
+                      style: TextStyle(fontSize: 20, color: isSelf ? Colors.blueAccent : Colors.white),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            Container(
+                height: 40,
+                child: IconButton(
+                    icon: Icon(
+                      Icons.file_download,
+                      color: isSelf ? Colors.white : Colors.blueAccent,
+                    ),
+                    onPressed: () => downloadFile(message.url)))
+          ],
+        ),
+      );
+    }
+    else{
+      return Container();
+    }
+  }
+
+  void showVideoPlayer(parentContext, String videoUrl) async {
+    await showModalBottomSheet(
+        context: parentContext,
+        builder: (BuildContext bc) {
+          return VideoPlayerWidget(videoUrl);
+        });
+  }
+
+  downloadFile(String fileUrl) async {
+    final Directory downloadsDirectory = await DownloadsPathProvider.downloadsDirectory;
+    final String downloadsPath = downloadsDirectory.path;
+    await FlutterDownloader.enqueue(
+      url: fileUrl,
+      savedDir: downloadsPath,
+      showNotification: true, // show download progress in status bar (for Android)
+      openFileFromNotification: true, // click on notification to open downloaded file (for Android)
     );
   }
 }
