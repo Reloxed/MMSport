@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:mmsport/components/dialogs.dart';
 import 'package:mmsport/models/socialProfile.dart';
@@ -30,9 +31,14 @@ class MyApp extends StatelessWidget {
   bool isAdmin;
   bool hasToCreateTheSportSchool = false;
 
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+  FlutterLocalNotificationsPlugin();
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+
+    configLocalNotification();
 
     return MaterialApp(
         localizationsDelegates: [
@@ -142,5 +148,14 @@ class MyApp extends StatelessWidget {
     }
 
     return map;
+  }
+
+  void configLocalNotification() {
+    var initializationSettingsAndroid =
+    new AndroidInitializationSettings('logo_mmsport');
+    var initializationSettingsIOS = new IOSInitializationSettings();
+    var initializationSettings = new InitializationSettings(
+        android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
+    flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 }

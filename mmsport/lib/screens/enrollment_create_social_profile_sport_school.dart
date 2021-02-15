@@ -9,6 +9,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mmsport/components/dialogs.dart';
 import 'package:mmsport/models/socialProfile.dart';
@@ -33,6 +34,9 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
   File imageProfile;
 
   String socialProfileRole = "";
+
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+  FlutterLocalNotificationsPlugin();
 
   @override
   Widget build(BuildContext context) {
@@ -353,6 +357,23 @@ class _EnrollmentCreateSocialProfileSportSchoolState extends State<EnrollmentCre
   }
 
   void showNotification(message) async {
+    var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
+      Platform.isAndroid
+          ? 'com.ittsport.ittsportapp'
+          : '',
+      'MMSport',
+      '',
+      playSound: true,
+      enableVibration: true,
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+    var iOSPlatformChannelSpecifics = new IOSNotificationDetails();
+    var platformChannelSpecifics = new NotificationDetails(
+        android: androidPlatformChannelSpecifics, iOS: iOSPlatformChannelSpecifics);
 
+    await flutterLocalNotificationsPlugin.show(0, message['title'].toString(),
+        message['body'].toString(), platformChannelSpecifics,
+        payload: json.encode(message));
   }
 }

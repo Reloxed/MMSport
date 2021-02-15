@@ -41,6 +41,7 @@ dependencies:
   flappy_search_bar: ^1.7.2
   intl: ^0.16.1
   firebase_messaging: ^7.0.3
+  flutter_local_notifications: ^4.0.1
 
   flutter_localizations:
     sdk: flutter
