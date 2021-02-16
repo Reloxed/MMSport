@@ -12,6 +12,7 @@ import 'package:mmsport/components/video_player_widget.dart';
 import 'package:mmsport/models/chat_message.dart';
 import 'package:mmsport/models/chat_room.dart';
 import 'package:mmsport/models/socialProfile.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatRoom extends StatefulWidget {
@@ -34,7 +35,8 @@ class _ChatRoom extends State<ChatRoom> {
           return Container(
             child: Wrap(
               children: <Widget>[
-                ListTile(leading: Icon(Icons.image), title: Text('Imagen'), onTap: () => showFilePicker(FileType.image)),
+                ListTile(
+                    leading: Icon(Icons.image), title: Text('Imagen'), onTap: () => showFilePicker(FileType.image)),
                 ListTile(
                     leading: Icon(Icons.videocam), title: Text('Vídeo'), onTap: () => showFilePicker(FileType.video)),
                 ListTile(
@@ -49,51 +51,73 @@ class _ChatRoom extends State<ChatRoom> {
   }
 
   void showFilePicker(FileType fileType) async {
-    File file = await FilePicker.getFile(type: fileType);
     Navigator.pop(context);
-    String url = await uploadFile(file, file.path);
     switch (fileType) {
       case FileType.any:
-        ChatMessage chatMessage =
-            new ChatMessage(null, loggedSocialProfile.id, socialProfileToChat.id, false, Timestamp.now(), url, "file");
-        await FirebaseFirestore.instance
-            .collection("chatRooms")
-            .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
-            .collection("messages")
-            .add(chatMessage.chatMessageToJson())
-            .then((value) => _textController.clear());
-        await FirebaseFirestore.instance
-            .collection("chatRooms")
-            .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
-            .update({'sentDate': chatMessage.sentDate});
+        FilePickerResult result = await FilePicker.platform.pickFiles(
+            type: FileType.custom,
+            allowedExtensions: ['svg', 'pdf', 'xls', 'doc', 'docx', 'png', 'xlsx'],
+            allowMultiple: true);
+        if (result != null) {
+          List<File> files = result.paths.map((path) => File(path)).toList();
+          for (File file in files) {
+            String url = await uploadFile(file, file.path);
+            ChatMessage chatMessage = new ChatMessage(
+                null, loggedSocialProfile.id, socialProfileToChat.id, false, Timestamp.now(), url, "file");
+            await FirebaseFirestore.instance
+                .collection("chatRooms")
+                .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
+                .collection("messages")
+                .add(chatMessage.chatMessageToJson())
+                .then((value) => _textController.clear());
+            await FirebaseFirestore.instance
+                .collection("chatRooms")
+                .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
+                .update({'sentDate': chatMessage.sentDate});
+          }
+        }
         break;
       case FileType.image:
-        ChatMessage chatMessage =
-            new ChatMessage(null, loggedSocialProfile.id, socialProfileToChat.id, false, Timestamp.now(), url, "image");
-        await FirebaseFirestore.instance
-            .collection("chatRooms")
-            .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
-            .collection("messages")
-            .add(chatMessage.chatMessageToJson())
-            .then((value) => _textController.clear());
-        await FirebaseFirestore.instance
-            .collection("chatRooms")
-            .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
-            .update({'sentDate': chatMessage.sentDate});
+        FilePickerResult result = await FilePicker.platform.pickFiles(type: FileType.image, allowMultiple: true);
+        if (result != null) {
+          List<File> files = result.paths.map((path) => File(path)).toList();
+          for (File file in files) {
+            String url = await uploadFile(file, file.path);
+            ChatMessage chatMessage = new ChatMessage(
+                null, loggedSocialProfile.id, socialProfileToChat.id, false, Timestamp.now(), url, "image");
+            await FirebaseFirestore.instance
+                .collection("chatRooms")
+                .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
+                .collection("messages")
+                .add(chatMessage.chatMessageToJson())
+                .then((value) => _textController.clear());
+            await FirebaseFirestore.instance
+                .collection("chatRooms")
+                .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
+                .update({'sentDate': chatMessage.sentDate});
+          }
+        }
         break;
       case FileType.video:
-        ChatMessage chatMessage =
-            new ChatMessage(null, loggedSocialProfile.id, socialProfileToChat.id, false, Timestamp.now(), url, "video");
-        await FirebaseFirestore.instance
-            .collection("chatRooms")
-            .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
-            .collection("messages")
-            .add(chatMessage.chatMessageToJson())
-            .then((value) => _textController.clear());
-        await FirebaseFirestore.instance
-            .collection("chatRooms")
-            .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
-            .update({'sentDate': chatMessage.sentDate});
+        FilePickerResult result = await FilePicker.platform.pickFiles(type: FileType.video, allowMultiple: true);
+        if (result != null) {
+          List<File> files = result.paths.map((path) => File(path)).toList();
+          for (File file in files) {
+            String url = await uploadFile(file, file.path);
+            ChatMessage chatMessage = new ChatMessage(
+                null, loggedSocialProfile.id, socialProfileToChat.id, false, Timestamp.now(), url, "video");
+            await FirebaseFirestore.instance
+                .collection("chatRooms")
+                .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
+                .collection("messages")
+                .add(chatMessage.chatMessageToJson())
+                .then((value) => _textController.clear());
+            await FirebaseFirestore.instance
+                .collection("chatRooms")
+                .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
+                .update({'sentDate': chatMessage.sentDate});
+          }
+        }
         break;
       default:
         break;
@@ -107,9 +131,7 @@ class _ChatRoom extends State<ChatRoom> {
     String loggedProfileId = loggedSocialProfile.id;
     StorageReference reference = firebaseStorage.ref().child(
         '$path/$chatId/$loggedProfileId-${DateTime.now().millisecondsSinceEpoch}-$fileName'); // get a reference to the path of the image directory
-    String p = await reference.getPath();
-    print('Subiendo archivo a $p');
-    StorageUploadTask uploadTask = reference.putFile(file); // put the file in the path
+    StorageUploadTask uploadTask = reference.putFile(File(file.path)); // put the file in the path
     StorageTaskSnapshot result = await uploadTask.onComplete; // wait for the upload to complete
     String url = await result.ref.getDownloadURL(); //retrieve the download link and return it
     return url;
@@ -198,7 +220,6 @@ class _ChatRoom extends State<ChatRoom> {
 
   @override
   Widget build(BuildContext context) {
-
     return FutureBuilder<List<dynamic>>(
         future: Future.wait([_loadDataChatRoom(), _loadDataSocialProfile()]),
         builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
@@ -435,8 +456,7 @@ class _ChatRoom extends State<ChatRoom> {
           ],
         ),
       );
-    }
-    else{
+    } else {
       return Container();
     }
   }
@@ -450,6 +470,7 @@ class _ChatRoom extends State<ChatRoom> {
   }
 
   downloadFile(String fileUrl) async {
+    await PermissionHandler().requestPermissions([PermissionGroup.storage]);
     final Directory downloadsDirectory = await DownloadsPathProvider.downloadsDirectory;
     final String downloadsPath = downloadsDirectory.path;
     await FlutterDownloader.enqueue(
