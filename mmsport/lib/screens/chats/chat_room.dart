@@ -1,11 +1,19 @@
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:downloads_path_provider/downloads_path_provider.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:mmsport/components/dialogs.dart';
+import 'package:mmsport/components/video_player_widget.dart';
 import 'package:mmsport/models/chat_message.dart';
 import 'package:mmsport/models/chat_room.dart';
 import 'package:mmsport/models/socialProfile.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatRoom extends StatefulWidget {
@@ -19,7 +27,157 @@ class _ChatRoom extends State<ChatRoom> {
   SocialProfile socialProfileToChat;
   SocialProfile loggedSocialProfile;
   bool isButtonEnabled = true;
+  bool visibleProgressIndicator;
+  double progressIndicatorValue;
   TextEditingController _textController = TextEditingController();
+
+  void showAttachmentBottomSheet(context) {
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext bc) {
+          return Container(
+            child: Wrap(
+              children: <Widget>[
+                ListTile(
+                    leading: Icon(Icons.image), title: Text('Imagen'), onTap: () => showFilePicker(FileType.image)),
+                ListTile(
+                    leading: Icon(Icons.videocam), title: Text('Vídeo'), onTap: () => showFilePicker(FileType.video)),
+                ListTile(
+                  leading: Icon(Icons.insert_drive_file),
+                  title: Text('Archivo'),
+                  onTap: () => showFilePicker(FileType.any),
+                ),
+              ],
+            ),
+          );
+        });
+  }
+
+  void showFilePicker(FileType fileType) async {
+    Navigator.pop(context);
+    switch (fileType) {
+      case FileType.any:
+        FilePickerResult result = await FilePicker.platform.pickFiles(
+            type: FileType.custom,
+            allowedExtensions: ['svg', 'pdf', 'xls', 'doc', 'docx', 'png', 'xlsx'],
+            allowMultiple: true);
+        if (result != null) {
+          setState(() {
+            visibleProgressIndicator = true;
+          });
+          List<File> files = result.paths.map((path) => File(path)).toList();
+          for (File file in files) {
+            String url = await uploadFile(file, file.path);
+            ChatMessage chatMessage = new ChatMessage(
+                null, loggedSocialProfile.id, socialProfileToChat.id, false, Timestamp.now(), url, "file");
+            await FirebaseFirestore.instance
+                .collection("chatRooms")
+                .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
+                .collection("messages")
+                .add(chatMessage.chatMessageToJson())
+                .then((value) => () {
+                      _textController.clear();
+                      setState(() {
+                        progressIndicatorValue += 1.0 / files.length;
+                      });
+                    });
+            await FirebaseFirestore.instance
+                .collection("chatRooms")
+                .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
+                .update({'sentDate': chatMessage.sentDate});
+          }
+          setState(() {
+            visibleProgressIndicator = false;
+          });
+        }
+        break;
+      case FileType.image:
+        FilePickerResult result = await FilePicker.platform.pickFiles(type: FileType.image, allowMultiple: true);
+        if (result != null) {
+          setState(() {
+            visibleProgressIndicator = true;
+          });
+          List<File> files = result.paths.map((path) => File(path)).toList();
+          for (File file in files) {
+            String url = await uploadFile(file, file.path);
+            ChatMessage chatMessage = new ChatMessage(
+                null, loggedSocialProfile.id, socialProfileToChat.id, false, Timestamp.now(), url, "image");
+            await FirebaseFirestore.instance
+                .collection("chatRooms")
+                .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
+                .collection("messages")
+                .add(chatMessage.chatMessageToJson())
+                .then((value) => () {
+                      _textController.clear();
+                      setState(() {
+                        progressIndicatorValue += 1.0 / files.length;
+                      });
+                    });
+            await FirebaseFirestore.instance
+                .collection("chatRooms")
+                .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
+                .update({'sentDate': chatMessage.sentDate});
+          }
+          setState(() {
+            visibleProgressIndicator = false;
+          });
+        }
+        break;
+      case FileType.video:
+        FilePickerResult result = await FilePicker.platform.pickFiles(type: FileType.video, allowMultiple: true);
+        if (result != null) {
+          setState(() {
+            visibleProgressIndicator = true;
+          });
+          List<File> files = result.paths.map((path) => File(path)).toList();
+          for (File file in files) {
+            String url = await uploadFile(file, file.path);
+            ChatMessage chatMessage = new ChatMessage(
+                null, loggedSocialProfile.id, socialProfileToChat.id, false, Timestamp.now(), url, "video");
+            await FirebaseFirestore.instance
+                .collection("chatRooms")
+                .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
+                .collection("messages")
+                .add(chatMessage.chatMessageToJson())
+                .then((value) => () {
+                      _textController.clear();
+                      setState(() {
+                        progressIndicatorValue += 1.0 / files.length;
+                      });
+                    });
+            await FirebaseFirestore.instance
+                .collection("chatRooms")
+                .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
+                .update({'sentDate': chatMessage.sentDate});
+          }
+          setState(() {
+            visibleProgressIndicator = false;
+          });
+        }
+        break;
+      default:
+        setState(() {
+          visibleProgressIndicator = false;
+        });
+        break;
+    }
+    setState(() {
+      progressIndicatorValue = 0;
+    });
+  }
+
+  Future<String> uploadFile(File file, String path) async {
+    final FirebaseStorage firebaseStorage = new FirebaseStorage();
+    String fileName = file.path.split('/').last;
+    String chatId = chosenChatRoom.id;
+    String loggedProfileId = loggedSocialProfile.id;
+    StorageReference reference = firebaseStorage.ref().child(
+        '$path/$chatId/$loggedProfileId-${DateTime.now().millisecondsSinceEpoch}-$fileName'); // get a reference to the path of the image directory
+    StorageUploadTask uploadTask = reference.putFile(File(file.path)); // put the file in the path
+    StorageTaskSnapshot result = await uploadTask.onComplete; // wait for the upload to complete
+    String url = await result.ref.getDownloadURL(); //retrieve the download link and return it
+    return url;
+  }
 
   Future<ChatRoomModel> _loadDataChatRoom() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
@@ -97,6 +255,8 @@ class _ChatRoom extends State<ChatRoom> {
 
   @override
   void initState() {
+    visibleProgressIndicator = false;
+    progressIndicatorValue = 0.0;
     _loadDataChatRoom();
     _loadDataSocialProfile();
     super.initState();
@@ -151,6 +311,11 @@ class _ChatRoom extends State<ChatRoom> {
                       ),
                     ),
                     body: Column(children: <Widget>[
+                      visibleProgressIndicator == true
+                          ? LinearProgressIndicator(
+                              minHeight: 8.0,
+                            )
+                          : SizedBox.shrink(),
                       Expanded(
                           child: Container(
                               decoration: BoxDecoration(color: Colors.black12),
@@ -183,6 +348,11 @@ class _ChatRoom extends State<ChatRoom> {
                         color: Colors.white,
                         child: Row(
                           children: <Widget>[
+                            IconButton(
+                                icon: Icon(Icons.attach_file),
+                                iconSize: 25.0,
+                                color: Colors.blueAccent,
+                                onPressed: () => showAttachmentBottomSheet(context)),
                             Expanded(
                               child: TextField(
                                 controller: _textController,
@@ -199,8 +369,8 @@ class _ChatRoom extends State<ChatRoom> {
                                   isButtonEnabled = false;
                                   String text = _textController.text;
                                   _textController.clear();
-                                  ChatMessage chatMessage = new ChatMessage(text,
-                                      loggedSocialProfile.id, socialProfileToChat.id, false, Timestamp.now());
+                                  ChatMessage chatMessage = new ChatMessage(text, loggedSocialProfile.id,
+                                      socialProfileToChat.id, false, Timestamp.now(), null, null);
                                   await FirebaseFirestore.instance
                                       .collection("chatRooms")
                                       .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
@@ -230,16 +400,130 @@ class _ChatRoom extends State<ChatRoom> {
       margin: isMe
           ? EdgeInsets.only(top: 8.0, bottom: 8.0, left: MediaQuery.of(context).size.width * 0.25)
           : EdgeInsets.only(top: 8.0, bottom: 8.0, right: MediaQuery.of(context).size.width * 0.25),
-      padding: EdgeInsets.symmetric(horizontal: 25.0, vertical: 15.0),
+      padding: EdgeInsets.symmetric(horizontal: 35.0, vertical: 15.0),
       width: MediaQuery.of(context).size.width * 0.75,
       decoration: BoxDecoration(
           color: isMe ? Colors.blueAccent : Colors.white,
           borderRadius: isMe
               ? BorderRadius.only(topLeft: Radius.circular(15.0), bottomLeft: Radius.circular(15.0))
               : BorderRadius.only(topRight: Radius.circular(15.0), bottomRight: Radius.circular(15.0))),
-      child: Text(message.message,
-          style:
-              isMe ? TextStyle(color: Colors.white, fontSize: 16.0) : TextStyle(color: Colors.black, fontSize: 16.0)),
+      child: _buildMessageContent(isMe, message, context),
+    );
+  }
+
+  Widget _buildMessageContent(bool isSelf, ChatMessage message, BuildContext context) {
+    if (message.message != null) {
+      return Text(
+        message.message,
+        style: isSelf ? TextStyle(color: Colors.white, fontSize: 16.0) : TextStyle(color: Colors.black, fontSize: 16.0),
+      );
+    } else if (message.type == "image") {
+      return CachedNetworkImage(
+        imageUrl: message.url,
+        progressIndicatorBuilder: (context, url, downloadProgress) =>
+            LinearProgressIndicator(value: downloadProgress.progress),
+        errorWidget: (context, url, error) => Icon(Icons.error),
+      );
+    } else if (message.type == "video") {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          Stack(
+            alignment: AlignmentDirectional.center,
+            children: <Widget>[
+              Container(
+                width: 140,
+                color: isSelf ? Colors.white : Colors.blueAccent,
+                height: 80,
+              ),
+              Column(
+                children: <Widget>[
+                  Icon(
+                    Icons.videocam,
+                    color: Colors.blueAccent,
+                  ),
+                  SizedBox(
+                    height: 5,
+                  ),
+                  Text(
+                    'Video',
+                    style: TextStyle(fontSize: 20, color: isSelf ? Colors.blueAccent : Colors.white),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          Container(
+              height: 40,
+              child: IconButton(
+                  icon: Icon(
+                    Icons.play_arrow,
+                    color: isSelf ? Colors.white : Colors.blueAccent,
+                  ),
+                  onPressed: () => showVideoPlayer(context, message.url)))
+        ],
+      );
+    } else if (message.type == "file") {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          Stack(
+            alignment: AlignmentDirectional.center,
+            children: <Widget>[
+              Container(
+                width: 140,
+                color: Colors.white,
+                height: 80,
+              ),
+              Column(
+                children: <Widget>[
+                  Icon(
+                    Icons.insert_drive_file,
+                    color: Colors.blueAccent,
+                  ),
+                  SizedBox(
+                    height: 5,
+                  ),
+                  Text(
+                    'Archivo',
+                    style: TextStyle(fontSize: 20, color: isSelf ? Colors.blueAccent : Colors.white),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          Container(
+              height: 40,
+              child: IconButton(
+                  icon: Icon(
+                    Icons.file_download,
+                    color: isSelf ? Colors.white : Colors.blueAccent,
+                  ),
+                  onPressed: () => downloadFile(message.url)))
+        ],
+      );
+    } else {
+      return Container();
+    }
+  }
+
+  void showVideoPlayer(parentContext, String videoUrl) async {
+    await showModalBottomSheet(
+        context: parentContext,
+        builder: (BuildContext bc) {
+          return VideoPlayerWidget(videoUrl);
+        });
+  }
+
+  downloadFile(String fileUrl) async {
+    await PermissionHandler().requestPermissions([PermissionGroup.storage]);
+    final Directory downloadsDirectory = await DownloadsPathProvider.downloadsDirectory;
+    final String downloadsPath = downloadsDirectory.path;
+    await FlutterDownloader.enqueue(
+      url: fileUrl,
+      savedDir: downloadsPath,
+      showNotification: true, // show download progress in status bar (for Android)
+      openFileFromNotification: true, // click on notification to open downloaded file (for Android)
     );
   }
 }

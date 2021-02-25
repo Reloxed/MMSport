@@ -269,7 +269,8 @@ class _ChatMain extends State<ChatMain> {
                           overflow: TextOverflow.ellipsis, softWrap: true, style: TextStyle(fontSize: 16))
                       : Text(socialProfile.name + " " + socialProfile.firstSurname,
                           overflow: TextOverflow.ellipsis, softWrap: true, style: TextStyle(fontSize: 16)),
-                  subtitle: listSnapshot.data.documents.length > 0
+                  subtitle: listSnapshot.data.documents.length > 0 &&
+                          listSnapshot.data.documents.elementAt(0).get("message") != null
                       ? Text(listSnapshot.data.documents.elementAt(0).get("message"))
                       : SizedBox.shrink(),
                   trailing: snapshot2.data.documents.length > 0
@@ -341,7 +342,8 @@ class _ChatMain extends State<ChatMain> {
                           overflow: TextOverflow.ellipsis, softWrap: true, style: TextStyle(fontSize: 16))
                       : Text(socialProfile.name + " " + socialProfile.firstSurname,
                           overflow: TextOverflow.ellipsis, softWrap: true, style: TextStyle(fontSize: 16)),
-                  subtitle: listSnapshot.data.documents.length > 0
+                  subtitle: listSnapshot.data.documents.length > 0 &&
+                          listSnapshot.data.documents.elementAt(0).get("message") != null
                       ? Text(listSnapshot.data.documents.elementAt(0).get("message"))
                       : SizedBox.shrink(),
                   onTap: () async {
