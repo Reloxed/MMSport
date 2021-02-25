@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:downloads_path_provider/downloads_path_provider.dart';
 import 'package:file_picker/file_picker.dart';
@@ -26,6 +27,8 @@ class _ChatRoom extends State<ChatRoom> {
   SocialProfile socialProfileToChat;
   SocialProfile loggedSocialProfile;
   bool isButtonEnabled = true;
+  bool visibleProgressIndicator;
+  double progressIndicatorValue;
   TextEditingController _textController = TextEditingController();
 
   void showAttachmentBottomSheet(context) {
@@ -59,6 +62,9 @@ class _ChatRoom extends State<ChatRoom> {
             allowedExtensions: ['svg', 'pdf', 'xls', 'doc', 'docx', 'png', 'xlsx'],
             allowMultiple: true);
         if (result != null) {
+          setState(() {
+            visibleProgressIndicator = true;
+          });
           List<File> files = result.paths.map((path) => File(path)).toList();
           for (File file in files) {
             String url = await uploadFile(file, file.path);
@@ -69,17 +75,28 @@ class _ChatRoom extends State<ChatRoom> {
                 .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
                 .collection("messages")
                 .add(chatMessage.chatMessageToJson())
-                .then((value) => _textController.clear());
+                .then((value) => () {
+                      _textController.clear();
+                      setState(() {
+                        progressIndicatorValue += 1.0 / files.length;
+                      });
+                    });
             await FirebaseFirestore.instance
                 .collection("chatRooms")
                 .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
                 .update({'sentDate': chatMessage.sentDate});
           }
+          setState(() {
+            visibleProgressIndicator = false;
+          });
         }
         break;
       case FileType.image:
         FilePickerResult result = await FilePicker.platform.pickFiles(type: FileType.image, allowMultiple: true);
         if (result != null) {
+          setState(() {
+            visibleProgressIndicator = true;
+          });
           List<File> files = result.paths.map((path) => File(path)).toList();
           for (File file in files) {
             String url = await uploadFile(file, file.path);
@@ -90,17 +107,28 @@ class _ChatRoom extends State<ChatRoom> {
                 .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
                 .collection("messages")
                 .add(chatMessage.chatMessageToJson())
-                .then((value) => _textController.clear());
+                .then((value) => () {
+                      _textController.clear();
+                      setState(() {
+                        progressIndicatorValue += 1.0 / files.length;
+                      });
+                    });
             await FirebaseFirestore.instance
                 .collection("chatRooms")
                 .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
                 .update({'sentDate': chatMessage.sentDate});
           }
+          setState(() {
+            visibleProgressIndicator = false;
+          });
         }
         break;
       case FileType.video:
         FilePickerResult result = await FilePicker.platform.pickFiles(type: FileType.video, allowMultiple: true);
         if (result != null) {
+          setState(() {
+            visibleProgressIndicator = true;
+          });
           List<File> files = result.paths.map((path) => File(path)).toList();
           for (File file in files) {
             String url = await uploadFile(file, file.path);
@@ -111,17 +139,31 @@ class _ChatRoom extends State<ChatRoom> {
                 .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
                 .collection("messages")
                 .add(chatMessage.chatMessageToJson())
-                .then((value) => _textController.clear());
+                .then((value) => () {
+                      _textController.clear();
+                      setState(() {
+                        progressIndicatorValue += 1.0 / files.length;
+                      });
+                    });
             await FirebaseFirestore.instance
                 .collection("chatRooms")
                 .doc(chosenChatRoom.users[0] + "_" + chosenChatRoom.users[1])
                 .update({'sentDate': chatMessage.sentDate});
           }
+          setState(() {
+            visibleProgressIndicator = false;
+          });
         }
         break;
       default:
+        setState(() {
+          visibleProgressIndicator = false;
+        });
         break;
     }
+    setState(() {
+      progressIndicatorValue = 0;
+    });
   }
 
   Future<String> uploadFile(File file, String path) async {
@@ -213,6 +255,8 @@ class _ChatRoom extends State<ChatRoom> {
 
   @override
   void initState() {
+    visibleProgressIndicator = false;
+    progressIndicatorValue = 0.0;
     _loadDataChatRoom();
     _loadDataSocialProfile();
     super.initState();
@@ -267,6 +311,11 @@ class _ChatRoom extends State<ChatRoom> {
                       ),
                     ),
                     body: Column(children: <Widget>[
+                      visibleProgressIndicator == true
+                          ? LinearProgressIndicator(
+                              minHeight: 8.0,
+                            )
+                          : SizedBox.shrink(),
                       Expanded(
                           child: Container(
                               decoration: BoxDecoration(color: Colors.black12),
@@ -369,92 +418,89 @@ class _ChatRoom extends State<ChatRoom> {
         style: isSelf ? TextStyle(color: Colors.white, fontSize: 16.0) : TextStyle(color: Colors.black, fontSize: 16.0),
       );
     } else if (message.type == "image") {
-      return ClipRRect(
-          borderRadius: BorderRadius.circular(8.0),
-          child: FadeInImage(placeholder: AssetImage("imagen"), image: NetworkImage(message.url)));
+      return CachedNetworkImage(
+        imageUrl: message.url,
+        progressIndicatorBuilder: (context, url, downloadProgress) =>
+            LinearProgressIndicator(value: downloadProgress.progress),
+        errorWidget: (context, url, error) => Icon(Icons.error),
+      );
     } else if (message.type == "video") {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(8.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            Stack(
-              alignment: AlignmentDirectional.center,
-              children: <Widget>[
-                Container(
-                  width: 140,
-                  color: isSelf ? Colors.white : Colors.blueAccent,
-                  height: 80,
-                ),
-                Column(
-                  children: <Widget>[
-                    Icon(
-                      Icons.videocam,
-                      color: Colors.blueAccent,
-                    ),
-                    SizedBox(
-                      height: 5,
-                    ),
-                    Text(
-                      'Video',
-                      style: TextStyle(fontSize: 20, color: isSelf ? Colors.blueAccent : Colors.white),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            Container(
-                height: 40,
-                child: IconButton(
-                    icon: Icon(
-                      Icons.play_arrow,
-                      color: isSelf ? Colors.white : Colors.blueAccent,
-                    ),
-                    onPressed: () => showVideoPlayer(context, message.url)))
-          ],
-        ),
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          Stack(
+            alignment: AlignmentDirectional.center,
+            children: <Widget>[
+              Container(
+                width: 140,
+                color: isSelf ? Colors.white : Colors.blueAccent,
+                height: 80,
+              ),
+              Column(
+                children: <Widget>[
+                  Icon(
+                    Icons.videocam,
+                    color: Colors.blueAccent,
+                  ),
+                  SizedBox(
+                    height: 5,
+                  ),
+                  Text(
+                    'Video',
+                    style: TextStyle(fontSize: 20, color: isSelf ? Colors.blueAccent : Colors.white),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          Container(
+              height: 40,
+              child: IconButton(
+                  icon: Icon(
+                    Icons.play_arrow,
+                    color: isSelf ? Colors.white : Colors.blueAccent,
+                  ),
+                  onPressed: () => showVideoPlayer(context, message.url)))
+        ],
       );
     } else if (message.type == "file") {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(8.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            Stack(
-              alignment: AlignmentDirectional.center,
-              children: <Widget>[
-                Container(
-                  width: 140,
-                  color: Colors.white,
-                  height: 80,
-                ),
-                Column(
-                  children: <Widget>[
-                    Icon(
-                      Icons.insert_drive_file,
-                      color: Colors.blueAccent,
-                    ),
-                    SizedBox(
-                      height: 5,
-                    ),
-                    Text(
-                      'Archivo',
-                      style: TextStyle(fontSize: 20, color: isSelf ? Colors.blueAccent : Colors.white),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            Container(
-                height: 40,
-                child: IconButton(
-                    icon: Icon(
-                      Icons.file_download,
-                      color: isSelf ? Colors.white : Colors.blueAccent,
-                    ),
-                    onPressed: () => downloadFile(message.url)))
-          ],
-        ),
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          Stack(
+            alignment: AlignmentDirectional.center,
+            children: <Widget>[
+              Container(
+                width: 140,
+                color: Colors.white,
+                height: 80,
+              ),
+              Column(
+                children: <Widget>[
+                  Icon(
+                    Icons.insert_drive_file,
+                    color: Colors.blueAccent,
+                  ),
+                  SizedBox(
+                    height: 5,
+                  ),
+                  Text(
+                    'Archivo',
+                    style: TextStyle(fontSize: 20, color: isSelf ? Colors.blueAccent : Colors.white),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          Container(
+              height: 40,
+              child: IconButton(
+                  icon: Icon(
+                    Icons.file_download,
+                    color: isSelf ? Colors.white : Colors.blueAccent,
+                  ),
+                  onPressed: () => downloadFile(message.url)))
+        ],
       );
     } else {
       return Container();
