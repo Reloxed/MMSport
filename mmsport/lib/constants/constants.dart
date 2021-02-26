@@ -57,3 +57,8 @@ void setEventToEdit(Event event) async{
   String eventToJson = jsonEncode(event.eventToJson());
   preferences.setString("eventToEdit", eventToJson);
 }
+
+void setVideoToPlay(String videoUrl) async {
+  SharedPreferences preferences = await SharedPreferences.getInstance();
+  preferences.setString("videoToPlay", videoUrl);
+}

@@ -18,20 +18,23 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   double videoDuration = 0;
   double currentDuration = 0;
 
-  _VideoPlayerWidgetState(this.videoUrl) : videoPlayerController = VideoPlayerController.network(videoUrl);
+  _VideoPlayerWidgetState(this.videoUrl)
+      : videoPlayerController = VideoPlayerController.network(videoUrl);
 
   @override
   void initState() {
     super.initState();
     videoPlayerController.initialize().then((_) {
       setState(() {
-        videoDuration = videoPlayerController.value.duration.inMilliseconds.toDouble();
+        videoDuration =
+            videoPlayerController.value.duration.inMilliseconds.toDouble();
       });
     });
 
     videoPlayerController.addListener(() {
       setState(() {
-        currentDuration = videoPlayerController.value.position.inMilliseconds.toDouble();
+        currentDuration =
+            videoPlayerController.value.position.inMilliseconds.toDouble();
       });
     });
     print(videoUrl);
@@ -40,16 +43,17 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Color(0xFF737373),
+      color: Colors.black,
       // This line set the transparent background
       child: Container(
-          color: Colors.blueAccent,
+          color: Colors.black87,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Container(
-                color: Colors.white,
-                constraints: BoxConstraints(maxHeight: 400),
+                color: Colors.black87,
+                alignment: Alignment.center,
+                constraints: BoxConstraints(maxHeight: 700),
                 child: videoPlayerController.value.initialized
                     ? AspectRatio(
                         aspectRatio: videoPlayerController.value.aspectRatio,
@@ -61,26 +65,29 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                       ),
               ),
               Slider(
+                activeColor: Colors.white,
                 value: currentDuration,
                 max: videoDuration,
-                onChanged: (value) => videoPlayerController.seekTo(Duration(milliseconds: value.toInt())),
+                onChanged: (value) => videoPlayerController
+                    .seekTo(Duration(milliseconds: value.toInt())),
               ),
               Container(
-                  child: GradientFab(
-                      elevation: 0,
-                      child: Icon(
-                        videoPlayerController.value.isPlaying ? Icons.pause : Icons.play_arrow,
-                      ),
-                      onPressed: () => setStateVideoPlayerController
-                  ))
-            ],
+                  child: IconButton(
+                    icon: videoPlayerController.value.isPlaying
+                        ? new Icon(Icons.pause, color: Colors.white)
+                        : new Icon(Icons.play_arrow, color: Colors.white),
+                    onPressed: () => setStateVideoPlayerController(),
+                  ),
+              )],
           )),
     );
   }
 
   void setStateVideoPlayerController() {
     setState(() {
-      videoPlayerController.value.isPlaying ? videoPlayerController.pause() : videoPlayerController.play();
+      videoPlayerController.value.isPlaying
+          ? videoPlayerController.pause()
+          : videoPlayerController.play();
     });
   }
 

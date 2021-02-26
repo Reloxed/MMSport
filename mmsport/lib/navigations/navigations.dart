@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mmsport/components/terms_and_conditions.dart';
+import 'package:mmsport/components/video_player_widget.dart';
 import 'package:mmsport/constants/constants.dart';
 import 'package:mmsport/models/event.dart';
 import 'package:mmsport/screens/reset_password.dart';
@@ -24,6 +25,7 @@ import 'package:mmsport/screens/remove/remove_sport_schools.dart';
 import 'package:mmsport/screens/remove/remove_social_profiles.dart';
 import 'package:mmsport/screens/sport_school_group_details.dart';
 import 'package:mmsport/screens/sport_school_groups_list.dart';
+import 'package:mmsport/screens/video_watcher.dart';
 
 void navigateToRegister(BuildContext context) {
   Navigator.push(context, MaterialPageRoute(builder: (context) => Register()));
@@ -120,4 +122,9 @@ void navigateToEditSocialProfile(BuildContext context) {
 
 void navigateToRemoveSportSchools(BuildContext context){
   Navigator.of(context).push(MaterialPageRoute(builder: (context) => RemoveSportSchools())).then((value) => null);
+}
+
+void navigateToVideoPlayer(BuildContext context, String videoUrl){
+  setVideoToPlay(videoUrl);
+  Navigator.of(context).push(MaterialPageRoute(builder: (context) => VideoWatcher())).then((value) => null);
 }

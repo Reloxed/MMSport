@@ -13,6 +13,7 @@ import 'package:mmsport/components/video_player_widget.dart';
 import 'package:mmsport/models/chat_message.dart';
 import 'package:mmsport/models/chat_room.dart';
 import 'package:mmsport/models/socialProfile.dart';
+import 'package:mmsport/navigations/navigations.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -508,11 +509,7 @@ class _ChatRoom extends State<ChatRoom> {
   }
 
   void showVideoPlayer(parentContext, String videoUrl) async {
-    await showModalBottomSheet(
-        context: parentContext,
-        builder: (BuildContext bc) {
-          return VideoPlayerWidget(videoUrl);
-        });
+    navigateToVideoPlayer(context, videoUrl);
   }
 
   downloadFile(String fileUrl) async {

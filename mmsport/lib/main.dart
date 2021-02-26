@@ -157,6 +157,7 @@ class MyApp extends StatelessWidget {
     var initializationSettings = new InitializationSettings(
         android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
     flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  }
 
   void initializeDownloader() async {
     WidgetsFlutterBinding.ensureInitialized();
