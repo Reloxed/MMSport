@@ -42,44 +42,58 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.black,
-      // This line set the transparent background
-      child: Container(
-          color: Colors.black87,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Container(
-                color: Colors.black87,
-                alignment: Alignment.center,
-                constraints: BoxConstraints(maxHeight: 700),
-                child: videoPlayerController.value.initialized
-                    ? AspectRatio(
-                        aspectRatio: videoPlayerController.value.aspectRatio,
-                        child: VideoPlayer(videoPlayerController),
-                      )
-                    : Container(
-                        height: 200,
-                        color: Colors.white,
+    return Material(
+      child: Scaffold(
+        body: SafeArea(
+          child: Center(
+            child: Container(
+              color: Colors.black,
+              // This line set the transparent background
+              child: Container(
+                  color: Colors.black87,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      Container(
+                        alignment: Alignment.topLeft,
+                        child: BackButton(
+                          color: Colors.white,
+                        ),
                       ),
-              ),
-              Slider(
-                activeColor: Colors.white,
-                value: currentDuration,
-                max: videoDuration,
-                onChanged: (value) => videoPlayerController
-                    .seekTo(Duration(milliseconds: value.toInt())),
-              ),
-              Container(
-                  child: IconButton(
-                    icon: videoPlayerController.value.isPlaying
-                        ? new Icon(Icons.pause, color: Colors.white)
-                        : new Icon(Icons.play_arrow, color: Colors.white),
-                    onPressed: () => setStateVideoPlayerController(),
-                  ),
-              )],
-          )),
+                      Container(
+                        color: Colors.black87,
+                        alignment: Alignment.center,
+                        constraints: BoxConstraints(maxHeight: 400),
+                        child: videoPlayerController.value.initialized
+                            ? AspectRatio(
+                          aspectRatio: videoPlayerController.value.aspectRatio,
+                          child: VideoPlayer(videoPlayerController),
+                        )
+                            : CircularProgressIndicator(
+
+                        ),
+                      ),
+                      Slider(
+                        activeColor: Colors.white,
+                        value: currentDuration,
+                        max: videoDuration,
+                        onChanged: (value) => videoPlayerController
+                            .seekTo(Duration(milliseconds: value.toInt())),
+                      ),
+                      Container(
+                        alignment: Alignment.bottomCenter,
+                        child: IconButton(
+                          icon: videoPlayerController.value.isPlaying
+                              ? new Icon(Icons.pause, color: Colors.white)
+                              : new Icon(Icons.play_arrow, color: Colors.white),
+                          onPressed: () => setStateVideoPlayerController(),
+                        ),
+                      )],
+                  )),
+            ),
+          )
+        ),
+      )
     );
   }
 
