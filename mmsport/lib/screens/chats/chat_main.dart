@@ -271,8 +271,52 @@ class _ChatMain extends State<ChatMain> {
                           overflow: TextOverflow.ellipsis, softWrap: true, style: TextStyle(fontSize: 16)),
                   subtitle: listSnapshot.data.documents.length > 0 &&
                           listSnapshot.data.documents.elementAt(0).get("message") != null
-                      ? Text(listSnapshot.data.documents.elementAt(0).get("message"))
-                      : SizedBox.shrink(),
+                      ? Text(listSnapshot.data.documents.elementAt(0).get("message"),
+                          style: TextStyle(color: Colors.black45))
+                      : listSnapshot.data.documents.elementAt(0).get("type") == "video"
+                          ? RichText(
+                              text: TextSpan(
+                                style: TextStyle(color: Colors.black45),
+                                children: [
+                                  WidgetSpan(
+                                    child: Icon(Icons.local_movies, size: 16, color: Colors.black45),
+                                  ),
+                                  TextSpan(
+                                    text: " Vídeo",
+                                  ),
+                                ],
+                              ),
+                            )
+                          : listSnapshot.data.documents.elementAt(0).get("type") == "image"
+                              ? RichText(
+                                  text: TextSpan(
+                                    style: TextStyle(color: Colors.black45),
+                                    children: [
+                                      WidgetSpan(
+                                        child: Icon(Icons.photo, size: 16, color: Colors.black45),
+                                      ),
+                                      TextSpan(
+                                        text: " Imagen",
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              : listSnapshot.data.documents.elementAt(0).get("type") == "file"
+                                  ? RichText(
+                                      text: TextSpan(
+                                        style: TextStyle(color: Colors.black45),
+                                        children: [
+                                          WidgetSpan(
+                                            child:
+                                                Icon(Icons.insert_drive_file_rounded, size: 16, color: Colors.black45),
+                                          ),
+                                          TextSpan(
+                                            text: " Archivo",
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  : SizedBox.shrink(),
                   trailing: snapshot2.data.documents.length > 0
                       ? Container(
                           width: 40.0,
