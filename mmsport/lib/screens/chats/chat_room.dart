@@ -441,7 +441,7 @@ class _ChatRoom extends State<ChatRoom> {
                 children: <Widget>[
                   Icon(
                     Icons.videocam,
-                    color: Colors.blueAccent,
+                    color: isSelf ? Colors.blueAccent : Colors.white,
                   ),
                   SizedBox(
                     height: 5,
@@ -473,14 +473,14 @@ class _ChatRoom extends State<ChatRoom> {
             children: <Widget>[
               Container(
                 width: 140,
-                color: Colors.white,
+                color: isSelf ? Colors.white : Colors.blueAccent,
                 height: 80,
               ),
               Column(
                 children: <Widget>[
                   Icon(
                     Icons.insert_drive_file,
-                    color: Colors.blueAccent,
+                    color: isSelf ? Colors.blueAccent : Colors.white,
                   ),
                   SizedBox(
                     height: 5,
