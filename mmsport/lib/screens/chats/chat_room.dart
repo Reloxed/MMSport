@@ -46,7 +46,7 @@ class _ChatRoom extends State<ChatRoom> {
                 ListTile(
                   leading: Icon(Icons.insert_drive_file),
                   title: Text('Archivo'),
-                  onTap: () => showFilePicker(FileType.any),
+                  onTap: () => showFilePicker(FileType.custom),
                 ),
               ],
             ),
@@ -57,7 +57,7 @@ class _ChatRoom extends State<ChatRoom> {
   void showFilePicker(FileType fileType) async {
     Navigator.pop(context);
     switch (fileType) {
-      case FileType.any:
+      case FileType.custom:
         FilePickerResult result = await FilePicker.platform.pickFiles(
             type: FileType.custom,
             allowedExtensions: ['svg', 'pdf', 'xls', 'doc', 'docx', 'xlsx'],
