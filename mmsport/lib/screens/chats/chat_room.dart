@@ -60,7 +60,7 @@ class _ChatRoom extends State<ChatRoom> {
       case FileType.any:
         FilePickerResult result = await FilePicker.platform.pickFiles(
             type: FileType.custom,
-            allowedExtensions: ['svg', 'pdf', 'xls', 'doc', 'docx', 'png', 'xlsx'],
+            allowedExtensions: ['svg', 'pdf', 'xls', 'doc', 'docx', 'xlsx'],
             allowMultiple: true);
         if (result != null) {
           setState(() {
