@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import "package:intl/intl.dart";
-import 'package:mmsport/components/date_utils.dart';
+import 'package:mmsport/components/date_utils.dart' as utils;
 
 class CalendarTile extends StatelessWidget {
   final VoidCallback onDateSelected;
@@ -57,7 +57,7 @@ class CalendarTile extends StatelessWidget {
                 ? BoxDecoration(
                     shape: BoxShape.circle,
                     color: selectedColor != null
-                        ? DateUtils.isSameDay(this.date, DateTime.now())
+                        ? utils.DateUtils.isSameDay(this.date, DateTime.now())
                             ? Colors.red
                             : selectedColor
                         : Theme.of(context).primaryColor,
@@ -74,7 +74,7 @@ class CalendarTile extends StatelessWidget {
                       fontWeight: FontWeight.w400,
                       color: isSelected
                           ? Colors.white
-                          : DateUtils.isSameDay(this.date, DateTime.now())
+                          : utils.DateUtils.isSameDay(this.date, DateTime.now())
                               ? todayColor
                               : inMonth ? Colors.black : Colors.grey),
                 ),
